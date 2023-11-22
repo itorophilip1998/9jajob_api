@@ -65,7 +65,7 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DATABASE_URL','postgres://unkdgtenjfmahy:4418f4d83cffc6162660207b0d2cfd13b5ddd9c3b545f4feba1805b19856ffed@ec2-52-21-61-131.compute-1.amazonaws.com:5432/d27bhtbdtsjte7'),
+            'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'forge'),
