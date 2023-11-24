@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\User;
+use App\Models\Ratings;
+use App\Models\ListingCategory;
+use App\Models\ListingLocation;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
 
@@ -37,8 +41,16 @@ class Listing extends Model
         'is_featured',
     ];
 
+    public function toArray()
+    {
+        $attributes = parent::toArray();
 
-    protected $with = ['rListingCategory', 'rListingLocation'];
+        // Add the 'user_photo' attribute to the array
+        $attributes['photo'] =  URL::to("/uploads/listing_featured_photos") . "/" . $this->listing_featured_photo;
+
+        return $attributes;
+    }
+    protected $with = ['rListingCategory', 'rListingLocation', 'user.ratings'];
     public function rListingCategory()
     {
         return $this->belongsTo(ListingCategory::class, 'listing_category_id');
@@ -49,5 +61,8 @@ class Listing extends Model
         return $this->belongsTo(ListingLocation::class, 'listing_location_id');
     }
 
-   
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id')->select(['id', 'name', 'email', 'photo']);
+    }
 }

@@ -31,7 +31,7 @@ class ListingController extends Controller
         $address_latitude = request()->input('address_latitude');
         $listing_name = request()->input('listing_name');
         $listing_city = request()->input('listing_city');
-        $url = URL::to("/uploads/listing_featured_photos");
+
 
         // Start with a base query
         $query = Listing::query();
@@ -54,25 +54,12 @@ class ListingController extends Controller
             $query->where(['address_longitude' => $address_longitude, 'address_latitude' => $address_latitude]);
         }
 
-        // Execute the query
         $listing = $query->get();
-        $listing->each(function ($category) use ($url) {
-            $category->listing_featured_photo = "$url/$category->listing_featured_photo";
-        });
+
 
         return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
     }
-    public function calculateAverageRating($count)
-    {
-        $totalRatings = $count; // Total number of ratings
-        $sumRatings = $this->sum('rating'); // Sum of all ratings
 
-        if ($totalRatings > 0) {
-            return $sumRatings / $totalRatings; // Calculate average rating
-        }
-
-        return 0; // Default to 0 if there are no ratings to avoid division by zero
-    }
 
     public function store(Request $request)
     {

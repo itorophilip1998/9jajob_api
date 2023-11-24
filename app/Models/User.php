@@ -2,16 +2,20 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Ratings;
+use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\URL;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    // ...
 
     /**
      * The attributes that are mass assignable.
@@ -61,8 +65,42 @@ class User extends Authenticatable implements JWTSubject
         'password' => 'hashed',
     ];
 
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    // protected $appends = ['user_photo'];
+
+    // ...
+
+    /**
+     * Get the user's photo attribute.
+     *
+     * @return string
+     */
+
+
+    // ...
+
+    /**
+     * Transform the model's attributes to an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray()
+    {
+        $attributes = parent::toArray();
+
+        // Add the 'user_photo' attribute to the array
+        $attributes['photo'] =  URL::to("/uploads/user_photos") . "/" . $this->photo;
+
+        return $attributes;
+    }
 
     // Rest omitted for brevity
+
+    // ...
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
@@ -82,5 +120,10 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Ratings::class);
     }
 }

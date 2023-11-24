@@ -16,7 +16,6 @@ class RatingsController extends Controller
     {
         $category = Ratings::where("user_id", $user_id)->get();
         return response()->json($category, 200);
-
     }
 
     /**
@@ -32,11 +31,13 @@ class RatingsController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 200);
         }
-        $req= request()->all();
-        $req['rator_id']=auth()->user()->id;
+
+        $req = request()->all();
+        $req['rator_id'] = auth()->user()->id;
+
+        $isRated = Ratings::where(['rator_id' => $req['rator_id'], 'user_id' => $req['user_id']])->first();
+        if ($isRated) return response()->json(['message' => 'User Already Rated'], 200);
         $res = Ratings::create($req);
         return response()->json($res, 200);
     }
-
-
 }
