@@ -20,22 +20,37 @@ use Auth;
 
 class ListingController extends Controller
 {
-  
+
 
     public function index() {
-        $listing = Listing::get();
-        return $listing;
-    }
+        $listing_category_id=request()->listing_category_id;
+        $address_longitude=request()->address_longitude;
+        $address_latitude=request()->address_latitude;
+        $listing_name=request()->listing_name;
+        $listing = Listing::where('listing_category_id', $listing_category_id)
+         ->orWhere('listing_name', 'LIKE', '%' . $listing_name . '%')
+       ->orWhere(['address_longitude' => $address_longitude, 'address_latitude' => $address_latitude])->get();
 
-    public function search_result(Request $request) {
-        $listing = Listing::with('rListingCategory','rListingLocation')
-                ->where('listing_name', 'LIKE', '%'.$request->listing_name.'%')
-                ->orderBy('id',$request->listing_order);
-        $listing_name_search = $request->listing_name;
-        $listing_order_search = $request->listing_order;
-
+        return response()->json(['Counts' => count($listing),"listing"=>$listing], 200);
 
     }
+    // public function listingByCategory($listing_category_id)
+    // {
+
+    //     $listing = Listing::where('listing_category_id', $listing_category_id)->get();
+
+    //     return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
+    // }
+    // public function listingByCategoryLocation()
+    // {
+    //     $listing_category_id = request()->listing_category_id;
+    //     $listing = Listing::where('listing_category_id', $listing_category_id)->get();
+
+    //     return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
+    // }
+
+
+
 
 
 

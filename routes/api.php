@@ -32,5 +32,8 @@ Route::group([
 ], function ($router) {
     Route::get('/', [CategoryController::class, 'index']);
     Route::get('/listing', [ListingCategoryController::class, 'index']);
-    Route::get('/all-listings', [ListingController::class, 'index']);
+    Route::get('/all-listing', [ListingController::class, 'index']);
+    // Route::get('/listing-category/{listing_category_id}', [ListingController::class, 'listingByCategory']);
+    // Route::get('/listing-keyword/{address_longitude}/{address_latitude}', [ListingController::class, 'listingByCategoryLocation']);
+
 });
