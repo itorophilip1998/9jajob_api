@@ -40,17 +40,18 @@ class Listing extends Model
         'listing_status',
         'is_featured',
     ];
+    protected $with = ['rListingCategory', 'rListingLocation', 'user'];
 
     public function toArray()
     {
         $attributes = parent::toArray();
 
         // Add the 'user_photo' attribute to the array
-        $attributes['photo'] =  URL::to("/uploads/listing_featured_photos") . "/" . $this->listing_featured_photo;
+        $attributes['listing_featured_photo'] =  URL::to("/uploads/listing_featured_photos") . "/" . $this->listing_featured_photo;
+
 
         return $attributes;
     }
-    protected $with = ['rListingCategory', 'rListingLocation', 'user.ratings'];
     public function rListingCategory()
     {
         return $this->belongsTo(ListingCategory::class, 'listing_category_id');
