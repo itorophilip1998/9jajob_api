@@ -7,7 +7,8 @@ use App\Http\Controllers\API\AmenityController;
 use App\Http\Controllers\API\ListingController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ListingCategoryController;
-
+use App\Http\Controllers\RatingsController;
+use App\Models\Ratings;
 
 // authentication
 Route::group([
@@ -37,3 +38,12 @@ Route::group([
     // Route::get('/listing-keyword/{address_longitude}/{address_latitude}', [ListingController::class, 'listingByCategoryLocation']);
 
 });
+
+// Ratings
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'ratings'
+], function ($router) {
+    Route::get('/{user_id}', [RatingsController::class, 'index']);
+    Route::post('/', [RatingsController::class, 'create'])->middleware("auth:api");
+ });
