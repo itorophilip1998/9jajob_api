@@ -42,16 +42,16 @@ class ListingController extends Controller
         }
 
         if ($listing_name !== null) {
-            $query->orWhere('listing_name', 'LIKE', '%' . $listing_name . '%');
+            $query->where('listing_name', 'LIKE', '%' . $listing_name . '%');
         }
         if ($listing_city !== null) {
-            $query->orWhereHas('rListingLocation', function ($q) use ($listing_city) {
+            $query->whereHas('rListingLocation', function ($q) use ($listing_city) {
                 $q->where('listing_location_name', 'LIKE', '%' . $listing_city . '%');
             });
         }
 
         if ($address_longitude !== null && $address_latitude !== null) {
-            $query->orWhere(['address_longitude' => $address_longitude, 'address_latitude' => $address_latitude]);
+            $query->where(['address_longitude' => $address_longitude, 'address_latitude' => $address_latitude]);
         }
 
         // Execute the query
