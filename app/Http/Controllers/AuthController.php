@@ -8,7 +8,7 @@ use App\Models\EmailTemplate;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Http\Controllers\AuthController;
+// use App\Http\Controllers\AuthController;
 use App\Mail\RegistrationEmailToCustomer;
 use Illuminate\Support\Facades\Validator;
 
