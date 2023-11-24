@@ -44,6 +44,7 @@ class AuthController extends Controller
     $data=request()->all();
     $data['password'] = Hash::make(request()->password);
     $data['token'] = $token;
+    $data['status'] = 'active';
     User::create($data);
 
 
