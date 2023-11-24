@@ -106,7 +106,13 @@ class AuthController extends Controller
      */
     public function refresh()
     {
-        return $this->respondWithToken(auth()->refresh(),'Refresh Token Added');
+       try {
+            //code...
+            return $this->respondWithToken(auth()->refresh(), 'Refresh Token Added');
+       } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['error' => 'Unauthorized'], 401);
+       }
     }
 
     /**
@@ -123,6 +129,6 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
             "message"=>$message
-        ]);
+        ],200);
     }
 }
