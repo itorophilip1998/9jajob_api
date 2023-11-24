@@ -1,22 +1,23 @@
 <?php
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
-use App\Models\Listing;
-use App\Models\ListingSocialItem;
-use App\Models\ListingAdditionalFeature;
-use App\Models\ListingPhoto;
-use App\Models\ListingVideo;
-use App\Models\ListingCategory;
-use App\Models\ListingLocation;
-use App\Models\ListingAmenity;
-use App\Models\Amenity;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Mail;
 use DB;
 use Auth;
+use App\Models\Amenity;
+use App\Models\Listing;
+use Illuminate\Support\Str;
+use App\Models\ListingPhoto;
+use App\Models\ListingVideo;
+use Illuminate\Http\Request;
+use App\Models\ListingAmenity;
+use App\Models\ListingCategory;
+use App\Models\ListingLocation;
+use Illuminate\Validation\Rule;
+use App\Models\ListingSocialItem;
+use Illuminate\Support\Facades\URL;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use App\Models\ListingAdditionalFeature;
 
 class ListingController extends Controller
 {
@@ -27,6 +28,7 @@ class ListingController extends Controller
         $address_longitude = request()->input('address_longitude');
         $address_latitude = request()->input('address_latitude');
         $listing_name = request()->input('listing_name');
+        $url = URL::to("/uploads/listing_featured_photos");
 
         // Start with a base query
         $query = Listing::query();
@@ -46,6 +48,9 @@ class ListingController extends Controller
 
         // Execute the query
         $listing = $query->get();
+        $listing->each(function ($category) use ($url) {
+            $category->listing_featured_photo = "$url/$category->listing_featured_photo";
+        });
 
         return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
 

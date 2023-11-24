@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
 
 class Listing extends Model
@@ -33,15 +34,20 @@ class Listing extends Model
         'seo_title',
         'seo_meta_description',
         'listing_status',
-        'is_featured'
+        'is_featured',
     ];
-protected $with=['rListingCategory','rListingLocation'];
-    public function rListingCategory() {
-        return $this->belongsTo( ListingCategory::class, 'listing_category_id' );
+
+
+    protected $with = ['rListingCategory', 'rListingLocation'];
+    public function rListingCategory()
+    {
+        return $this->belongsTo(ListingCategory::class, 'listing_category_id');
     }
 
-    public function rListingLocation() {
-        return $this->belongsTo( ListingLocation::class, 'listing_location_id' );
+    public function rListingLocation()
+    {
+        return $this->belongsTo(ListingLocation::class, 'listing_location_id');
     }
 
+   
 }
