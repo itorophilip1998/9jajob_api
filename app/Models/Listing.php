@@ -35,7 +35,7 @@ class Listing extends Model
         'listing_status',
         'is_featured'
     ];
-
+protected $with=['rListingCategory','rListingLocation'];
     public function rListingCategory() {
         return $this->belongsTo( ListingCategory::class, 'listing_category_id' );
     }

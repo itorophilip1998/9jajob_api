@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\API\AmenityController;
+use App\Http\Controllers\API\ListingController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ListingCategoryController;
 
@@ -31,4 +32,5 @@ Route::group([
 ], function ($router) {
     Route::get('/', [CategoryController::class, 'index']);
     Route::get('/listing', [ListingCategoryController::class, 'index']);
+    Route::get('/all-listings', [ListingController::class, 'index']);
 });

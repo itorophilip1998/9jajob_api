@@ -1,5 +1,6 @@
 <?php
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\API;
+
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
 use App\Models\ListingSocialItem;
@@ -19,15 +20,11 @@ use Auth;
 
 class ListingController extends Controller
 {
-    public function __construct() {
-        $this->middleware('auth.admin:admin');
-    }
+  
 
     public function index() {
-        $listing = Listing::with('rListingCategory','rListingLocation')->paginate(20);
-        $listing_name_search = '';
-        $listing_order_search = 'asc'; 
-        return view('admin.listing_view', compact('listing','listing_name_search','listing_order_search'));
+        $listing = Listing::get();
+        return $listing;
     }
 
     public function search_result(Request $request) {
@@ -37,10 +34,10 @@ class ListingController extends Controller
         $listing_name_search = $request->listing_name;
         $listing_order_search = $request->listing_order;
 
-        
+
     }
 
- 
+
 
     public function store(Request $request) {
 
