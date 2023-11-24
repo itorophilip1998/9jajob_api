@@ -23,35 +23,34 @@ class ListingController extends Controller
 
 
     public function index() {
-        $listing_category_id=request()->listing_category_id;
-        $address_longitude=request()->address_longitude;
-        $address_latitude=request()->address_latitude;
-        $listing_name=request()->listing_name;
-        $listing = Listing::where('listing_category_id', $listing_category_id)
-         ->orWhere('listing_name', 'LIKE', '%' . $listing_name . '%')
-       ->orWhere(['address_longitude' => $address_longitude, 'address_latitude' => $address_latitude])->get();
+        $listing_category_id = request()->input('listing_category_id');
+        $address_longitude = request()->input('address_longitude');
+        $address_latitude = request()->input('address_latitude');
+        $listing_name = request()->input('listing_name');
 
-        return response()->json(['Counts' => count($listing),"listing"=>$listing], 200);
+        // Start with a base query
+        $query = Listing::query();
+
+        // Add conditions only for parameters with values
+        if ($listing_category_id !== null) {
+            $query->where('listing_category_id', $listing_category_id);
+        }
+
+        if ($listing_name !== null) {
+            $query->orWhere('listing_name', 'LIKE', '%' . $listing_name . '%');
+        }
+
+        if ($address_longitude !== null && $address_latitude !== null) {
+            $query->orWhere(['address_longitude' => $address_longitude, 'address_latitude' => $address_latitude]);
+        }
+
+        // Execute the query
+        $listing = $query->get();
+
+        return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
+
 
     }
-    // public function listingByCategory($listing_category_id)
-    // {
-
-    //     $listing = Listing::where('listing_category_id', $listing_category_id)->get();
-
-    //     return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
-    // }
-    // public function listingByCategoryLocation()
-    // {
-    //     $listing_category_id = request()->listing_category_id;
-    //     $listing = Listing::where('listing_category_id', $listing_category_id)->get();
-
-    //     return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
-    // }
-
-
-
-
 
 
     public function store(Request $request) {
