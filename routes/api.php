@@ -34,6 +34,7 @@ Route::group([
     'prefix' => 'categories'
 ], function ($router) {
     Route::get('/', [CategoryController::class, 'index']);
+    Route::get('/listing', [ListingController::class, 'index']);
     Route::get('/all-listing', [ListingController::class, 'index']);
     Route::get('/my-listing', [ListingController::class, 'myListings'])->middleware("auth:api");
 });
