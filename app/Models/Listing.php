@@ -40,7 +40,16 @@ class Listing extends Model
         'listing_status',
         'is_featured',
     ];
-    protected $with = ['rListingCategory', 'rListingLocation', 'user'];
+    protected $with = ['rListingCategory',
+    'rListingLocation', 'user',
+     'amenities',
+     'reviews',
+        'listingAdditionalFeatures',
+        'listingSocialItem',
+        'listingsPhotos',
+        'listingsVideos'
+
+    ];
 
     public function toArray()
     {
@@ -65,5 +74,32 @@ class Listing extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id')->select(['id', 'name', 'email', 'photo']);
+    }
+
+    public function amenities()
+    {
+        return $this->hasMany(Amenity::class, 'id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'id');
+    }
+
+    public function listingsVideos()
+    {
+        return $this->hasMany(ListingVideo::class, 'id');
+    }
+    public function listingsPhotos()
+    {
+        return $this->hasMany(ListingPhoto::class, 'id');
+    }
+    public function listingSocialItem()
+    {
+        return $this->hasMany(ListingSocialItem::class, 'id');
+    }
+    public function listingAdditionalFeatures()
+    {
+        return $this->hasMany(ListingAdditionalFeature::class, 'id');
     }
 }

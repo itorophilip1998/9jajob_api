@@ -7,19 +7,20 @@ use App\Http\Controllers\API\AmenityController;
 use App\Http\Controllers\API\ListingController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ListingCategoryController;
+use App\Http\Controllers\API\ReviewController;
 use App\Http\Controllers\RatingsController;
-use App\Models\Ratings;
+
 
 // authentication
 Route::group([
     'middleware' => 'api',
     'prefix' => 'auth'
 ], function ($router) {
-    Route::post('register', [AuthController::class,'register']);
-    Route::post('login', [AuthController::class,'login']);
-    Route::post('logout',  [AuthController::class,'logout'])->middleware("auth:api");
-    Route::post('refresh',  [AuthController::class,'refresh'])->middleware("auth:api");
-    Route::get('auth-user',  [AuthController::class,'authUser'])->middleware("auth:api");
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('logout',  [AuthController::class, 'logout'])->middleware("auth:api");
+    Route::post('refresh',  [AuthController::class, 'refresh'])->middleware("auth:api");
+    Route::get('auth-user',  [AuthController::class, 'authUser'])->middleware("auth:api");
 });
 
 
@@ -42,8 +43,10 @@ Route::group([
 // Ratings
 Route::group([
     'middleware' => 'api',
-    'prefix' => 'ratings'
+    'prefix' => 'reviews'
 ], function ($router) {
-    Route::get('/{user_id}', [RatingsController::class, 'index']);
-    Route::post('/', [RatingsController::class, 'create'])->middleware("auth:api");
- });
+    Route::get('/{id}', [ReviewController::class, 'index']);
+    Route::post('/', [ReviewController::class, 'create'])->middleware("auth:api");
+    Route::post('/delete/{id}', [ReviewController::class, 'delete'])->middleware("auth:api");
+    Route::post('/update/{id}', [ReviewController::class, 'update'])->middleware("auth:api");
+});
