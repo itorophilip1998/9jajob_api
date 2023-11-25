@@ -55,16 +55,7 @@ class ListingController extends Controller
         }
 
         // Execute the query
-        $listing = $query->get();
-        $listing->each(function ($data) {
-            // if (is_array($data->user->ratings)) {
-            //     $ratings = $data->user;
-            //     $count = count($ratings);
-            //     $data['rate_star'] = $count > 0 ? min(5, round(array_reduce($ratings, fn ($carry, $item) => $carry + $item["rate"], 0) / $count, 2)) : 0;
-            // } else
-            $data['rate_star'] = 4;
-            return $data;
-        });
+        $listing = $query->get(); 
 
         return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
     }

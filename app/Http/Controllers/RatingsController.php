@@ -14,7 +14,7 @@ class RatingsController extends Controller
      */
     public function index($user_id)
     {
-        $category = Ratings::where("user_id", $user_id)->get();
+        $category = Ratings::where("user_id", $user_id)->get(); 
         return response()->json($category, 200);
     }
 

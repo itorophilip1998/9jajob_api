@@ -40,25 +40,26 @@ class Listing extends Model
         'listing_status',
         'is_featured',
     ];
-    protected $with = ['rListingCategory',
-    'rListingLocation', 'user',
-     'amenities',
-     'reviews',
+    protected $with = [
+        'rListingCategory',
+        'rListingLocation', 'user',
+        'amenities',
         'listingAdditionalFeatures',
         'listingSocialItem',
         'listingsPhotos',
         'listingsVideos'
-
     ];
 
     public function toArray()
     {
         $attributes = parent::toArray();
-
         // Add the 'user_photo' attribute to the array
         $attributes['listing_featured_photo'] =  URL::to("/uploads/listing_featured_photos") . "/" . $this->listing_featured_photo;
+        $ratings = $this->reviews->pluck('rating')->toArray();
+        $count = count($ratings);
+        $sum = array_sum($ratings);
 
-
+        $attributes['rate_star'] = ($count !== 0) ? min(5, round($sum / $count, 2)) : 0;
         return $attributes;
     }
     public function rListingCategory()
