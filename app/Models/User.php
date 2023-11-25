@@ -93,7 +93,8 @@ class User extends Authenticatable implements JWTSubject
         $attributes = parent::toArray();
 
         // Add the 'user_photo' attribute to the array
-        $attributes['photo'] =  URL::to("/uploads/user_photos") . "/" . $this->photo;
+        $attributes['photo'] =
+            $this->photo ? URL::to("/uploads/user_photos") . "/" . $this->photo :  null;
 
         return $attributes;
     }
