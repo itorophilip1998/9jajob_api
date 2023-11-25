@@ -10,7 +10,7 @@ use App\Http\Controllers\API\ListingCategoryController;
 use App\Http\Controllers\API\ReviewController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\RatingsController;
-
+use App\Models\ListingCategory;
 
 // authentication
 Route::group([
@@ -34,7 +34,7 @@ Route::group([
     'prefix' => 'categories'
 ], function ($router) {
     Route::get('/', [CategoryController::class, 'index']);
-    Route::get('/listing', [ListingController::class, 'index']);
+    Route::get('/listing', [ListingCategoryController::class, 'index']);
     Route::get('/all-listing', [ListingController::class, 'index']);
     Route::get('/my-listing', [ListingController::class, 'myListings'])->middleware("auth:api");
 });
@@ -57,5 +57,4 @@ Route::group([
 ], function ($router) {
     Route::get('/', [BookingController::class, 'index'])->middleware("auth:api");
     Route::post('/', [BookingController::class, 'book'])->middleware("auth:api");
-
 });
