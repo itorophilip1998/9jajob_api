@@ -69,6 +69,10 @@ class ListingController extends Controller
         return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
     }
 
+     public function myListings(){
+        $data = Listing::where("user_id", auth()->user()->id)->get();
+        return response()->json($data, 200);
+     }
 
     public function store(Request $request)
     {

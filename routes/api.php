@@ -8,6 +8,7 @@ use App\Http\Controllers\API\ListingController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ListingCategoryController;
 use App\Http\Controllers\API\ReviewController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\RatingsController;
 
 
@@ -33,11 +34,8 @@ Route::group([
     'prefix' => 'categories'
 ], function ($router) {
     Route::get('/', [CategoryController::class, 'index']);
-    Route::get('/listing', [ListingCategoryController::class, 'index']);
     Route::get('/all-listing', [ListingController::class, 'index']);
-    // Route::get('/listing-category/{listing_category_id}', [ListingController::class, 'listingByCategory']);
-    // Route::get('/listing-keyword/{address_longitude}/{address_latitude}', [ListingController::class, 'listingByCategoryLocation']);
-
+    Route::get('/my-listing', [ListingController::class, 'myListings'])->middleware("auth:api");
 });
 
 // Ratings
@@ -49,4 +47,14 @@ Route::group([
     Route::post('/', [ReviewController::class, 'create'])->middleware("auth:api");
     Route::post('/delete/{id}', [ReviewController::class, 'delete'])->middleware("auth:api");
     Route::post('/update/{id}', [ReviewController::class, 'update'])->middleware("auth:api");
+});
+
+// Bookings
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'bookings'
+], function ($router) {
+    Route::get('/', [BookingController::class, 'index'])->middleware("auth:api");
+    Route::post('/', [BookingController::class, 'book'])->middleware("auth:api");
+
 });
