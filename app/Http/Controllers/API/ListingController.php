@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use DB;
 use Auth;
+use App\Models\User;
 use App\Models\Amenity;
 use App\Models\Listing;
 use Illuminate\Support\Str;
@@ -31,6 +32,8 @@ class ListingController extends Controller
         $address_latitude = request()->input('address_latitude');
         $listing_name = request()->input('listing_name');
         $listing_city = request()->input('listing_city');
+        $is_nearest = request()->input('is_nearest');
+        $is_trending = request()->input('is_trending');
 
 
         // Start with a base query
@@ -54,8 +57,14 @@ class ListingController extends Controller
             $query->where(['address_longitude' => $address_longitude, 'address_latitude' => $address_latitude]);
         }
 
+
+        if ($is_trending == true) {
+               $query->has('reviews', '>=', 1);
+
+        }
+
         // Execute the query
-        $listing = $query->get(); 
+        $listing = $query->get();
 
         return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
     }
