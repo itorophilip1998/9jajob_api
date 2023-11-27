@@ -1,17 +1,18 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Models\ListingCategory;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\RatingsController;
+use App\Http\Controllers\API\ReviewController;
 use App\Http\Controllers\API\AmenityController;
 use App\Http\Controllers\API\ListingController;
 use App\Http\Controllers\API\CategoryController;
-use App\Http\Controllers\API\ListingCategoryController;
-use App\Http\Controllers\API\ReviewController;
-use App\Http\Controllers\BookingController;
-use App\Http\Controllers\RatingsController;
+use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\VerificationController;
-use App\Models\ListingCategory;
+use App\Http\Controllers\API\ListingCategoryController;
 
 // authentication
 Route::group([
@@ -63,7 +64,8 @@ Route::group([
 // Verification
 Route::group([
     'middleware' => 'api',
-    'prefix' => 'verification'
+    'prefix' => 'transaction'
 ], function ($router) {
-    Route::post('/', [VerificationController::class, 'create'])->middleware("auth:api");
+    Route::post('/initiate', [TransactionsController::class, 'initiateTransaction'])->middleware("auth:api");
+    Route::get('/', [TransactionsController::class, 'getAll'])->middleware("auth:api");
 });

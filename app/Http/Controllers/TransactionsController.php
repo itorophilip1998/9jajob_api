@@ -2,65 +2,52 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transactions;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreTransactionsRequest;
 use App\Http\Requests\UpdateTransactionsRequest;
-use App\Models\Transactions;
 
 class TransactionsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
+
+    public function initiateTransaction()
+    { 
+        $validator = Validator::make(request()->all(), [
+            'type' => 'required',
+            'status' => 'required',
+            'ref_number' => 'required',
+            'trans_id' => 'required',
+            'amount' => 'required',
+            'description' => 'nullable',
+            'purpose' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
+        $req = request()->all();
+        Transactions::create($req);
+        return response()->json(['message' => 'Success!!'], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function getAll()
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreTransactionsRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Transactions $transactions)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Transactions $transactions)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateTransactionsRequest $request, Transactions $transactions)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Transactions $transactions)
-    {
-        //
+        $purpose = request()->input('purpose');
+        $user_id = auth()->user()->id;
+        $credit =   Transactions::where(['type' => 'credit', 'user_id' => $user_id])->get()->sum('amount');
+        $debit =   Transactions::where(['type' => 'debit', 'user_id' => $user_id])->get()->sum('amount');
+        $balance = $credit - $debit;
+        $totalBalance = Transactions::where(['user_id' => $user_id])->get()->sum('amount');
+        $query = Transactions::query()->where('user_id', auth()->user()->id);
+        $query->where('purpose', $purpose);
+        $transactions = $query->get();
+        return response()->json(
+            [
+                'balance' => $balance,
+                'totalBalance' => $totalBalance,
+                'debitBalance' => $debit,
+                'transactions' => $transactions
+            ],
+            200
+        );
     }
 }
