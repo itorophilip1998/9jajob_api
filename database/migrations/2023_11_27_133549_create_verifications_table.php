@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('cac_document')->nullable();
             $table->string('skill_certificate')->nullable();
             $table->jsonb('services')->nullable();
-            $table->foreignId('package_id');
+            $table->string('status')->default('pending'); //pending==completed
+            $table->foreignId('listing_id');
             $table->timestamps();
         });
     }

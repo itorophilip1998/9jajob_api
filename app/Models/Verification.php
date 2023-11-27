@@ -16,6 +16,7 @@ class Verification extends Model
         'cac_document',
         'skill_certificate',
         'services',
+        'status',
     ];
     protected $cast = [
         'services' => 'array',
