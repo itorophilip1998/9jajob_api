@@ -11,7 +11,7 @@ class TransactionsController extends Controller
 {
 
     public function initiateTransaction()
-    { 
+    {
         $validator = Validator::make(request()->all(), [
             'type' => 'required',
             'status' => 'required',
@@ -38,7 +38,9 @@ class TransactionsController extends Controller
         $balance = $credit - $debit;
         $totalBalance = Transactions::where(['user_id' => $user_id])->get()->sum('amount');
         $query = Transactions::query()->where('user_id', auth()->user()->id);
+        if ($purpose !== null) {
         $query->where('purpose', $purpose);
+        }
         $transactions = $query->get();
         return response()->json(
             [
