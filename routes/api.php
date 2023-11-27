@@ -10,6 +10,7 @@ use App\Http\Controllers\API\ListingCategoryController;
 use App\Http\Controllers\API\ReviewController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\RatingsController;
+use App\Http\Controllers\VerificationController;
 use App\Models\ListingCategory;
 
 // authentication
@@ -57,4 +58,12 @@ Route::group([
 ], function ($router) {
     Route::get('/', [BookingController::class, 'index'])->middleware("auth:api");
     Route::post('/', [BookingController::class, 'book'])->middleware("auth:api");
+});
+
+// Verification
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'verification'
+], function ($router) {
+    Route::post('/', [VerificationController::class, 'create'])->middleware("auth:api");
 });
