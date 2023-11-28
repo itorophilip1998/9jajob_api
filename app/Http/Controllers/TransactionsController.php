@@ -25,6 +25,7 @@ class TransactionsController extends Controller
             return response()->json(['error' => $validator->messages()], 200);
         }
         $req = request()->all();
+        $req['user_id'] = auth()->user()->id;
         Transactions::create($req);
         return response()->json(['message' => 'Success!!'], 200);
     }
@@ -39,7 +40,7 @@ class TransactionsController extends Controller
         $totalBalance = Transactions::where(['user_id' => $user_id])->get()->sum('amount');
         $query = Transactions::query()->where('user_id', auth()->user()->id);
         if ($purpose !== null) {
-        $query->where('purpose', $purpose);
+            $query->where('purpose', $purpose);
         }
         $transactions = $query->get();
         return response()->json(

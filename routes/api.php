@@ -69,3 +69,11 @@ Route::group([
     Route::post('/initiate', [TransactionsController::class, 'initiateTransaction'])->middleware("auth:api");
     Route::get('/', [TransactionsController::class, 'getAll'])->middleware("auth:api");
 });
+// Report
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'report'
+], function ($router) {
+    Route::post('/', [TransactionsController::class, 'create'])->middleware("auth:api");
+
+});

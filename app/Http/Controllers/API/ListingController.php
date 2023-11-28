@@ -77,9 +77,6 @@ class ListingController extends Controller
     public function store(Request $request)
     {
 
-        if (env('PROJECT_MODE') == 0) {
-            return redirect()->back()->with('error', env('PROJECT_NOTIFICATION'));
-        }
 
         $user_data = Auth::user();
 
@@ -90,16 +87,6 @@ class ListingController extends Controller
             'listing_phone' => 'required',
             'listing_address' => 'required',
             'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ], [
-            'listing_name.required' => ERR_NAME_REQUIRED,
-            'listing_name.unique' => ERR_NAME_EXIST,
-            'listing_slug.unique' => ERR_SLUG_UNIQUE,
-            'listing_description.required' => ERR_DESCRIPTION_REQUIRED,
-            'listing_phone.required' => ERR_PHONE_REQUIRED,
-            'listing_featured_photo.required' => ERR_PHOTO_REQUIRED,
-            'listing_featured_photo.image' => ERR_PHOTO_IMAGE,
-            'listing_featured_photo.mimes' => ERR_PHOTO_JPG_PNG_GIF,
-            'listing_featured_photo.max' => ERR_PHOTO_MAX
         ]);
 
         $statement = DB::select("SHOW TABLE STATUS LIKE 'listings'");
