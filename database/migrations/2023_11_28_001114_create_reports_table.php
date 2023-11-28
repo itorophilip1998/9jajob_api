@@ -16,7 +16,7 @@ return new class extends Migration
             $table->longText('report');
             $table->foreignId('user_id');
             $table->foreignId('reporter_id');
-            $table->enum('status',['escalated','pending','settled']);
+            $table->enum('status',['escalated','pending','settled'])->default('pending');
             $table->timestamps();
         });
     }

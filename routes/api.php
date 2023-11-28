@@ -13,6 +13,7 @@ use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\API\ListingCategoryController;
+use App\Http\Controllers\ReportController;
 
 // authentication
 Route::group([
@@ -74,6 +75,6 @@ Route::group([
     'middleware' => 'api',
     'prefix' => 'report'
 ], function ($router) {
-    Route::post('/', [TransactionsController::class, 'create'])->middleware("auth:api");
+    Route::post('/', [ReportController::class, 'create'])->middleware("auth:api");
 
 });
