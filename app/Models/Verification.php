@@ -13,6 +13,7 @@ class Verification extends Model
         'reg_number',
         'id_card_front',
         'id_card_back',
+        'proof_address',
         'cac_document',
         'skill_certificate',
         'services',

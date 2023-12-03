@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
             $table->longText('report');
-            $table->foreignId('user_id');
+            $table->foreignId('listing_id');
             $table->foreignId('reporter_id');
             $table->enum('status',['escalated','pending','settled'])->default('pending');
             $table->timestamps();

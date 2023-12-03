@@ -65,6 +65,15 @@ Route::group([
 // Verification
 Route::group([
     'middleware' => 'api',
+    'prefix' => 'verification'
+], function ($router) {
+    Route::post('/', [VerificationController::class, 'create'])->middleware("auth:api");
+
+});
+
+// transaction
+Route::group([
+    'middleware' => 'api',
     'prefix' => 'transaction'
 ], function ($router) {
     Route::post('/initiate', [TransactionsController::class, 'initiateTransaction'])->middleware("auth:api");

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('id_card_front')->nullable();
             $table->string('id_card_back')->nullable();
             $table->string('cac_document')->nullable();
+            $table->string('proof_address')->nullable();
             $table->string('skill_certificate')->nullable();
             $table->jsonb('services')->nullable();
             $table->string('status')->default('pending'); //pending==completed

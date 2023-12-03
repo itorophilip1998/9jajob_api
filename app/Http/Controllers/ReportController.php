@@ -17,7 +17,7 @@ class ReportController extends Controller
     public function create()
     {
         $validator = Validator::make(request()->all(), [
-            'user_id' => 'required',
+            'listing_id' => 'required',
             'report' => 'required',
         ]);
         if ($validator->fails()) {
