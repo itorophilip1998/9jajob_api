@@ -2,24 +2,26 @@
 
 namespace App\Http\Controllers\API;
 
-use DB;
-use Auth;
+
 use App\Models\User;
 use App\Models\Amenity;
 use App\Models\Listing;
 use Illuminate\Support\Str;
 use App\Models\ListingPhoto;
 use App\Models\ListingVideo;
-use Illuminate\Http\Request;
 use App\Models\ListingAmenity;
 use App\Models\ListingCategory;
 use App\Models\ListingLocation;
 use Illuminate\Validation\Rule;
 use App\Models\ListingSocialItem;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Request;
 use App\Models\ListingAdditionalFeature;
+use Illuminate\Support\Facades\Validator;
 
 class ListingController extends Controller
 {
@@ -59,8 +61,7 @@ class ListingController extends Controller
 
 
         if ($is_trending == true) {
-               $query->has('reviews', '>=', 1);
-
+            $query->has('reviews', '>=', 1);
         }
 
         // Execute the query
@@ -69,53 +70,54 @@ class ListingController extends Controller
         return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
     }
 
-     public function myListings(){
+    public function myListings()
+    {
         $data = Listing::where("user_id", auth()->user()->id)->get();
         return response()->json($data, 200);
-     }
+    }
 
-    public function store(Request $request)
+    public function AddListings()
     {
 
-
         $user_data = Auth::user();
-
-        $request->validate([
+        $validator = Validator::make(request()->all(), [
             'listing_name' => 'required|unique:listings',
-            'listing_slug' => 'unique:listings',
             'listing_description' => 'required',
             'listing_phone' => 'required',
             'listing_address' => 'required',
-            'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
         ]);
 
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
         $statement = DB::select("SHOW TABLE STATUS LIKE 'listings'");
         $ai_id = $statement[0]->Auto_increment;
-
         $rand_value = md5(mt_rand(11111111, 99999999));
-        $ext = $request->file('listing_featured_photo')->extension();
+        $ext = request()->file('listing_featured_photo')->extension();
         $final_name = $rand_value . '.' . $ext;
-        $request->file('listing_featured_photo')->move(public_path('uploads/listing_featured_photos'), $final_name);
+        request()->file('listing_featured_photo')->move(public_path('uploads/listing_featured_photos'), $final_name);
 
         $obj = new Listing();
-        $data = $request->only($obj->getFillable());
+        $data = request()->only($obj->getFillable());
         if (empty($data['listing_slug'])) {
             unset($data['listing_slug']);
-            $data['listing_slug'] = Str::slug($request->listing_name);
+            $data['listing_slug'] = Str::slug(request()->listing_name);
         }
         if (preg_match('/\s/', $data['listing_slug'])) {
-            return Redirect()->back()->with('error', ERR_SLUG_WHITESPACE);
+            return response()->json(['error' => "No Spacing"], 422);
         }
         $data['listing_featured_photo'] = $final_name;
-        $data['user_id'] = 0;
-        $data['admin_id'] = $user_data->id;
+        $data['user_id'] = $user_data->id;
+        $data['admin_id'] = 0;
+        $data['listing_status'] = "Active";
         $obj->fill($data)->save();
 
 
         // Amenity
-        if ($request->amenity != '') {
+        if (request()->amenity != '') {
             $arr_amenity = array();
-            foreach ($request->amenity as $item) {
+            foreach (request()->amenity as $item) {
                 $arr_amenity[] = $item;
             }
             for ($i = 0; $i < count($arr_amenity); $i++) {
@@ -127,15 +129,13 @@ class ListingController extends Controller
         }
 
         // Photo
-        if ($request->photo_list == '') {
-            //echo 'No photo selected';
-        } else {
-            foreach ($request->photo_list as $item) {
-                $file_in_mb = $item->getSize() / 1024 / 1024;
+        if (isset(request()->photo_list) &&  is_array(request()->photo_list)) {
+            foreach (request()->photo_list as $item) {
+dd($item);
                 $main_file_ext = $item->extension();
                 $main_mime_type = $item->getMimeType();
 
-                if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif') && $file_in_mb <= 2) {
+                if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
                     $rand_value = md5(mt_rand(11111111, 99999999));
                     $final_photo_name = $rand_value . '.' . $main_file_ext;
                     $item->move(public_path('uploads/listing_photos'), $final_photo_name);
@@ -146,13 +146,14 @@ class ListingController extends Controller
                     $obj->save();
                 }
             }
+        } else {
+            return response()->json(['error' => "No Photo List Selected"], 422);
         }
 
-
         // Video
-        if ($request->youtube_video_id[0] != '') {
+        if (request()->youtube_video_id[0] != '') {
             $arr_youtube_video_id = array();
-            foreach ($request->youtube_video_id as $item) {
+            foreach (request()->youtube_video_id as $item) {
                 $arr_youtube_video_id[] = $item;
             }
             for ($i = 0; $i < count($arr_youtube_video_id); $i++) {
@@ -165,15 +166,14 @@ class ListingController extends Controller
             }
         }
 
-
         // Social Icons
-        if ($request->social_icon[0] != '') {
+        if (request()->social_icon[0] != '') {
             $arr_social_icon = array();
             $arr_social_url = array();
-            foreach ($request->social_icon as $item) {
+            foreach (request()->social_icon as $item) {
                 $arr_social_icon[] = $item;
             }
-            foreach ($request->social_url as $item) {
+            foreach (request()->social_url as $item) {
                 $arr_social_url[] = $item;
             }
             for ($i = 0; $i < count($arr_social_icon); $i++) {
@@ -189,13 +189,13 @@ class ListingController extends Controller
 
 
         // Additional Features
-        if ($request->additional_feature_name[0] != '') {
+        if (request()->additional_feature_name[0] != '') {
             $arr_additional_feature_name = array();
             $arr_additional_feature_value = array();
-            foreach ($request->additional_feature_name as $item) {
+            foreach (request()->additional_feature_name as $item) {
                 $arr_additional_feature_name[] = $item;
             }
-            foreach ($request->additional_feature_value as $item) {
+            foreach (request()->additional_feature_value as $item) {
                 $arr_additional_feature_value[] = $item;
             }
             for ($i = 0; $i < count($arr_additional_feature_name); $i++) {
@@ -208,8 +208,11 @@ class ListingController extends Controller
                 }
             }
         }
-        return redirect()->route('admin_listing_view')->with('success', SUCCESS_ACTION);
+        return response()->json(['message' => "Success!!",  "listing" => $obj], 200);
     }
+
+
+
 
     public function edit($id)
     {

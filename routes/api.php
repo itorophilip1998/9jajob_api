@@ -42,6 +42,8 @@ Route::group([
     Route::get('/my-listing', [ListingController::class, 'myListings'])->middleware("auth:api");
 });
 
+Route::post('/add-listings', [ListingController::class, 'AddListings'])->middleware("auth:api");
+
 // Ratings
 Route::group([
     'middleware' => 'api',
