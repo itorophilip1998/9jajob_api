@@ -17,9 +17,15 @@ class PackagePurchase extends Model
         'package_end_date',
         'currently_active'
     ];
+    protected $with = [
+        'purchaseDetails'
+    ];
 
     public function rPackage() {
         return $this->belongsTo( Package::class, 'package_id' );
+    }
+    public function purchaseDetails() {
+        return $this->belongsTo(Package::class, 'package_id' );
     }
 
     public function rUser() {

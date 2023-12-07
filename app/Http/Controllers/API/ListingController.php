@@ -87,6 +87,7 @@ class ListingController extends Controller
             'listing_address' => 'required',
             'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
         ]);
+        dd(request()->all());
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 200);
@@ -129,12 +130,12 @@ class ListingController extends Controller
         }
 
         // Photo
-        if (isset(request()->photo_list) &&  is_array(request()->photo_list)) {
+
+        if (request()->photo_list !== null) {
             foreach (request()->photo_list as $item) {
-dd($item);
+
                 $main_file_ext = $item->extension();
                 $main_mime_type = $item->getMimeType();
-
                 if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
                     $rand_value = md5(mt_rand(11111111, 99999999));
                     $final_photo_name = $rand_value . '.' . $main_file_ext;
