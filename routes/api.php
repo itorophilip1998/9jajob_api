@@ -97,4 +97,5 @@ Route::group([
     'prefix' => 'package'
 ], function ($router) {
     Route::get('/', [PackageController::class, 'index'])->middleware("auth:api");
+    Route::post('/purchase', [PackageController::class, 'purchase'])->middleware("auth:api");
 });

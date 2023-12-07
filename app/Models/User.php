@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Ratings;
 use Illuminate\Support\Str;
+use App\Models\PackagePurchase;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\URL;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -65,6 +66,9 @@ class User extends Authenticatable implements JWTSubject
         'password' => 'hashed',
     ];
 
+    protected $with=[
+            'package'
+    ];
     /**
      * The accessors to append to the model's array form.
      *
@@ -126,5 +130,9 @@ class User extends Authenticatable implements JWTSubject
     public function ratings()
     {
         return $this->hasMany(Ratings::class);
+    }
+    public function package()
+    {
+        return $this->hasOne(PackagePurchase::class,'user_id')->where('currently_active','1');
     }
 }

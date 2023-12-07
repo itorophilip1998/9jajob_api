@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\PackagePurchase;
 use Illuminate\Http\Request;
@@ -10,10 +10,7 @@ use Auth;
 
 class PurchaseHistoryController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth.admin:admin');
-    }
+
 
     public function index()
     {
@@ -23,23 +20,7 @@ class PurchaseHistoryController extends Controller
 
         return view('admin.purchase_history_view', compact('purchase_history'));
     }
-
-    public function approve($id)
-    {
-        $g_setting = DB::table('general_settings')->where('id', 1)->first();
-        
-        $table_data = PackagePurchase::where('id',$id)->first();
-
-        $data['currently_active'] = 0;
-        PackagePurchase::where('user_id',$table_data->user_id)->update($data);
-
-        $table_data->payment_status = 'Completed';
-        $table_data->currently_active = 1;
-        $table_data->update();
-
-        return redirect()->back()->with('success', SUCCESS_ACTION);
-    }
-
+ 
 
     public function detail($id)
     {
@@ -67,7 +48,7 @@ class PurchaseHistoryController extends Controller
             ->select('package_purchases.*', 'packages.package_name', 'users.name', 'users.email')
             ->where('package_purchases.id', $id)
             ->first();
-        
+
         if(!$detail)
         {
             abort(404);
@@ -76,8 +57,8 @@ class PurchaseHistoryController extends Controller
         return view('admin.purchase_history_invoice', compact('g_setting','detail'));
     }
 
-    
 
-    
+
+
 
 }
