@@ -43,7 +43,8 @@ class User extends Authenticatable implements JWTSubject
         'banner',
         'password',
         'token',
-        'status'
+        'status',
+        'ref_code'
     ];
 
     /**
@@ -99,7 +100,7 @@ class User extends Authenticatable implements JWTSubject
         // Add the 'user_photo' attribute to the array
         $attributes['photo'] =
             $this->photo ? URL::to("/uploads/user_photos") . "/" . $this->photo :  null;
-
+         $attributes['ref_code'] = "ref-".$this->id;
         return $attributes;
     }
 

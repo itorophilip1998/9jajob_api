@@ -1,14 +1,18 @@
 <?php
+
 namespace App\Http\Controllers;
 
 
 
 use App\Models\User;
+use App\Models\Referral;
+use Illuminate\Support\Str;
+use App\Models\Transactions;
 use App\Models\EmailTemplate;
+// use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-// use App\Http\Controllers\AuthController;
 use App\Mail\RegistrationEmailToCustomer;
 use Illuminate\Support\Facades\Validator;
 
@@ -35,46 +39,68 @@ class AuthController extends Controller
             're_password' => 'required|same:password',
         ]);
 
-    //Send failed response if request is not valid
-    if ($validator->fails()) {
-        return response()->json(['error' => $validator->messages()], 200);
-    }
+        //Send failed response if request is not valid
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
 
-    $token = hash('sha256',time());
-    $data=request()->all();
-    $data['password'] = Hash::make(request()->password);
-    $data['token'] = $token;
-    $data['status'] = 'active';
-    User::create($data);
+        $token = hash('sha256', time());
+        $data = request()->all();
+        $data['password'] = Hash::make(request()->password);
+        $data['token'] = $token;
+        $data['status'] = 'active';
+        User::create($data);
 
 
-    // Send Email
-    // $et_data = EmailTemplate::where('id', 6)->first();
-    // $subject = $et_data->et_subject;
-    // $message = $et_data->et_content;
-    // $verification_link = url('customer/registration/verify/'.$token.'/'.request()->email);
-    // $message = str_replace('[[verification_link]]', $verification_link, $message);
-    // Mail::to(request()->email)->send(new RegistrationEmailToCustomer($subject,$message));
+        // Send Email
+        // $et_data = EmailTemplate::where('id', 6)->first();
+        // $subject = $et_data->et_subject;
+        // $message = $et_data->et_content;
+        // $verification_link = url('customer/registration/verify/' . $token . '/' . request()->email);
+        // $message = str_replace('[[verification_link]]', $verification_link, $message);
+        // Mail::to(request()->email)->send(new RegistrationEmailToCustomer($subject, $message));
 
 
         $credentials = request(['email', 'password']);
-        if (! $token = auth()->attempt($credentials)) {
+        if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+        // create referral and transaction if user include the code
+        if ($data['ref_code'] !== null) {
+            $ref = Referral::create([
+                'user_id' => auth()->user()->id,
+                'referrer_id' => substr($data['ref_code'], 4),
+                'ref_code' => $data['ref_code'],
+                'amount_earn' => 150,
+            ]);
+            $transaction = [
+                'user_id' => auth()->user()->id,
+                'type' => 'credit',
+                'status' => 'success', //debit, credit
+                'ref_number' => Str::random(10),
+                'trans_id' => Str::random(10),
+                'amount' => $ref["amount_earn"],
+                'description' => "referrals withdrawal from " . auth()->user()->name,
+                'purpose' => 'referrals', //verification ,packages, top-up, withdrawal,referrals, boost]
+                'referral_code' => auth()->user()->ref_code,
+            ];
+            Transactions::create($transaction);
+        }
 
-        return $this->respondWithToken($token,"Registered Successfully!, Please check your mail for verification");
+        return $this->respondWithToken($token, "Registered Successfully!, Please check your mail for verification");
     }
+
 
     public function login()
     {
 
         $credentials = request(['email', 'password']);
 
-        if (! $token = auth()->attempt($credentials)) {
+        if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return $this->respondWithToken($token,"Login Successfully!");
+        return $this->respondWithToken($token, "Login Successfully!");
     }
 
     /**
@@ -106,13 +132,13 @@ class AuthController extends Controller
      */
     public function refresh()
     {
-       try {
+        try {
             //code...
             return $this->respondWithToken(auth()->refresh(), 'Refresh Token Added');
-       } catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             //throw $th;
             return response()->json(['error' => 'Unauthorized'], 401);
-       }
+        }
     }
 
     /**
@@ -122,13 +148,13 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token,$message)
+    protected function respondWithToken($token, $message)
     {
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
-            "message"=>$message
-        ],200);
+            "message" => $message
+        ], 200);
     }
 }

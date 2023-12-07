@@ -15,6 +15,7 @@ use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\ListingCategoryController;
+use App\Http\Controllers\ReferralController;
 
 // authentication
 Route::group([
@@ -98,4 +99,13 @@ Route::group([
 ], function ($router) {
     Route::get('/', [PackageController::class, 'index'])->middleware("auth:api");
     Route::post('/purchase', [PackageController::class, 'purchase'])->middleware("auth:api");
+});
+
+// Referrals
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'referrals'
+], function ($router) {
+    Route::get('/', [ReferralController::class, 'index'])->middleware("auth:api");
+  
 });

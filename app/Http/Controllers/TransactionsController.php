@@ -42,7 +42,7 @@ class TransactionsController extends Controller
         if ($purpose !== null) {
             $query->where('purpose', $purpose);
         }
-        $transactions = $query->get();
+        $transactions = $query->latest()->get();
         return response()->json(
             [
                 'balance' => $balance,

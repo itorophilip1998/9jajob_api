@@ -87,7 +87,7 @@ class ListingController extends Controller
             'listing_address' => 'required',
             'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
         ]);
-        dd(request()->all());
+        // dd(request()->all());
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 200);
@@ -116,7 +116,7 @@ class ListingController extends Controller
 
 
         // Amenity
-        if (request()->amenity != '') {
+        if (is_array(request()->amenity) || is_object(request()->amenity)) {
             $arr_amenity = array();
             foreach (request()->amenity as $item) {
                 $arr_amenity[] = $item;
@@ -131,7 +131,7 @@ class ListingController extends Controller
 
         // Photo
 
-        if (request()->photo_list !== null) {
+        if (is_array(request()->photo_list) || is_object(request()->photo_list)) {
             foreach (request()->photo_list as $item) {
 
                 $main_file_ext = $item->extension();
@@ -152,7 +152,7 @@ class ListingController extends Controller
         }
 
         // Video
-        if (request()->youtube_video_id[0] != '') {
+        if (is_array(request()->youtube_video_id) || is_object(request()->youtube_video_id)) {
             $arr_youtube_video_id = array();
             foreach (request()->youtube_video_id as $item) {
                 $arr_youtube_video_id[] = $item;
@@ -168,29 +168,23 @@ class ListingController extends Controller
         }
 
         // Social Icons
-        if (request()->social_icon[0] != '') {
-            $arr_social_icon = array();
-            $arr_social_url = array();
-            foreach (request()->social_icon as $item) {
-                $arr_social_icon[] = $item;
+        if (is_array(request()->socialMedia) || is_object(request()->socialMedia)) {
+
+            foreach (request()->socialMedia as $item) {
+                $arr_social_icon = $item["arr_social_icon"];
+                $arr_social_url = $item["arr_social_url"];
+                $obj = new ListingSocialItem;
+                $obj->listing_id = $ai_id;
+                $obj->social_icon = $arr_social_icon[$i];
+                $obj->social_url = $arr_social_url[$i];
+                $obj->save();
             }
-            foreach (request()->social_url as $item) {
-                $arr_social_url[] = $item;
-            }
-            for ($i = 0; $i < count($arr_social_icon); $i++) {
-                if (($arr_social_icon[$i] != '') && ($arr_social_url[$i] != '')) {
-                    $obj = new ListingSocialItem;
-                    $obj->listing_id = $ai_id;
-                    $obj->social_icon = $arr_social_icon[$i];
-                    $obj->social_url = $arr_social_url[$i];
-                    $obj->save();
-                }
-            }
+
         }
 
 
         // Additional Features
-        if (request()->additional_feature_name[0] != '') {
+        if ( is_array(request()->additional_feature_name) || is_object(request()->additional_feature_name)) {
             $arr_additional_feature_name = array();
             $arr_additional_feature_value = array();
             foreach (request()->additional_feature_name as $item) {
@@ -208,8 +202,10 @@ class ListingController extends Controller
                     $obj->save();
                 }
             }
+
         }
-        return response()->json(['message' => "Success!!",  "listing" => $obj], 200);
+        $Listings=Listing::find($obj->id);
+        return response()->json(['message' => "Success!!",  "listing" => $Listings], 200);
     }
 
 

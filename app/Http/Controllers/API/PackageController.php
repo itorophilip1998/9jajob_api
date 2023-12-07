@@ -54,7 +54,7 @@ class PackageController extends Controller
                 'purpose' => 'packages', //verification ,packages, top-up, withdrawal,referrals, boost]
                 'package_id' => $req["package_id"],
             ];
-            $package = Transactions::create($transaction);
+            Transactions::create($transaction);
             $item = [
                 "invoiceNumber" => rand(1111, 9999),
                 "invoiceDate" => Carbon::now()->format("d M, Y"),
