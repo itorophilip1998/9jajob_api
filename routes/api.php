@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use App\Models\ListingCategory;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\RatingsController;
 use App\Http\Controllers\API\ReviewController;
@@ -12,8 +13,8 @@ use App\Http\Controllers\API\ListingController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\ListingCategoryController;
-use App\Http\Controllers\ReportController;
 
 // authentication
 Route::group([
@@ -88,4 +89,12 @@ Route::group([
 ], function ($router) {
     Route::post('/', [ReportController::class, 'create'])->middleware("auth:api");
 
+});
+
+// Package
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'package'
+], function ($router) {
+    Route::get('/', [PackageController::class, 'index'])->middleware("auth:api");
 });
