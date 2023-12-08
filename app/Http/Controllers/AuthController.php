@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\RegistrationEmailToCustomer;
 use Illuminate\Support\Facades\Validator;
 
+use function PHPUnit\Framework\isEmpty;
+
 class AuthController extends Controller
 {
     /**
@@ -104,10 +106,10 @@ class AuthController extends Controller
         }
 
         $data = request()->all();
-        if ($data['password'] !== null) {
+        if (request()->password!==null) {
             $data['password'] = Hash::make($data['password']);
         }
-        if ($data['name'] !== null) {
+        if (request()->name !== null) {
             $data['name'] = $data['name'];
         }
         if (request()->hasFile('photo')) {
