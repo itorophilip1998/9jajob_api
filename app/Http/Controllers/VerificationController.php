@@ -51,10 +51,10 @@ class VerificationController extends Controller
             request()->file('skill_certificate')->move(public_path('uploads/verifications'), $skill_certificate);
             $req['skill_certificate'] = $skill_certificate;
         }
-        if(is_array(request()->services)){
-            $req['services']=json_encode(request()->services);
+        if (is_array(request()->services)) {
+            $req['services'] = json_encode(request()->services);
         }
-        // $req['status'] = ;
+
         $isVerified = Verification::where('listing_id', $req['listing_id'])->first();
 
         if (isset($isVerified) && $isVerified->status == 'pending') return response()->json(['message' => 'Verification In Progress!'], 200);
