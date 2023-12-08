@@ -29,28 +29,33 @@ class VerificationController extends Controller
             $id_card_front = request()->file('id_card_front')->getClientOriginalName();
             request()->file('id_card_front')->move(public_path('uploads/verifications'), $id_card_front);
             $req['id_card_front'] = $id_card_front;
-        }   if (request()->hasFile('id_card_back')) {
+        }
+        if (request()->hasFile('id_card_back')) {
             $id_card_back = request()->file('id_card_back')->getClientOriginalName();
             request()->file('id_card_back')->move(public_path('uploads/verifications'), $id_card_back);
             $req['id_card_back'] = $id_card_back;
         }
-          if (request()->hasFile('proof_address')) {
+        if (request()->hasFile('proof_address')) {
             $proof_address = request()->file('proof_address')->getClientOriginalName();
             request()->file('proof_address')->move(public_path('uploads/verifications'), $proof_address);
             $req['proof_address'] = $proof_address;
-        }   if (request()->hasFile('cac_document')) {
+        }
+        if (request()->hasFile('cac_document')) {
             $cac_document = request()->file('cac_document')->getClientOriginalName();
             request()->file('cac_document')->move(public_path('uploads/verifications'), $cac_document);
             $req['cac_document'] = $cac_document;
         }
 
-          if (request()->hasFile('skill_certificate')) {
+        if (request()->hasFile('skill_certificate')) {
             $skill_certificate = request()->file('skill_certificate')->getClientOriginalName();
             request()->file('skill_certificate')->move(public_path('uploads/verifications'), $skill_certificate);
             $req['skill_certificate'] = $skill_certificate;
         }
+        if(is_array(request()->services)){
+            $req['services']=json_encode(request()->services);
+        }
         // $req['status'] = ;
-        $isVerified = Verification::where('listing_id',$req['listing_id'])->first();
+        $isVerified = Verification::where('listing_id', $req['listing_id'])->first();
 
         if (isset($isVerified) && $isVerified->status == 'pending') return response()->json(['message' => 'Verification In Progress!'], 200);
         else if (isset($isVerified) &&  $isVerified->status != 'completed') return response()->json(['message' => 'Verification Completed Already!'], 200);
