@@ -27,6 +27,7 @@ Route::group([
     Route::post('logout',  [AuthController::class, 'logout'])->middleware("auth:api");
     Route::post('refresh',  [AuthController::class, 'refresh'])->middleware("auth:api");
     Route::get('auth-user',  [AuthController::class, 'authUser'])->middleware("auth:api");
+    Route::post('edit-user',  [AuthController::class, 'editUser'])->middleware("auth:api");
 });
 
 
@@ -107,5 +108,5 @@ Route::group([
     'prefix' => 'referrals'
 ], function ($router) {
     Route::get('/', [ReferralController::class, 'index'])->middleware("auth:api");
-  
+
 });

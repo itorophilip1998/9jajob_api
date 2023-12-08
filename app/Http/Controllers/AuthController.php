@@ -35,7 +35,7 @@ class AuthController extends Controller
         $validator = Validator::make(request()->all(), [
             'name' => 'required',
             'email' => 'required|email|unique:users',
-            'password' => 'required',
+            'password' => 'required|min:8',
             're_password' => 'required|same:password',
         ]);
 
@@ -88,6 +88,38 @@ class AuthController extends Controller
         }
 
         return $this->respondWithToken($token, "Registered Successfully!, Please check your mail for verification");
+    }
+
+    public function editUser()
+    {
+
+        $validator = Validator::make(request()->all(), [
+            'password' => 'nullable|min:8',
+            're_password' => 'nullable|same:password',
+        ]);
+
+        //Send failed response if request is not valid
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
+
+        $data = request()->all();
+        if ($data['password'] !== null) {
+            $data['password'] = Hash::make($data['password']);
+        }
+        if ($data['name'] !== null) {
+            $data['name'] = $data['name'];
+        }
+        if (request()->hasFile('photo')) {
+            $photo = request()->file('photo')->getClientOriginalName();
+            request()->file('photo')->move(public_path('uploads/user_photos'), $photo);
+            $data['photo'] = $photo;
+        }
+
+        $user = User::find(auth()->user()->id);
+        $user->update($data);
+
+        return response()->json(['message' => 'Successfully edited User'], 200);
     }
 
 
