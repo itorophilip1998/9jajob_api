@@ -8,7 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Boosting extends Model
 {
     use HasFactory;
-    protected $fillable=[
-      
+    protected $fillable = [
+        'amount',
+        'start_date',
+        'end_date',
+        'status',
+        'duration',
+        'listing_id'
     ];
 }

@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('boostings', function (Blueprint $table) {
             $table->id();
+            $table->integer('amount');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->enum('status',['active','in-active']);
+            $table->integer('duration');
+            $table->foreignId('listing_id'); // Assuming 'user_id' is a foreign key referencing the 'id' column of the 'users' table.
             $table->timestamps();
         });
     }

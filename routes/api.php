@@ -15,6 +15,7 @@ use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\ListingCategoryController;
+use App\Http\Controllers\BoostingController;
 use App\Http\Controllers\ReferralController;
 
 // authentication
@@ -108,5 +109,13 @@ Route::group([
     'prefix' => 'referrals'
 ], function ($router) {
     Route::get('/', [ReferralController::class, 'index'])->middleware("auth:api");
+
+});
+// Boosting
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'boosting'
+], function ($router) {
+    Route::post('/', [BoostingController::class, 'create'])->middleware("auth:api");
 
 });
