@@ -68,23 +68,24 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         // create referral and transaction if user include the code
-        if ($data['ref_code'] !== null) {
+        if (request()->ref_code !== null) {
             $ref = Referral::create([
                 'user_id' => auth()->user()->id,
                 'referrer_id' => substr($data['ref_code'], 4),
                 'ref_code' => $data['ref_code'],
                 'amount_earn' => 150,
             ]);
+            $ref_number= Str::random(10);
             $transaction = [
-                'user_id' => auth()->user()->id,
+                'user_id' => substr($data['ref_code'], 4),
                 'type' => 'credit',
                 'status' => 'success', //debit, credit
-                'ref_number' => Str::random(10),
-                'trans_id' => Str::random(10),
+                'ref_number' => $ref_number,
+                'trans_id' => $ref_number,
                 'amount' => $ref["amount_earn"],
                 'description' => "referrals withdrawal from " . auth()->user()->name,
                 'purpose' => 'referrals', //verification ,packages, top-up, withdrawal,referrals, boost]
-                'referral_code' => auth()->user()->ref_code,
+                'referral_code' => $data['ref_code'],
             ];
             Transactions::create($transaction);
         }

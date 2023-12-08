@@ -50,7 +50,7 @@ class PackageController extends Controller
                 'ref_number' => $req["transaction_id"],
                 'trans_id' => $req["transaction_id"],
                 'amount' => $req["paid_amount"],
-                'description' => "Package from" . auth()->user()->name,
+                'description' => "Package from " . auth()->user()->name,
                 'purpose' => 'packages', //verification ,packages, top-up, withdrawal,referrals, boost]
                 'package_id' => $req["package_id"],
             ];
