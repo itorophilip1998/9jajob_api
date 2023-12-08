@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+use App\Models\Transactions;
 use App\Models\Verification;
 use Illuminate\Http\Client\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreVerificationRequest;
 use App\Http\Requests\UpdateVerificationRequest;
@@ -22,6 +26,15 @@ class VerificationController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 200);
+        }
+
+
+        // check balance
+
+        $totalBalance = Transactions::where(['user_id' => auth()->user()->id])->get()->sum('amount');
+        if($totalBalance < 1000){
+            return response()->json(['message' => 'insufficient fund'], 200);
+
         }
         $req = request()->all();
 
@@ -59,7 +72,38 @@ class VerificationController extends Controller
 
         if (isset($isVerified) && $isVerified->status == 'pending') return response()->json(['message' => 'Verification In Progress!'], 200);
         else if (isset($isVerified) &&  $isVerified->status != 'completed') return response()->json(['message' => 'Verification Completed Already!'], 200);
+
+
         Verification::create($req);
+        // send transaction
+        $ref_number = Str::random(10);
+        $transaction = [
+            'user_id' => auth()->user()->id,
+            'type' => 'debit',
+            'status' => 'success', //debit, credit
+            'ref_number' => $ref_number,
+            'trans_id' => $ref_number,
+            'amount' => 1000,
+            'description' => "Verification from " . auth()->user()->name,
+            'purpose' => 'verification', //verification ,packages, top-up, withdrawal,referrals, boost]
+
+        ];
+        Transactions::create($transaction);
+
+        // send invioce
+        $item = [
+            "invoiceNumber" => rand(1111, 9999),
+            "invoiceDate" => Carbon::now()->format("d M, Y"),
+            "user" => auth()->user()->name,
+            "purpose" => $transaction["purpose"],
+            "status" => $transaction["status"],
+            "ref_number" => $transaction["ref_number"],
+            "amount" => $transaction["amount"],
+        ];
+        Mail::send('mail.invioce',  ['item' => $item], function ($message) {
+            $message->to(auth()->user()->email);
+            $message->subject('Invioce');
+        });
         return response()->json(['message' => 'Verification In Progress!!!'], 200);
     }
 }

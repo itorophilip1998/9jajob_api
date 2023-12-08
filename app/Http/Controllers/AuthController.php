@@ -4,19 +4,20 @@ namespace App\Http\Controllers;
 
 
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Referral;
 use Illuminate\Support\Str;
 use App\Models\Transactions;
-use App\Models\EmailTemplate;
 // use App\Http\Controllers\AuthController;
+use App\Models\EmailTemplate;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use function PHPUnit\Framework\isEmpty;
+
 use App\Mail\RegistrationEmailToCustomer;
 use Illuminate\Support\Facades\Validator;
-
-use function PHPUnit\Framework\isEmpty;
 
 class AuthController extends Controller
 {
@@ -75,7 +76,7 @@ class AuthController extends Controller
                 'ref_code' => $data['ref_code'],
                 'amount_earn' => 150,
             ]);
-            $ref_number= Str::random(10);
+            $ref_number = Str::random(10);
             $transaction = [
                 'user_id' => substr($data['ref_code'], 4),
                 'type' => 'credit',
@@ -88,6 +89,22 @@ class AuthController extends Controller
                 'referral_code' => $data['ref_code'],
             ];
             Transactions::create($transaction);
+
+            // send invioce
+            $referrer_name = User::find(substr($data['ref_code'], 4));
+            $item = [
+                "invoiceNumber" => rand(1111, 9999),
+                "invoiceDate" => Carbon::now()->format("d M, Y"),
+                "user" => $referrer_name->name,
+                "purpose" => $transaction["purpose"],
+                "status" => $transaction["status"],
+                "ref_number" => $transaction["ref_number"],
+                "amount" => $transaction["amount"],
+            ];
+            Mail::send('mail.invioce',  ['item' => $item], function ($message) use ($referrer_name) {
+                $message->to($referrer_name->email);
+                $message->subject('Invioce');
+            });
         }
 
         return $this->respondWithToken($token, "Registered Successfully!, Please check your mail for verification");
@@ -107,7 +124,7 @@ class AuthController extends Controller
         }
 
         $data = request()->all();
-        if (request()->password!==null) {
+        if (request()->password !== null) {
             $data['password'] = Hash::make($data['password']);
         }
         if (request()->name !== null) {
