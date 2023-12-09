@@ -46,24 +46,23 @@ class ListingController extends Controller
             $query->where('listing_category_id', $listing_category_id);
         }
 
-        if ($listing_name !== null) {
-            $query->where('listing_name', 'LIKE', '%' . $listing_name . '%');
-        }
+
         if ($listing_city !== null) {
-            $query->whereHas('rListingLocation', function ($q) use ($listing_city) {
-                $q->where('listing_address', 'LIKE', '%' . $listing_city . '%');
-            });
+            $query->where('listing_address', 'LIKE', '%' . $listing_city . '%');
         }
 
         if ($address_longitude !== null && $address_latitude !== null) {
             $query->where(['address_longitude' => $address_longitude, 'address_latitude' => $address_latitude]);
-        }
-
-
+        } 
         if ($is_trending == true) {
             $query->has('reviews', '>=', 1);
         }
-
+        if ($listing_name !== null) {
+            $query->where('listing_name', 'LIKE', '%' . $listing_name . '%')
+                ->orWhereHas('rListingCategory', function ($q) use ($listing_name) {
+                    $q->where('listing_category_name', 'LIKE', '%' . $listing_name . '%');
+                });
+        }
         // Execute the query
         $listing = $query->get();
 
@@ -179,12 +178,11 @@ class ListingController extends Controller
                 $obj->social_url = $arr_social_url[$i];
                 $obj->save();
             }
-
         }
 
 
         // Additional Features
-        if ( is_array(request()->additional_feature_name) || is_object(request()->additional_feature_name)) {
+        if (is_array(request()->additional_feature_name) || is_object(request()->additional_feature_name)) {
             $arr_additional_feature_name = array();
             $arr_additional_feature_value = array();
             foreach (request()->additional_feature_name as $item) {
@@ -202,9 +200,8 @@ class ListingController extends Controller
                     $obj->save();
                 }
             }
-
         }
-        $Listings=Listing::find($obj->id);
+        $Listings = Listing::find($obj->id);
         return response()->json(['message' => "Success!!",  "listing" => $Listings], 200);
     }
 
@@ -446,7 +443,6 @@ class ListingController extends Controller
 
         // Success Message and redirect
         return response()->json(['message' => "deleted"], 200);
-
     }
 
 
