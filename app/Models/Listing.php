@@ -109,10 +109,10 @@ class Listing extends Model
 
     public function boosting()
     {
-        return $this->hasOne(Boosting::class, 'listing_id');
+        return $this->hasOne(Boosting::class, 'listing_id')->select('id', 'status', 'listing_id');
     }
     public function verified()
     {
-        return $this->belongsTo(Verification::class, 'listing_id');
+        return $this->hasOne(Verification::class, 'listing_id')->select('id','status', 'listing_id');
     }
 }

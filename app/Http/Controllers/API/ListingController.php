@@ -51,7 +51,7 @@ class ListingController extends Controller
         }
         if ($listing_city !== null) {
             $query->whereHas('rListingLocation', function ($q) use ($listing_city) {
-                $q->where('listing_location_name', 'LIKE', '%' . $listing_city . '%');
+                $q->where('listing_address', 'LIKE', '%' . $listing_city . '%');
             });
         }
 
