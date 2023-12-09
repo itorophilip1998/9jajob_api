@@ -45,9 +45,11 @@ Route::group([
     Route::get('/listing', [ListingCategoryController::class, 'index']);
     Route::get('/all-listing', [ListingController::class, 'index']);
     Route::get('/my-listing', [ListingController::class, 'myListings'])->middleware("auth:api");
+    Route::post('/my-listing', [ListingController::class, 'myListings'])->middleware("auth:api");
 });
 
 Route::post('/add-listings', [ListingController::class, 'AddListings'])->middleware("auth:api");
+Route::delete('/delete-listings/{id}', [ListingController::class, 'destroy'])->middleware("auth:api");
 
 // Ratings
 Route::group([

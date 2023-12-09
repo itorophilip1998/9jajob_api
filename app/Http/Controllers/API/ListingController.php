@@ -427,9 +427,6 @@ class ListingController extends Controller
     public function destroy($id)
     {
 
-        if (env('PROJECT_MODE') == 0) {
-            return redirect()->back()->with('error', env('PROJECT_NOTIFICATION'));
-        }
 
         $listing = Listing::findOrFail($id);
         unlink(public_path('uploads/listing_featured_photos/' . $listing->listing_featured_photo));
@@ -448,7 +445,8 @@ class ListingController extends Controller
         ListingPhoto::where('listing_id', $id)->delete();
 
         // Success Message and redirect
-        return Redirect()->back()->with('success', SUCCESS_ACTION);
+        return response()->json(['message' => "deleted"], 200);
+
     }
 
 

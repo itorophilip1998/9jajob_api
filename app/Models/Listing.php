@@ -9,9 +9,11 @@ use App\Models\ListingLocation;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Listing extends Model
 {
+    // use SoftDeletes;
     protected $fillable = [
         'listing_name',
         'listing_slug',
@@ -113,6 +115,6 @@ class Listing extends Model
     }
     public function verified()
     {
-        return $this->hasOne(Verification::class, 'listing_id')->select('id','status', 'listing_id');
+        return $this->hasOne(Verification::class, 'listing_id')->select('id', 'status', 'listing_id');
     }
 }
