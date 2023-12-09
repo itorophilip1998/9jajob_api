@@ -126,7 +126,7 @@ class VerificationController extends Controller
 
     public function updateVerifications($id)
     {
-        Verification::find($id)->update(request()->all());
+        Verification::where('listing_id',$id)->update(request()->all());
         return response()->json(["message" => 'Verification Updated!!'], 200);
     }
 }
