@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Ratings;
 use App\Models\ListingCategory;
 use App\Models\ListingLocation;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
 
@@ -47,7 +48,9 @@ class Listing extends Model
         'listingAdditionalFeatures',
         'listingSocialItem',
         'listingsPhotos',
-        'listingsVideos'
+        'listingsVideos',
+        'verified',
+        'boosting',
     ];
 
     public function toArray()
@@ -102,5 +105,14 @@ class Listing extends Model
     public function listingAdditionalFeatures()
     {
         return $this->hasMany(ListingAdditionalFeature::class, 'id');
+    }
+
+    public function boosting()
+    {
+        return $this->hasOne(Boosting::class, 'listing_id');
+    }
+    public function verified()
+    {
+        return $this->belongsTo(Verification::class, 'listing_id');
     }
 }

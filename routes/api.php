@@ -29,6 +29,7 @@ Route::group([
     Route::post('refresh',  [AuthController::class, 'refresh'])->middleware("auth:api");
     Route::get('auth-user',  [AuthController::class, 'authUser'])->middleware("auth:api");
     Route::post('edit-user',  [AuthController::class, 'editUser'])->middleware("auth:api");
+    Route::post('forgot-password',  [AuthController::class, 'forgotPassword']);
 });
 
 
@@ -74,7 +75,8 @@ Route::group([
     'prefix' => 'verification'
 ], function ($router) {
     Route::post('/', [VerificationController::class, 'create'])->middleware("auth:api");
-
+    Route::get('/', [VerificationController::class, 'listOfVerifications'])->middleware("auth:api");
+    Route::post('/{id}', [VerificationController::class, 'updateVerifications'])->middleware("auth:api");
 });
 
 // transaction
@@ -91,7 +93,6 @@ Route::group([
     'prefix' => 'report'
 ], function ($router) {
     Route::post('/', [ReportController::class, 'create'])->middleware("auth:api");
-
 });
 
 // Package
@@ -109,7 +110,6 @@ Route::group([
     'prefix' => 'referrals'
 ], function ($router) {
     Route::get('/', [ReferralController::class, 'index'])->middleware("auth:api");
-
 });
 // Boosting
 Route::group([
@@ -117,5 +117,4 @@ Route::group([
     'prefix' => 'boosting'
 ], function ($router) {
     Route::post('/', [BoostingController::class, 'create'])->middleware("auth:api");
-
 });

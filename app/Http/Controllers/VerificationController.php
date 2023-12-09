@@ -32,9 +32,8 @@ class VerificationController extends Controller
         // check balance
 
         $totalBalance = Transactions::where(['user_id' => auth()->user()->id])->get()->sum('amount');
-        if($totalBalance < 1000){
+        if ($totalBalance < 1000) {
             return response()->json(['message' => 'insufficient fund'], 200);
-
         }
         $req = request()->all();
 
@@ -105,5 +104,29 @@ class VerificationController extends Controller
             $message->subject('Invioce');
         });
         return response()->json(['message' => 'Verification In Progress!!!'], 200);
+    }
+    public function listOfVerifications()
+    {
+        $status = request()->input('status');
+
+
+        // Start with a base query
+        $query = Verification::query();
+
+        // Add conditions only for parameters with values
+        if ($status !== null) {
+            $query->where('status', $status);
+        }
+
+        // Execute the query
+        $verification = $query->get();
+
+        return response()->json(['Counts' => count($verification), "verification" => $verification], 200);
+    }
+
+    public function updateVerifications($id)
+    {
+        Verification::find($id)->update(request()->all());
+        return response()->json(["message" => 'Verification Updated!!'], 200);
     }
 }

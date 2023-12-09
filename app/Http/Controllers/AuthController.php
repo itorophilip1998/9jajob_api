@@ -18,6 +18,7 @@ use function PHPUnit\Framework\isEmpty;
 
 use App\Mail\RegistrationEmailToCustomer;
 use Illuminate\Support\Facades\Validator;
+use App\Mail\ResetPasswordMessageToCustomer;
 
 class AuthController extends Controller
 {
@@ -208,5 +209,39 @@ class AuthController extends Controller
             'expires_in' => auth()->factory()->getTTL() * 60,
             "message" => $message
         ], 200);
+    }
+
+
+    public function forgotPassword()
+    {
+
+
+        $validator = Validator::make(request()->all(), [
+            'email' => 'required|email'
+
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
+
+
+
+        $check_email = User::where('email', request()->email)->where('status', 'Active')->first();
+        if (!$check_email) {
+            return redirect()->back()->with('error', 'Email Not Found !');
+        } else {
+            $et_data = EmailTemplate::where('id', 7)->first();
+            $subject = $et_data->et_subject;
+            $message = $et_data->et_content;
+            $token = hash('sha256', time());
+            $reset_link = url('customer/reset-password/' . $token . '/' . request()->email);
+            $message = str_replace('[[reset_link]]', $reset_link, $message);
+
+            $data['token'] = $token;
+            User::where('email', request()->email)->update($data);
+            Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message));
+        }
+        $email = request()->email;
+        return redirect()->back()->with('success', "Successfully sent mail to $email !! ");
     }
 }

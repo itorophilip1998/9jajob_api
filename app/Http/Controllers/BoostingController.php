@@ -30,8 +30,7 @@ class BoostingController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 200);
         }
-
-
+ 
 
         $isVerified = Boosting::where(['listing_id' => request()->listing_id])->latest()->first();
 
