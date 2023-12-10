@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Chats extends Model
 {
@@ -31,4 +32,16 @@ class Chats extends Model
     {
         return $this->belongsTo(User::class, 'friend_id')->without(['package'])->select(['id','name','email','photo']) ;
     }
+
+    public function toArray()
+    {
+        $attributes = parent::toArray();
+
+        // Add the 'user_photo' attribute to the array
+        $attributes['photo'] =
+            $this->photo ? URL::to("/uploads/chats") . "/" . $this->photo :  null;
+        $attributes['ref_code'] = "ref-" . $this->id;
+        return $attributes;
+    }
+
 }
