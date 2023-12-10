@@ -16,6 +16,7 @@ use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\ListingCategoryController;
 use App\Http\Controllers\BoostingController;
+use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\ReferralController;
 
 // authentication
@@ -120,4 +121,12 @@ Route::group([
     'prefix' => 'boosting'
 ], function ($router) {
     Route::post('/', [BoostingController::class, 'create'])->middleware("auth:api");
+});
+// chats
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'chats'
+], function ($router) {
+    Route::post('/', [ChatsController::class, 'create'])->middleware("auth:api");
+    Route::get('/{friend_id}', [ChatsController::class, 'index'])->middleware("auth:api");
 });
