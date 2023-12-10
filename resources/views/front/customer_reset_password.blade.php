@@ -3,11 +3,11 @@
 @section('content')
 
 <div class="page-banner">
-	<h1>{{ RESET_PASSWORD }}</h1>
+	<h1>{{ "Reset Password" }}</h1>
 	<nav>
 		<ol class="breadcrumb justify-content-center">
-			<li class="breadcrumb-item"><a href="{{ url('/') }}">{{ HOME }}</a></li>
-			<li class="breadcrumb-item active">{{ RESET_PASSWORD }}</li>
+			<li class="breadcrumb-item"><a href="{{ url('/') }}">{{ 'Home' }}</a></li>
+			<li class="breadcrumb-item active">{{ 'Reset Password' }}</li>
 		</ol>
 	</nav>
 </div>
@@ -28,11 +28,11 @@
 							@csrf
 							<input type="hidden" name="current_email" value="{{ $email }}">
 							<div class="form-group">
-								<label for="">{{ NEW_PASSWORD }}</label>
+								<label for="">{{ 'New Password' }}</label>
 								<input type="password" class="form-control" name="new_password">
 							</div>
 							<div class="form-group">
-								<label for="">{{ RETYPE_PASSWORD }}</label>
+								<label for="">{{ 'Retype Password' }}</label>
 								<input type="password" class="form-control" name="retype_password">
 							</div>
 							@if($g_setting->google_recaptcha_status == 'Show')
@@ -40,9 +40,9 @@
 								<div class="g-recaptcha" data-sitekey="{{ $g_setting->google_recaptcha_site_key }}"></div>
 							</div>
 							@endif
-							<button type="submit" class="btn btn-primary">{{ UPDATE }}</button>
+							<button type="submit" class="btn btn-primary">{{ 'Update' }}</button>
 							<div class="new-user">
-								<a href="{{ route('customer_login') }}">{{ BACK_TO_LOGIN_PAGE }}</a>
+								<a href="{{ route('customer_login') }}">{{ 'Back to login page' }}</a>
 							</div>
 						</form>
 					</div>

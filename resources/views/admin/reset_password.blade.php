@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>{{ RESET_PASSWORD}}</title>
+    <title>{{ "Reset Password"}}</title>
 
     @include('admin.app_styles')
 
@@ -30,7 +30,7 @@
                             <div class="p-5">
 
                                 <div class="text-center">
-                                    <h1 class="h4 text-gray-900 mb-4">{{ RESET_PASSWORD}}</h1>
+                                    <h1 class="h4 text-gray-900 mb-4">{{ 'Reset Password'}}</h1>
                                 </div>
 
                                 <form action="{{ route('admin_reset_password_update') }}" class="user" method="post">

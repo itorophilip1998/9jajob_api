@@ -57,12 +57,12 @@ class AuthController extends Controller
 
 
         // Send Email
-        // $et_data = EmailTemplate::where('id', 6)->first();
-        // $subject = $et_data->et_subject;
-        // $message = $et_data->et_content;
-        // $verification_link = url('customer/registration/verify/' . $token . '/' . request()->email);
-        // $message = str_replace('[[verification_link]]', $verification_link, $message);
-        // Mail::to(request()->email)->send(new RegistrationEmailToCustomer($subject, $message));
+        $et_data = EmailTemplate::where('id', 6)->first();
+        $subject = $et_data->et_subject;
+        $message = $et_data->et_content;
+        $verification_link = url('customer/registration/verify/' . $token . '/' . request()->email);
+        $message = str_replace('[[verification_link]]', $verification_link, $message);
+        Mail::to(request()->email)->send(new RegistrationEmailToCustomer($subject, $message));
 
 
         $credentials = request(['email', 'password']);
@@ -223,25 +223,46 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 200);
         }
-
-
-
         $check_email = User::where('email', request()->email)->where('status', 'Active')->first();
+
         if (!$check_email) {
             return redirect()->back()->with('error', 'Email Not Found !');
         } else {
             $et_data = EmailTemplate::where('id', 7)->first();
             $subject = $et_data->et_subject;
-            $message = $et_data->et_content;
-            $token = hash('sha256', time());
-            $reset_link = url('customer/reset-password/' . $token . '/' . request()->email);
-            $message = str_replace('[[reset_link]]', $reset_link, $message);
+            $message = 'Hello ' . $check_email->name . ", \n to reset your password copy the OTP bellow:";
+            $token = rand(10000, 99999);
+            // $reset_link = url('customer/reset-password/' . $token . '/' . request()->email);
 
             $data['token'] = $token;
             User::where('email', request()->email)->update($data);
-            Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message));
+            Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message, $token));
         }
+
         $email = request()->email;
-        return redirect()->back()->with('success', "Successfully sent mail to $email !! ");
+
+        return response()->json(['message', "Successfully sent mail to $email !! "], 200);
+    }
+
+
+    public function resetPassword()
+    {
+
+        $validator = Validator::make(request()->all(), [
+            'email' => 'required|email',
+            'otp' => 'required',
+            'password' => 'required|min:8',
+            're_password' => 'required|same:password',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
+        $user = User::where(['email'=> request()->email,'token'=>request()->otp])->first();
+        if (!$user)
+        return response()->json(['error', "Invalid Credentials!! "], 200);
+        $data['password'] = Hash::make(request()->password);
+        $data['token'] = '';
+        $user->update($data);
+        return response()->json(['message'=>"Successfully updated password!! "], 200);
     }
 }

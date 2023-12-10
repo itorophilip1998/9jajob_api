@@ -30,6 +30,7 @@ Route::group([
     Route::get('auth-user',  [AuthController::class, 'authUser'])->middleware("auth:api");
     Route::post('edit-user',  [AuthController::class, 'editUser'])->middleware("auth:api");
     Route::post('forgot-password',  [AuthController::class, 'forgotPassword']);
+    Route::post('reset-password',  [AuthController::class, 'resetPassword']);
 });
 
 

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Transactions;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreTransactionsRequest;
 use App\Http\Requests\UpdateTransactionsRequest;
@@ -26,7 +28,21 @@ class TransactionsController extends Controller
         }
         $req = request()->all();
         $req['user_id'] = auth()->user()->id;
-        Transactions::create($req);
+        $transaction=  Transactions::create($req);
+        // send invioce
+        $item = [
+            "invoiceNumber" => rand(1111, 9999),
+            "invoiceDate" => Carbon::now()->format("d M, Y"),
+            "user" => auth()->user()->name,
+            "purpose" => $transaction["purpose"],
+            "status" => $transaction["status"],
+            "ref_number" => $transaction["ref_number"],
+            "amount" => $transaction["amount"],
+        ];
+        Mail::send('mail.invioce',  ['item' => $item], function ($message) {
+            $message->to(auth()->user()->email);
+            $message->subject('Invioce');
+        });
         return response()->json(['message' => 'Success!!'], 200);
     }
 

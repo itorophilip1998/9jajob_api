@@ -13,15 +13,17 @@ class ResetPasswordMessageToCustomer extends Mailable
 
     public $subject;
     public $message;
+    public $token;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($subject,$message)
+    public function __construct($subject,$message,$token)
     {
         $this->subject = $subject;
+        $this->token = $token;
         $this->message = $message;
     }
 

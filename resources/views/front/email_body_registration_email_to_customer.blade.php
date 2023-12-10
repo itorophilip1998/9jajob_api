@@ -1,3 +1,5 @@
+
+
 @component('mail::message')
-    {!! clean($message) !!}
+    {!!  clean($message) !!}
 @endcomponent

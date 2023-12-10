@@ -33,48 +33,48 @@ $page_listing_category_item = \App\Models\PageListingCategoryItem::where('id',1)
 
 
 						<li class="nav-item">
-							<a href="{{ url('/') }}" class="nav-link">{{ MENU_HOME }}</a>
+							<a href="{{ url('/') }}" class="nav-link">{{ 'Home' }}</a>
 						</li>
 
                         @if($page_listing_item->status == 'Show')
 						<li class="nav-item">
-							<a href="{{ url('listing-result?text=') }}" class="nav-link">{{ MENU_LISTING }}</a>
+							<a href="{{ url('listing-result?text=') }}" class="nav-link">{{ 'Listing' }}</a>
 						</li>
                         @endif
 
                         @if($page_pricing_item->status == 'Show')
 						<li class="nav-item">
-							<a href="{{ route('front_pricing') }}" class="nav-link">{{ MENU_PRICING }}</a>
+							<a href="{{ route('front_pricing') }}" class="nav-link">{{ 'Pricing' }}</a>
 						</li>
                         @endif
 
 
                         @if($page_about_item->status == 'Show' || $page_faq_item->status == 'Show' || $page_listing_category_item->status == 'Show' || $page_blog_item->status == 'Show' || (!$dynamic_pages->isEmpty()))
 						<li class="nav-item">
-							<a href="javascript:void;" class="nav-link dropdown-toggle">{{ MENU_PAGES }}</a>
+							<a href="javascript:void;" class="nav-link dropdown-toggle">{{ 'Pages' }}</a>
 							<ul class="dropdown-menu">
 
                                 @if($page_about_item->status == 'Show')
 								<li class="nav-item">
-									<a href="{{ route('front_about') }}" class="nav-link">{{ MENU_ABOUT }}</a>
+									<a href="{{ route('front_about') }}" class="nav-link">{{ 'About' }}</a>
 								</li>
                                 @endif
 
                                 @if($page_faq_item->status == 'Show')
 								<li class="nav-item">
-									<a href="{{ route('front_faq') }}" class="nav-link">{{ MENU_FAQ }}</a>
+									<a href="{{ route('front_faq') }}" class="nav-link">{{ 'FAQ' }}</a>
 								</li>
                                 @endif
 
                                 @if($page_listing_category_item->status == 'Show')
 								<li class="nav-item">
-									<a href="{{ route('front_listing_category_all') }}" class="nav-link">{{ MENU_CATEGORY }}</a>
+									<a href="{{ route('front_listing_category_all') }}" class="nav-link">{{ 'Category' }}</a>
 								</li>
                                 @endif
 
                                 @if($page_blog_item->status == 'Show')
 								<li class="nav-item">
-									<a href="{{ route('front_blogs') }}" class="nav-link">{{ MENU_BLOG }}</a>
+									<a href="{{ route('front_blogs') }}" class="nav-link">{{ 'Blog' }}</a>
 								</li>
                                 @endif
 
@@ -91,7 +91,7 @@ $page_listing_category_item = \App\Models\PageListingCategoryItem::where('id',1)
 
                         @if($page_contact_item->status == 'Show')
 						<li class="nav-item">
-							<a href="{{ route('front_contact') }}" class="nav-link">{{ MENU_CONTACT }}</a>
+							<a href="{{ route('front_contact') }}" class="nav-link">{{ 'Contact' }}</a>
 						</li>
                         @endif
 
@@ -99,13 +99,13 @@ $page_listing_category_item = \App\Models\PageListingCategoryItem::where('id',1)
                         @if($g_settings->customer_listing_option == 'On')
 						<li class="nav-item nav-item-last">
 							@if(Auth::user())
-							<a href="{{ route('customer_dashboard') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> {{ MENU_DASHBOARD }}</a>
+							<a href="{{ route('customer_dashboard') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> {{ 'Dashboard' }}</a>
 							@else
-							<a href="{{ route('customer_login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> {{ MENU_LOGIN_REGISTER }}</a>
+							<a href="{{ route('customer_login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> {{ 'Login' }}</a>
 							@endif
 						</li>
 						<li class="nav-item nav-item-last">
-							<a href="{{ route('customer_listing_add') }}" class="nav-link"><i class="fas fa-plus"></i> {{ MENU_ADD_LISTING }}</a>
+							<a href="{{ route('customer_listing_add') }}" class="nav-link"><i class="fas fa-plus"></i> {{ 'Add Listing' }}</a>
 						</li>
                         @endif
 

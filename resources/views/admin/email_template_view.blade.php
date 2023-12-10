@@ -9,7 +9,7 @@
                     <thead>
                     <tr>
                         <th>{{ SERIAL }}</th>
-                        <th>{{ NAME }}</th>
+                        <th>{{ NAME }}</th> 
                         <th>{{ ACTION }}</th>
                     </tr>
                     </thead>
