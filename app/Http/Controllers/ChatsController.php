@@ -62,6 +62,7 @@ class ChatsController extends Controller
         })->get();
         return response()->json(['chatted_users' => $chattedUsers], 200);
     }
+    
     public function allUsers()
     {
         $users = User::all();

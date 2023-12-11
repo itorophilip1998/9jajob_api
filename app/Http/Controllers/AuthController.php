@@ -241,7 +241,7 @@ class AuthController extends Controller
 
         $email = request()->email;
 
-        return response()->json(['message', "Successfully sent mail to $email !! "], 200);
+        return response()->json(['message'=> "Successfully sent mail to $email !! "], 200);
     }
 
 
