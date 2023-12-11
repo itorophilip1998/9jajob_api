@@ -13,8 +13,7 @@ class CreateExponentPushNotificationInterestsTable extends Migration
     {
         Schema::create(config('exponent-push-notifications.interests.database.table_name'), function (Blueprint $table) {
             $table->string('key')->index();
-            $table->string('value');
-
+            $table->string('value'); 
             $table->unique(['key','value']);
         });
     }
