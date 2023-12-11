@@ -22,7 +22,7 @@ class ChatsController extends Controller
         })->orWhere(function ($query) use ($user_id, $friend_id) {
             $query->where('user_id', $friend_id)
                 ->where('friend_id', $user_id);
-        })->latest()->get();
+        })->get();
         return response()->json(['chats' => $chats], 200);
     }
 
@@ -58,15 +58,18 @@ class ChatsController extends Controller
     {
         $authUser = auth()->user();
         $chattedUsers = User::whereHas('chats', function ($query) use ($authUser) {
-            $query->where('user_id', $authUser->id);
-        })->without('package')->get();
+            $query->where('user_id', $authUser->id)->latest();
+        })->withOnly('chats')
+            ->get();
+
         return response()->json(['chatted_users' => $chattedUsers], 200);
     }
 
     public function updateStatus()
     {
         Chats::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
-            ->update(['status'=> 'read']);
+            ->update(['status' => 'read']);
+
         return response()->json(['message' => 'Updated Successfully'], 200);
     }
 
