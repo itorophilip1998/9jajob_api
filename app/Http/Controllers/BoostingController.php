@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Boosting;
 use Illuminate\Support\Str;
+use App\Models\Notification;
 use App\Models\Transactions;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -64,10 +65,23 @@ class BoostingController extends Controller
             "ref_number" => $transaction["ref_number"],
             "amount" => $transaction["amount"],
         ];
+
+        Notification::create(
+            [
+                'message' =>
+                $transaction['description'],
+                'user_id' => auth()->user()->id
+            ]
+        );
+        try {
+
         Mail::send('mail.invioce',  ['item' => $item], function ($message) {
             $message->to(auth()->user()->email);
             $message->subject('Invioce');
         });
+           } catch (\Throwable $th) {
+                //throw $th;
+            }
         return response()->json(['message' => 'Booting In Progress!!!'], 200);
     }
 }

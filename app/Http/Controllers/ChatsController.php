@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Chats;
 use App\Http\Requests\StoreChatsRequest;
 use App\Http\Requests\UpdateChatsRequest;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
 
 class ChatsController extends Controller
@@ -44,26 +45,40 @@ class ChatsController extends Controller
 
         $req = request()->all();
         $req['user_id'] = auth()->user()->id;
-        $photos=[];
+        $photos = [];
         if (is_array(request()->photo) || is_object(
             request()->photo
         )) {
             foreach (request()->photo as $item) {
                 $photo = $item->getClientOriginalName();
                 $item->move(public_path('uploads/chats'), $photo);
-                $photos[]= $photo;
+                $photos[] = $photo;
             }
         }
 
-         $req['photo'] = json_encode($photos);
+        $req['photo'] = json_encode($photos);
         Chats::create($req);
+        $friend = User::where(['id' => request()->friend_id])->first();
+        $user = User::where(['id' => $req['user_id']])->first();
+        Notification::create(
+            [
+                'message' => 'Chats from ' . $friend->name,
+                'user_id' => $user->id
+            ]
+        );
+        Notification::create(
+            [
+                'message' => 'Chats from ' . $user->name,
+                'user_id' => $friend->id
+            ]
+        );
         return response()->json(['message' => "Successfully initiated Chat!!"], 200);
     }
 
     public function userChats()
     {
         $authUser = auth()->user();
-        $chattedUsers = User::select('id','name','email','phone','photo')->whereHas('chats', function ($query) use ($authUser) {
+        $chattedUsers = User::select('id', 'name', 'email', 'phone', 'photo')->whereHas('chats', function ($query) use ($authUser) {
             $query->where('user_id', $authUser->id)->latest();
         })->withOnly('chats')
             ->get();

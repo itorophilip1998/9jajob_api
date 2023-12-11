@@ -17,6 +17,7 @@ use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\ListingCategoryController;
 use App\Http\Controllers\BoostingController;
 use App\Http\Controllers\ChatsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReferralController;
 
 // authentication
@@ -133,3 +134,13 @@ Route::group([
 Route::get('/friends', [ChatsController::class, 'userChats'])->middleware("auth:api");
 Route::get('/users', [ChatsController::class, 'allUsers'])->middleware("auth:api");
 Route::post('/unread-chats', [ChatsController::class, 'updateStatus'])->middleware("auth:api");
+
+// Notifications
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'notification'
+], function ($router) {
+    Route::get('/', [NotificationController::class, 'index'])->middleware("auth:api");
+    Route::get('/counts', [NotificationController::class, 'counts'])->middleware("auth:api");
+    Route::post('/read-all', [NotificationController::class, 'readNotifications'])->middleware("auth:api");
+});

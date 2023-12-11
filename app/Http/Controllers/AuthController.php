@@ -8,14 +8,15 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Referral;
 use Illuminate\Support\Str;
-use App\Models\Transactions;
+use App\Models\Notification;
 // use App\Http\Controllers\AuthController;
+use App\Models\Transactions;
 use App\Models\EmailTemplate;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use function PHPUnit\Framework\isEmpty;
 
+use function PHPUnit\Framework\isEmpty;
 use App\Mail\RegistrationEmailToCustomer;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\ResetPasswordMessageToCustomer;
@@ -53,7 +54,7 @@ class AuthController extends Controller
         $data['password'] = Hash::make(request()->password);
         $data['token'] = $token;
         $data['status'] = 'active';
-        User::create($data);
+        $user=User::create($data);
 
 
         // Send Email
@@ -62,8 +63,11 @@ class AuthController extends Controller
         $message = $et_data->et_content;
         $verification_link = url('customer/registration/verify/' . $token . '/' . request()->email);
         $message = str_replace('[[verification_link]]', $verification_link, $message);
+        try {
         Mail::to(request()->email)->send(new RegistrationEmailToCustomer($subject, $message));
-
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
 
         $credentials = request(['email', 'password']);
         if (!$token = auth()->attempt($credentials)) {
@@ -102,10 +106,21 @@ class AuthController extends Controller
                 "ref_number" => $transaction["ref_number"],
                 "amount" => $transaction["amount"],
             ];
-            Mail::send('mail.invioce',  ['item' => $item], function ($message) use ($referrer_name) {
-                $message->to($referrer_name->email);
-                $message->subject('Invioce');
-            });
+
+            Notification::create(
+                [
+                    'message' => 'You Referred ' . $user->name . ' And earn ' . $item['amount'],
+                    'user_id' => substr($data['ref_code'], 4)
+                ]
+            );
+            try {
+                Mail::send('mail.invioce',  ['item' => $item], function ($message) use ($referrer_name) {
+                    $message->to($referrer_name->email);
+                    $message->subject('Invioce');
+                });
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
         }
 
         return $this->respondWithToken($token, "Registered Successfully!, Please check your mail for verification");
@@ -226,7 +241,7 @@ class AuthController extends Controller
         $check_email = User::where('email', request()->email)->where('status', 'Active')->first();
 
         if (!$check_email) {
-            return response()->json(['error' => 'Email Not Found !'],422);
+            return response()->json(['error' => 'Email Not Found !'], 422);
         } else {
             $et_data = EmailTemplate::where('id', 7)->first();
             $subject = $et_data->et_subject;
@@ -236,7 +251,12 @@ class AuthController extends Controller
 
             $data['token'] = $token;
             User::where('email', request()->email)->update($data);
+            try {
+
             Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message, $token));
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
         }
 
         $email = request()->email;

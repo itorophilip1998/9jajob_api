@@ -8,6 +8,7 @@ use App\Models\Package;
 
 use App\Utils\Validate;
 use Illuminate\Support\Str;
+use App\Models\Notification;
 use App\Models\Transactions;
 use Illuminate\Http\Request;
 use App\Models\PackagePurchase;
@@ -27,7 +28,7 @@ class PackageController extends Controller
 
     public function purchase()
     {
-       try {
+        try {
             $validate = [
                 "package_id" => 'required',
                 "package_start_date" => 'required',
@@ -64,14 +65,25 @@ class PackageController extends Controller
                 "ref_number" => $transaction["ref_number"],
                 "amount" => $transaction["amount"],
             ];
-            Mail::send('mail.invioce',  ['item' => $item], function ($message) {
-                $message->to(auth()->user()->email);
-                $message->subject('Invioce');
-            });
 
-            return response()->json(['message' => 'PLease check your mail for Invoice '.auth()->user()->email], 200);
-       } catch (\Throwable $th) {
-        //throw $th;
-       }
+            Notification::create(
+                [
+                    'message' =>
+                    $transaction['description'],
+                    'user_id' => auth()->user()->id
+                ]
+            );
+            try {
+                Mail::send('mail.invioce',  ['item' => $item], function ($message) {
+                    $message->to(auth()->user()->email);
+                    $message->subject('Invioce');
+                });
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+            return response()->json(['message' => 'PLease check your mail for Invoice ' . auth()->user()->email], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 }

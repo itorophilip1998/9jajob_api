@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use App\Models\Notification;
 use App\Models\Transactions;
 use App\Models\Verification;
 use Illuminate\Http\Client\Request;
@@ -103,6 +104,12 @@ class VerificationController extends Controller
             $message->to(auth()->user()->email);
             $message->subject('Invioce');
         });
+        Notification::create(
+            [
+                'message' => $transaction['description'],
+                'user_id' => auth()->user()->id
+            ]
+        );
         return response()->json(['message' => 'Verification In Progress!!!'], 200);
     }
     public function listOfVerifications()
