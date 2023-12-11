@@ -129,7 +129,7 @@ Route::group([
 ], function ($router) {
     Route::post('/', [ChatsController::class, 'create'])->middleware("auth:api");
     Route::get('/{friend_id}', [ChatsController::class, 'index'])->middleware("auth:api");
-
 });
 Route::get('/friends', [ChatsController::class, 'userChats'])->middleware("auth:api");
 Route::get('/users', [ChatsController::class, 'allUsers'])->middleware("auth:api");
+Route::post('/unread-chats', [ChatsController::class, 'updateStatus'])->middleware("auth:api");

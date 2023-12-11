@@ -58,9 +58,16 @@ class ChatsController extends Controller
     {
         $authUser = auth()->user();
         $chattedUsers = User::whereHas('chats', function ($query) use ($authUser) {
-            $query->where('friend_id', $authUser->id);
-        })->get();
+            $query->where('user_id', $authUser->id);
+        })->without('package')->get();
         return response()->json(['chatted_users' => $chattedUsers], 200);
+    }
+
+    public function updateStatus()
+    {
+        Chats::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
+            ->update(['status'=> 'read']);
+        return response()->json(['message' => 'Updated Successfully'], 200);
     }
 
     public function allUsers()
