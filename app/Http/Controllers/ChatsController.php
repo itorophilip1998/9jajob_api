@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Spam;
 use App\Models\User;
 use App\Models\Chats;
+use App\Models\Notification;
 use App\Http\Requests\StoreChatsRequest;
 use App\Http\Requests\UpdateChatsRequest;
-use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
 
 class ChatsController extends Controller
@@ -23,7 +24,12 @@ class ChatsController extends Controller
         })->orWhere(function ($query) use ($user_id, $friend_id) {
             $query->where('user_id', $friend_id)
                 ->where('friend_id', $user_id);
-        })->get();
+        })->get()
+          ->map(function ($item) use($friend_id) {
+                $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $friend_id])->without('friend')->first();
+                $item['spam'] = ($spam) ? $spam->status : null;
+                return $item;
+            });
         return response()->json(['chats' => $chats], 200);
     }
 
@@ -80,8 +86,12 @@ class ChatsController extends Controller
         $authUser = auth()->user();
         $chattedUsers = User::select('id', 'name', 'email', 'phone', 'photo')->whereHas('chats', function ($query) use ($authUser) {
             $query->where('user_id', $authUser->id)->latest();
-        })->withOnly('chats')
-            ->get();
+        })->withOnly('chats')->get()
+            ->map(function ($item) {
+                $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $item->id])->without('friend')->first();
+                $item['spam'] = ($spam) ? $spam->status : null;
+                return $item;
+            });
 
         return response()->json(['chatted_users' => $chattedUsers], 200);
     }
