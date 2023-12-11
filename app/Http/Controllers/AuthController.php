@@ -54,7 +54,7 @@ class AuthController extends Controller
         $data['password'] = Hash::make(request()->password);
         $data['token'] = $token;
         $data['status'] = 'active';
-        $user=User::create($data);
+        $user = User::create($data);
 
 
         // Send Email
@@ -64,7 +64,7 @@ class AuthController extends Controller
         $verification_link = url('customer/registration/verify/' . $token . '/' . request()->email);
         $message = str_replace('[[verification_link]]', $verification_link, $message);
         try {
-        Mail::to(request()->email)->send(new RegistrationEmailToCustomer($subject, $message));
+            Mail::to(request()->email)->send(new RegistrationEmailToCustomer($subject, $message));
         } catch (\Throwable $th) {
             //throw $th;
         }
@@ -201,7 +201,12 @@ class AuthController extends Controller
     public function refresh()
     {
         try {
-            //code...
+            $user = User::find(auth()->user()->id);
+            if ($user && $user->expo_token === request()->expo_token) {
+
+                $user->update(['expo_token' => request()->expo_token]);
+            }
+
             return $this->respondWithToken(auth()->refresh(), 'Refresh Token Added');
         } catch (\Throwable $th) {
             //throw $th;
@@ -253,7 +258,7 @@ class AuthController extends Controller
             User::where('email', request()->email)->update($data);
             try {
 
-            Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message, $token));
+                Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message, $token));
             } catch (\Throwable $th) {
                 //throw $th;
             }
