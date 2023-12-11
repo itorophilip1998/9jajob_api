@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id');
             $table->foreignId('friend_id');
             $table->longText('message');
-            $table->string('photo')->nullable();
+            $table->jsonb('photo')->nullable();
             $table->enum('status', ['read', 'unread','spam'])->default('unread');
             $table->timestamps();
         });

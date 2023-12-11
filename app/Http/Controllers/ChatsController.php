@@ -34,7 +34,7 @@ class ChatsController extends Controller
         $validator = Validator::make(request()->all(), [
             'friend_id' => 'required',
             'message' => 'required',
-            'photo' => 'nullable|file',
+            'photo' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -44,12 +44,18 @@ class ChatsController extends Controller
 
         $req = request()->all();
         $req['user_id'] = auth()->user()->id;
-
-        if (request()->hasFile('photo')) {
-            $photo = request()->file('photo')->getClientOriginalName();
-            request()->file('photo')->move(public_path('uploads/chats'), $photo);
-            $req['photo'] = $photo;
+        $photos=[];
+        if (is_array(request()->photo) || is_object(
+            request()->photo
+        )) {
+            foreach (request()->photo as $item) {
+                $photo = $item->getClientOriginalName();
+                $item->move(public_path('uploads/chats'), $photo);
+                $photos[]= $photo;
+            }
         }
+
+         $req['photo'] = json_encode($photos);
         Chats::create($req);
         return response()->json(['message' => "Successfully initiated Chat!!"], 200);
     }
@@ -57,7 +63,7 @@ class ChatsController extends Controller
     public function userChats()
     {
         $authUser = auth()->user();
-        $chattedUsers = User::whereHas('chats', function ($query) use ($authUser) {
+        $chattedUsers = User::select('id','name','email','phone','photo')->whereHas('chats', function ($query) use ($authUser) {
             $query->where('user_id', $authUser->id)->latest();
         })->withOnly('chats')
             ->get();

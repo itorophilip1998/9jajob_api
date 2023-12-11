@@ -79,7 +79,7 @@ class Listing extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id')->select(['id', 'name', 'email', 'photo']);
+        return $this->belongsTo(User::class, 'user_id')->select(['id', 'name', 'email', 'photo', 'phone'])->without('package');
     }
 
     public function amenities()

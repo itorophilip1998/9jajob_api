@@ -17,6 +17,9 @@ class Chats extends Model
         'photo',
         'status',
     ];
+    protected $cast = [
+        'photo' => 'array',
+    ];
 
     protected $with = [
         // 'user',
@@ -25,12 +28,12 @@ class Chats extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id')->without(['package'])->select(['id','name','email','photo']);
+        return $this->belongsTo(User::class, 'user_id')->without(['package'])->select(['id', 'name', 'email', 'photo']);
     }
 
     public function friend()
     {
-        return $this->belongsTo(User::class, 'friend_id')->without(['package'])->select(['id','name','email','photo']) ;
+        return $this->belongsTo(User::class, 'friend_id')->without(['package'])->select(['id', 'name', 'email', 'photo']);
     }
 
     public function toArray()
@@ -38,10 +41,13 @@ class Chats extends Model
         $attributes = parent::toArray();
 
         // Add the 'user_photo' attribute to the array
-        $attributes['photo'] =
-            $this->photo ? URL::to("/uploads/chats") . "/" . $this->photo :  null;
-        $attributes['ref_code'] = "ref-" . $this->id;
+
+        $photos = [];
+        // dump(json_decode($this->photo));
+        foreach (json_decode($this->photo)  as $item) {
+            $photos[] =  $item ? URL::to("/uploads/chats") . "/" . $item :  null;
+        }
+        $attributes['photo'] = $photos;
         return $attributes;
     }
-
 }
