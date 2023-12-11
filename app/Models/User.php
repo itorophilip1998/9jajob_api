@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Chats;
 use App\Models\Ratings;
 use Illuminate\Support\Str;
 use App\Models\PackagePurchase;
@@ -135,5 +136,10 @@ class User extends Authenticatable implements JWTSubject
     public function package()
     {
         return $this->hasOne(PackagePurchase::class,'user_id')->where('currently_active','1');
+    }
+
+    public function chats()
+    {
+        return $this->hasMany(Chats::class, 'friend_id');
     }
 }

@@ -49,8 +49,22 @@ class ChatsController extends Controller
             $photo = request()->file('photo')->getClientOriginalName();
             request()->file('photo')->move(public_path('uploads/chats'), $photo);
             $req['photo'] = $photo;
-        } 
+        }
         Chats::create($req);
         return response()->json(['message' => "Successfully initiated Chat!!"], 200);
+    }
+
+    public function userChats()
+    {
+        $authUser = auth()->user();
+        $chattedUsers = User::whereHas('chats', function ($query) use ($authUser) {
+            $query->where('friend_id', $authUser->id);
+        })->get();
+        return response()->json(['chatted_users' => $chattedUsers], 200);
+    }
+    public function allUsers()
+    {
+        $users = User::all();
+        return response()->json(['users' => $users], 200);
     }
 }
