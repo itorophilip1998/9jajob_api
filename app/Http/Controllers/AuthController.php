@@ -226,7 +226,7 @@ class AuthController extends Controller
         $check_email = User::where('email', request()->email)->where('status', 'Active')->first();
 
         if (!$check_email) {
-            return redirect()->back()->with('error', 'Email Not Found !');
+            return response()->json(['error'=> 'Email Not Found !']);
         } else {
             $et_data = EmailTemplate::where('id', 7)->first();
             $subject = $et_data->et_subject;
@@ -259,7 +259,7 @@ class AuthController extends Controller
         }
         $user = User::where(['email'=> request()->email,'token'=>request()->otp])->first();
         if (!$user)
-        return response()->json(['error', "Invalid Credentials!! "], 200);
+        return response()->json(['error'=> "Invalid Credentials!! "], 200);
         $data['password'] = Hash::make(request()->password);
         $data['token'] = '';
         $user->update($data);
