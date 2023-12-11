@@ -36,7 +36,7 @@ class BookingController extends Controller
             'time' => 'required',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
         $req = request()->all();
         $req['user_id'] = auth()->user()->id;

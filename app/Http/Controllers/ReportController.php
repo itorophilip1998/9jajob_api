@@ -21,13 +21,11 @@ class ReportController extends Controller
             'report' => 'required',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
         $req = request()->all();
         $req['reporter_id'] = auth()->user()->id;
         Report::create($req);
         return response()->json(['message' => 'Success!!'], 200);
-
     }
-
 }

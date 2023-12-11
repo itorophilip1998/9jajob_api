@@ -25,7 +25,7 @@ class VerificationController extends Controller
             'id_card_back' => 'required|file'
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
 
 
@@ -126,7 +126,7 @@ class VerificationController extends Controller
 
     public function updateVerifications($id)
     {
-        Verification::where('listing_id',$id)->update(request()->all());
+        Verification::where('listing_id', $id)->update(request()->all());
         return response()->json(["message" => 'Verification Updated!!'], 200);
     }
 }

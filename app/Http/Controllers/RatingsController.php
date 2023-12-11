@@ -14,7 +14,7 @@ class RatingsController extends Controller
      */
     public function index($user_id)
     {
-        $category = Ratings::where("user_id", $user_id)->get(); 
+        $category = Ratings::where("user_id", $user_id)->get();
         return response()->json($category, 200);
     }
 
@@ -29,7 +29,7 @@ class RatingsController extends Controller
             'user_id' => 'required',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
 
         $req = request()->all();

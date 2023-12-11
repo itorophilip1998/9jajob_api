@@ -53,7 +53,7 @@ class ListingController extends Controller
 
         if ($address_longitude !== null && $address_latitude !== null) {
             $query->where(['address_longitude' => $address_longitude, 'address_latitude' => $address_latitude]);
-        } 
+        }
         if ($is_trending == true) {
             $query->has('reviews', '>=', 1);
         }
@@ -89,7 +89,7 @@ class ListingController extends Controller
         // dd(request()->all());
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
         $statement = DB::select("SHOW TABLE STATUS LIKE 'listings'");
         $ai_id = $statement[0]->Auto_increment;

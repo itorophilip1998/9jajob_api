@@ -24,11 +24,11 @@ class TransactionsController extends Controller
             'purpose' => 'required',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
         $req = request()->all();
         $req['user_id'] = auth()->user()->id;
-        $transaction=  Transactions::create($req);
+        $transaction =  Transactions::create($req);
         // send invioce
         $item = [
             "invoiceNumber" => rand(1111, 9999),

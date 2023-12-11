@@ -38,7 +38,7 @@ class ChatsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
 
 
@@ -62,10 +62,10 @@ class ChatsController extends Controller
         })->get();
         return response()->json(['chatted_users' => $chattedUsers], 200);
     }
-    
+
     public function allUsers()
     {
         $users = User::all();
-        return response()->json(['users' => $users], 200);
+        return response()->json(['counts' => count($users), 'users' => $users], 200);
     }
 }

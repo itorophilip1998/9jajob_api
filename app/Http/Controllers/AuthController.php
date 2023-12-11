@@ -45,7 +45,7 @@ class AuthController extends Controller
 
         //Send failed response if request is not valid
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
 
         $token = hash('sha256', time());
@@ -121,7 +121,7 @@ class AuthController extends Controller
 
         //Send failed response if request is not valid
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
 
         $data = request()->all();
@@ -221,12 +221,12 @@ class AuthController extends Controller
 
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
         $check_email = User::where('email', request()->email)->where('status', 'Active')->first();
 
         if (!$check_email) {
-            return response()->json(['error'=> 'Email Not Found !']);
+            return response()->json(['error' => 'Email Not Found !'],422);
         } else {
             $et_data = EmailTemplate::where('id', 7)->first();
             $subject = $et_data->et_subject;
@@ -241,7 +241,7 @@ class AuthController extends Controller
 
         $email = request()->email;
 
-        return response()->json(['message'=> "Successfully sent mail to $email !! "], 200);
+        return response()->json(['message' => "Successfully sent mail to $email !! "], 200);
     }
 
 
@@ -255,14 +255,14 @@ class AuthController extends Controller
             're_password' => 'required|same:password',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 422);
         }
-        $user = User::where(['email'=> request()->email,'token'=>request()->otp])->first();
+        $user = User::where(['email' => request()->email, 'token' => request()->otp])->first();
         if (!$user)
-        return response()->json(['error'=> "Invalid Credentials!! "], 200);
+            return response()->json(['error' => "Invalid Credentials!! "], 422);
         $data['password'] = Hash::make(request()->password);
         $data['token'] = '';
         $user->update($data);
-        return response()->json(['message'=>"Successfully updated password!! "], 200);
+        return response()->json(['message' => "Successfully updated password!! "], 200);
     }
 }
