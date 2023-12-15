@@ -99,7 +99,7 @@ class ListingController extends Controller
 
 
         $statement = DB::select("SHOW TABLE STATUS LIKE 'listings'");
-        $ai_id = $statement[0]->Auto_increment;
+        $listing = $statement[0]->Auto_increment;
         $rand_value = md5(mt_rand(11111111, 99999999));
         $ext = request()->file('listing_featured_photo')->extension();
         $final_name = $rand_value . '.' . $ext;
@@ -115,11 +115,11 @@ class ListingController extends Controller
 
         // Amenity
         if (is_array(request()->amenity) || is_object(request()->amenity)) {
-
+            dd(request()->amenity);
             foreach (request()->amenity as $item) {
                 ListingAmenity::create(
                     [
-                        'listing_id' => $ai_id,
+                        'listing_id' => $listing->id,
                         'amenity_id' => $item
                     ]
                 );
@@ -139,7 +139,7 @@ class ListingController extends Controller
                     $item->move(public_path('uploads/listing_photos'), $final_photo_name);
 
                     $obj = new ListingPhoto;
-                    $obj->listing_id = $ai_id;
+                    $obj->listing_id = $listing->id;
                     $obj->photo = $final_photo_name;
                     $obj->save();
                 }
@@ -159,7 +159,7 @@ class ListingController extends Controller
                     $item->move(public_path('uploads/listing_video'), $youtube_video_id);
 
                     $obj = new ListingVideo;
-                    $obj->listing_id = $ai_id;
+                    $obj->listing_id = $listing->id;
                     $obj->youtube_video_id = $youtube_video_id;
                     $obj->save();
                 }
@@ -174,7 +174,7 @@ class ListingController extends Controller
             foreach (request()->social_media as $item) {
                 if (is_array($item) && array_key_exists('icon', $item) && array_key_exists('url', $item)) {
                     ListingSocialItem::create([
-                        "listing_id" => $ai_id,
+                        "listing_id" => $listing->id,
                         "social_icon" => $item['icon'],
                         "social_url" => $item['url'],
                     ]);
@@ -188,7 +188,7 @@ class ListingController extends Controller
 
             foreach (request()->additional_feature_name as $item) {
                 ListingAdditionalFeature::create([
-                    'listing_id' => $ai_id,
+                    'listing_id' => $listing->id,
                     'additional_feature_name' => $item,
                     'additional_feature_value' => $item,
                 ]);
@@ -421,7 +421,7 @@ class ListingController extends Controller
 
 
         $listing = Listing::findOrFail($id);
-        unlink(public_path('uploads/listing_featured_photos/' . $listing->listing_featured_photo));
+
         $listing->delete();
 
         ListingAmenity::where('listing_id', $id)->delete();
@@ -430,11 +430,16 @@ class ListingController extends Controller
         ListingAdditionalFeature::where('listing_id', $id)->delete();
 
         $all_photos = ListingPhoto::where('listing_id', $id)->get();
-        foreach ($all_photos as $item) {
-            unlink(public_path('uploads/listing_photos/' . $item->photo));
-        }
 
         ListingPhoto::where('listing_id', $id)->delete();
+        try {
+            unlink(public_path('uploads/listing_featured_photos/' . $listing->listing_featured_photo));
+            foreach ($all_photos as $item) {
+                unlink(public_path('uploads/listing_photos/' . $item->photo));
+            }
+        } catch (\Throwable $th) {
+        }
+
 
         // Success Message and redirect
         return response()->json(['message' => "deleted"], 200);
