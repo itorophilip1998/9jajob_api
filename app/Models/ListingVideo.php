@@ -8,7 +8,8 @@ class ListingVideo extends Model
 {
     protected $fillable = [
         'listing_id',
-        'youtube_video_id'
+        'youtube_video_id',
+        'is_mobile_video'
     ];
 
     public function toArray()
@@ -17,9 +18,8 @@ class ListingVideo extends Model
 
         // Add the 'user_photo' attribute to the array
         $attributes['video_url'] =
-        $this->youtube_video_id ? "https://www.youtube.com/embed/" . $this->youtube_video_id :  null;
+            $this->youtube_video_id ? "https://www.youtube.com/embed/" . $this->youtube_video_id :  null;
 
         return $attributes;
     }
-
 }

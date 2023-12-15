@@ -71,12 +71,14 @@ class ListingController extends Controller
 
     public function myListings()
     {
-        $data = Listing::where("user_id", auth()->user()->id)->get();
+        $data = Listing::where("user_id", auth()->user()->id)->latest()->get();
         return response()->json($data, 200);
     }
 
     public function AddListings()
     {
+        // dd(request()->social_media);
+
 
         $user_data = Auth::user();
         $validator = Validator::make(request()->all(), [
@@ -85,46 +87,42 @@ class ListingController extends Controller
             'listing_phone' => 'required',
             'listing_address' => 'required',
             'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
+            'photo_list' => 'nullable|array',
+            'amenity' => 'nullable|array',
+            'video' => 'nullable|array',
         ]);
         // dd(request()->all());
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
         }
+
+
         $statement = DB::select("SHOW TABLE STATUS LIKE 'listings'");
         $ai_id = $statement[0]->Auto_increment;
         $rand_value = md5(mt_rand(11111111, 99999999));
         $ext = request()->file('listing_featured_photo')->extension();
         $final_name = $rand_value . '.' . $ext;
         request()->file('listing_featured_photo')->move(public_path('uploads/listing_featured_photos'), $final_name);
-
-        $obj = new Listing();
-        $data = request()->only($obj->getFillable());
-        if (empty($data['listing_slug'])) {
-            unset($data['listing_slug']);
-            $data['listing_slug'] = Str::slug(request()->listing_name);
-        }
-        if (preg_match('/\s/', $data['listing_slug'])) {
-            return response()->json(['error' => "No Spacing"], 422);
-        }
+        $data = request()->all();
+        $data['listing_slug'] = Str::slug(request()->listing_name);
         $data['listing_featured_photo'] = $final_name;
         $data['user_id'] = $user_data->id;
         $data['admin_id'] = 0;
         $data['listing_status'] = "Active";
-        $obj->fill($data)->save();
+        $listing = Listing::create($data); //listing Created
 
 
         // Amenity
         if (is_array(request()->amenity) || is_object(request()->amenity)) {
-            $arr_amenity = array();
+
             foreach (request()->amenity as $item) {
-                $arr_amenity[] = $item;
-            }
-            for ($i = 0; $i < count($arr_amenity); $i++) {
-                $obj = new ListingAmenity;
-                $obj->listing_id = $ai_id;
-                $obj->amenity_id = $arr_amenity[$i];
-                $obj->save();
+                ListingAmenity::create(
+                    [
+                        'listing_id' => $ai_id,
+                        'amenity_id' => $item
+                    ]
+                );
             }
         }
 
@@ -151,58 +149,55 @@ class ListingController extends Controller
         }
 
         // Video
-        if (is_array(request()->youtube_video_id) || is_object(request()->youtube_video_id)) {
-            $arr_youtube_video_id = array();
-            foreach (request()->youtube_video_id as $item) {
-                $arr_youtube_video_id[] = $item;
-            }
-            for ($i = 0; $i < count($arr_youtube_video_id); $i++) {
-                if ($arr_youtube_video_id[$i] != '') {
+        if (is_array(request()->video) || is_object(request()->video)) {
+            foreach (request()->photo_list as $item) {
+                $main_file_ext = $item->extension();
+                $main_mime_type = $item->getMimeType();
+                if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
+                    $rand_value = md5(mt_rand(11111111, 99999999));
+                    $youtube_video_id = $rand_value . '.' . $main_file_ext;
+                    $item->move(public_path('uploads/listing_video'), $youtube_video_id);
+
                     $obj = new ListingVideo;
                     $obj->listing_id = $ai_id;
-                    $obj->youtube_video_id = $arr_youtube_video_id[$i];
+                    $obj->youtube_video_id = $youtube_video_id;
                     $obj->save();
                 }
             }
         }
 
-        // Social Icons
-        if (is_array(request()->socialMedia) || is_object(request()->socialMedia)) {
 
-            foreach (request()->socialMedia as $item) {
-                $arr_social_icon = $item["arr_social_icon"];
-                $arr_social_url = $item["arr_social_url"];
-                $obj = new ListingSocialItem;
-                $obj->listing_id = $ai_id;
-                $obj->social_icon = $arr_social_icon[$i];
-                $obj->social_url = $arr_social_url[$i];
-                $obj->save();
+        // Social Icons
+        if (is_array(request()->social_media) || is_object(request()->social_media)) {
+
+            // dump(request()->social_media);
+            foreach (request()->social_media as $item) {
+                if (is_array($item) && array_key_exists('icon', $item) && array_key_exists('url', $item)) {
+                    ListingSocialItem::create([
+                        "listing_id" => $ai_id,
+                        "social_icon" => $item['icon'],
+                        "social_url" => $item['url'],
+                    ]);
+                }
             }
         }
 
 
         // Additional Features
         if (is_array(request()->additional_feature_name) || is_object(request()->additional_feature_name)) {
-            $arr_additional_feature_name = array();
-            $arr_additional_feature_value = array();
+
             foreach (request()->additional_feature_name as $item) {
-                $arr_additional_feature_name[] = $item;
-            }
-            foreach (request()->additional_feature_value as $item) {
-                $arr_additional_feature_value[] = $item;
-            }
-            for ($i = 0; $i < count($arr_additional_feature_name); $i++) {
-                if (($arr_additional_feature_name[$i] != '') && ($arr_additional_feature_value[$i] != '')) {
-                    $obj = new ListingAdditionalFeature;
-                    $obj->listing_id = $ai_id;
-                    $obj->additional_feature_name = $arr_additional_feature_name[$i];
-                    $obj->additional_feature_value = $arr_additional_feature_value[$i];
-                    $obj->save();
-                }
+                ListingAdditionalFeature::create([
+                    'listing_id' => $ai_id,
+                    'additional_feature_name' => $item,
+                    'additional_feature_value' => $item,
+                ]);
             }
         }
-        $Listings = Listing::find($obj->id);
-        return response()->json(['message' => "Success!!",  "listing" => $Listings], 200);
+
+        $getAll = Listing::find($listing->id);
+
+        return response()->json(['message' => "Success!!",  "listing" => $getAll], 200);
     }
 
 
