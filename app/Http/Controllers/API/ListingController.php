@@ -428,9 +428,7 @@ class ListingController extends Controller
         ListingSocialItem::where('listing_id', $id)->delete();
         ListingVideo::where('listing_id', $id)->delete();
         ListingAdditionalFeature::where('listing_id', $id)->delete();
-
         $all_photos = ListingPhoto::where('listing_id', $id)->get();
-
         ListingPhoto::where('listing_id', $id)->delete();
         try {
             unlink(public_path('uploads/listing_featured_photos/' . $listing->listing_featured_photo));
