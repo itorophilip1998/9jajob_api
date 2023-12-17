@@ -115,7 +115,7 @@ class ListingController extends Controller
 
         // Amenity
         if (is_array(request()->amenity) || is_object(request()->amenity)) {
-            dd(request()->amenity);
+            // dd(request()->amenity);
             foreach (request()->amenity as $item) {
                 ListingAmenity::create(
                     [
