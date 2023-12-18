@@ -36,6 +36,7 @@ class ListingController extends Controller
         $is_trending = request()->input('is_trending');
 
 
+
         // Start with a base query
         $query = Listing::query();
 
@@ -48,8 +49,9 @@ class ListingController extends Controller
             $query->where('listing_address', 'LIKE', '%' . $listing_city . '%');
         }
 
-        if ($is_trending == true) {
-            $query->has('reviews', '>=', 1);
+        if ($is_trending !== null) {
+            $query->has('boosting', '>=', 1)
+                ->OrHas('reviews', '>=', 1);
         }
         if ($listing_name !== null) {
             $query->where('listing_name', 'LIKE', '%' . $listing_name . '%')
@@ -94,7 +96,7 @@ class ListingController extends Controller
 
         // Distance in kilometers
         $distance = $R * $c;
-        $distanceKm= number_format($distance, 1);
+        $distanceKm = number_format($distance, 1);
         return  (float)$distanceKm;
     }
 
