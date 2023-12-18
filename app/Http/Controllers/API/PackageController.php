@@ -25,6 +25,27 @@ class PackageController extends Controller
         $package = Package::orderBy('id')->get();
         return response()->json(['package' => $package], 200);
     }
+    public function updatePackage()
+    {
+        $validate = [
+            'package_type' => 'required',
+            'package_name' => 'required',
+            'package_price' => 'required',
+            'valid_days' => 'required',
+            'total_listings' => 'required',
+            'total_amenities' => 'required',
+            'total_photos' => 'required',
+            'total_videos' => 'required',
+            'total_social_items' => 'required',
+            'total_additional_features' => 'required',
+            'allow_featured' => 'required',
+            'package_order' => 'required'
+        ];
+        (new Validate)->validate($validate);
+        $req = request()->all();
+        Package::updateOrCreate(['id' => $req['id']], $req)->update($req);
+        return response()->json(['message' => 'Package Saved Successfully!'], 200);
+    }
 
     public function purchase()
     {
