@@ -46,8 +46,9 @@ class User extends Authenticatable implements JWTSubject
         'token',
         'status',
         'ref_code',
-        'expo_token'
-
+        'expo_token',
+        'address_longitude',
+        'address_latitude' 
     ];
 
     /**

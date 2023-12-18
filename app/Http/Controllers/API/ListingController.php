@@ -30,8 +30,6 @@ class ListingController extends Controller
     public function index()
     {
         $listing_category_id = request()->input('listing_category_id');
-        $address_longitude = request()->input('address_longitude');
-        $address_latitude = request()->input('address_latitude');
         $listing_name = request()->input('listing_name');
         $listing_city = request()->input('listing_city');
         $is_nearest = request()->input('is_nearest');
@@ -46,14 +44,10 @@ class ListingController extends Controller
             $query->where('listing_category_id', $listing_category_id);
         }
 
-
         if ($listing_city !== null) {
             $query->where('listing_address', 'LIKE', '%' . $listing_city . '%');
         }
 
-        if ($address_longitude !== null && $address_latitude !== null) {
-            $query->where(['address_longitude' => $address_longitude, 'address_latitude' => $address_latitude]);
-        }
         if ($is_trending == true) {
             $query->has('reviews', '>=', 1);
         }
@@ -64,10 +58,46 @@ class ListingController extends Controller
                 });
         }
         // Execute the query
-        $listing = $query->get();
+        $item2 = [
+            "address_latitude" => request()->address_latitude,
+            "address_longitude" => request()->address_longitude
+        ];
+        $listing = $query->get()->map(function ($item) use ($item2) {
+            $radLat1 = $item['address_latitude'];
+            $radLon1 = $item['address_longitude'];
+            $radLat2 = $item2['address_latitude'];
+            $radLon2 = $item2['address_longitude'];
+            $item['km'] = $this->haversineDistance($radLat1, $radLon1, $radLat2, $radLon2);
+            return $item;
+        });
 
         return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
     }
+
+    function haversineDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $R = 6371; // Earth radius in kilometers
+
+        // Convert latitude and longitude from degrees to radians
+        $radLat1 = deg2rad($lat1);
+        $radLon1 = deg2rad($lon1);
+        $radLat2 = deg2rad($lat2);
+        $radLon2 = deg2rad($lon2);
+
+        // Differences in coordinates
+        $dLat = $radLat2 - $radLat1;
+        $dLon = $radLon2 - $radLon1;
+
+        // Haversine formula
+        $a = sin($dLat / 2) ** 2 + cos($radLat1) * cos($radLat2) * sin($dLon / 2) ** 2;
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        // Distance in kilometers
+        $distance = $R * $c;
+        $distanceKm= number_format($distance, 1);
+        return  (float)$distanceKm;
+    }
+
 
     public function myListings()
     {
