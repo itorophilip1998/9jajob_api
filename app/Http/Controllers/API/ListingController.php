@@ -173,8 +173,7 @@ class ListingController extends Controller
             }
         }
 
-        // Photo
-
+        // Photo 
         if (is_array(request()->photo_list) || isset(request()->photo_list)) {
             foreach (request()->photo_list as $item) {
 
