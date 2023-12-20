@@ -15,6 +15,6 @@ class ListingAmenity extends Model
 
     public function amenity_details()
     {
-        return $this->belongsTo(Amenity::class, 'listing_id');
+        return $this->belongsTo(Amenity::class, 'amenity_id');
     }
 }

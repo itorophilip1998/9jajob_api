@@ -109,9 +109,7 @@ class ListingController extends Controller
 
     public function AddListings()
     {
-        // dd(request()->social_media);
-
-
+        $listing_id = request()->listing_id;
 
 
         $user_data = Auth::user();
@@ -120,7 +118,7 @@ class ListingController extends Controller
             'listing_description' => 'required',
             'listing_phone' => 'required',
             'listing_address' => 'required',
-            'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
+            // 'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
             'photo_list' => 'nullable|array',
             'amenity' => 'nullable|array',
             'video' => 'nullable|array',
@@ -132,7 +130,6 @@ class ListingController extends Controller
         }
 
 
-        $statement = DB::select("SHOW TABLE STATUS LIKE 'listings'");
         $rand_value = md5(mt_rand(11111111, 99999999));
         $ext = request()->file('listing_featured_photo')->extension();
         $final_name = $rand_value . '.' . $ext;
@@ -152,11 +149,13 @@ class ListingController extends Controller
             // dump(request()->social_media);
             foreach (request()->social_media as $item) {
                 if (is_array($item) && array_key_exists('icon', $item) && array_key_exists('url', $item)) {
-                    ListingSocialItem::create([
-                        "listing_id" => $listing->id,
-                        "social_icon" =>  $item['icon'],
-                        "social_url" =>  $item['url'],
-                    ]);
+                    ListingSocialItem::create(
+                        [
+                            "listing_id" => $listing->id,
+                            "social_icon" =>  $item['icon'],
+                            "social_url" =>  $item['url'],
+                        ]
+                    );
                 }
             }
         }
@@ -173,7 +172,7 @@ class ListingController extends Controller
             }
         }
 
-        // Photo 
+        // Photo
         if (is_array(request()->photo_list) || isset(request()->photo_list)) {
             foreach (request()->photo_list as $item) {
 
@@ -183,32 +182,31 @@ class ListingController extends Controller
                     $rand_value = md5(mt_rand(11111111, 99999999));
                     $final_photo_name = $rand_value . '.' . $main_file_ext;
                     $item->move(public_path('uploads/listing_photos'), $final_photo_name);
-
-                    $obj = new ListingPhoto;
-                    $obj->listing_id = $listing->id;
-                    $obj->photo = $final_photo_name;
-                    $obj->save();
+                     ListingPhoto::create( [
+                        'listing_id' => $listing->id,
+                        'photo' => $final_photo_name,
+                    ]);
                 }
             }
         }
 
         // Video
-        if (is_array(request()->video) || isset(request()->video)) {
-            foreach (request()->photo_list as $item) {
-                $main_file_ext = $item->extension();
-                $main_mime_type = $item->getMimeType();
-                if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
-                    $rand_value = md5(mt_rand(11111111, 99999999));
-                    $youtube_video_id = $rand_value . '.' . $main_file_ext;
-                    $item->move(public_path('uploads/listing_video'), $youtube_video_id);
-                    $obj = new ListingVideo;
-                    $obj->listing_id = $listing->id;
-                    $obj->is_mobile_video = true;
-                    $obj->youtube_video_id = $youtube_video_id;
-                    $obj->save();
-                }
-            }
-        }
+        // if (is_array(request()->video) || isset(request()->video)) {
+        //     foreach (request()->photo_list as $item) {
+        //         $main_file_ext = $item->extension();
+        //         $main_mime_type = $item->getMimeType();
+        //         if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
+        //             $rand_value = md5(mt_rand(11111111, 99999999));
+        //             $youtube_video_id = $rand_value . '.' . $main_file_ext;
+        //             $item->move(public_path('uploads/listing_video'), $youtube_video_id);
+        //             $obj = new ListingVideo;
+        //             $obj->listing_id = $listing->id;
+        //             $obj->is_mobile_video = true;
+        //             $obj->youtube_video_id = $youtube_video_id;
+        //             $obj->save();
+        //         }
+        //     }
+        // }
 
 
 
@@ -217,11 +215,13 @@ class ListingController extends Controller
         if (is_array(request()->additional_feature_name) || isset(request()->additional_feature_name)) {
 
             foreach (request()->additional_feature_name as $item) {
-                ListingAdditionalFeature::create([
-                    'listing_id' => $listing->id,
-                    'additional_feature_name' => $item,
-                    'additional_feature_value' => $item,
-                ]);
+                ListingAdditionalFeature::create(
+                    [
+                        'listing_id' => $listing->id,
+                        'additional_feature_name' => $item,
+                        'additional_feature_value' => $item,
+                    ]
+                );
             }
         }
 
@@ -258,7 +258,7 @@ class ListingController extends Controller
         }
 
         $listing_photos = ListingPhoto::where('listing_id', $id)->orderBy('id', 'asc')->get();
-        $listing_videos = ListingVideo::where('listing_id', $id)->orderBy('id', 'asc')->get();
+        // $listing_videos = ListingVideo::where('listing_id', $id)->orderBy('id', 'asc')->get();
         $listing_additional_features = ListingAdditionalFeature::where('listing_id', $id)->orderBy('id', 'asc')->get();
 
         $listing_social_items = ListingSocialItem::where('listing_id', $id)->orderBy('id', 'asc')->get();
@@ -269,183 +269,129 @@ class ListingController extends Controller
     public function update(Request $request, $id)
     {
 
-        if (env('PROJECT_MODE') == 0) {
-            return redirect()->back()->with('error', env('PROJECT_NOTIFICATION'));
-        }
+        $listing_id = request()->listing_id;
 
-        $obj = Listing::findOrFail($id);
-        $data = $request->only($obj->getFillable());
-        if ($request->hasFile('listing_featured_photo')) {
 
-            $request->validate([
-                'listing_featured_photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
-            ], [
-                'listing_featured_photo.image' => ERR_PHOTO_IMAGE,
-                'listing_featured_photo.mimes' => ERR_PHOTO_JPG_PNG_GIF,
-                'listing_featured_photo.max' => ERR_PHOTO_MAX
-            ]);
-
-            unlink(public_path('uploads/listing_featured_photos/' . $request->current_photo));
-
-            // Uploading the file
-            $ext = $request->file('listing_featured_photo')->extension();
-            $rand_value = md5(mt_rand(11111111, 99999999));
-            $final_name = $rand_value . '.' . $ext;
-            $request->file('listing_featured_photo')->move(public_path('uploads/listing_featured_photos/'), $final_name);
-
-            unset($data['listing_featured_photo']);
-            $data['listing_featured_photo'] = $final_name;
-        }
-
-        $request->validate([
-            'listing_name'   =>  [
-                'required',
-                Rule::unique('listings')->ignore($id),
-            ],
-            'listing_slug'   =>  [
-                Rule::unique('listings')->ignore($id),
-            ],
+        $user_data = Auth::user();
+        $validator = Validator::make(request()->all(), [
+            'listing_name' => 'required|unique:listings',
             'listing_description' => 'required',
             'listing_phone' => 'required',
             'listing_address' => 'required',
-        ], [
-            'listing_name.required' => ERR_NAME_REQUIRED,
-            'listing_name.unique' => ERR_NAME_EXIST,
-            'listing_slug.unique' => ERR_SLUG_UNIQUE,
-            'listing_description.required' => ERR_DESCRIPTION_REQUIRED,
-            'listing_phone.required' => ERR_PHONE_REQUIRED,
+            // 'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
+            'photo_list' => 'nullable|array',
+            'amenity' => 'nullable|array',
+            'video' => 'nullable|array',
         ]);
-        if (empty($data['listing_slug'])) {
-            unset($data['listing_slug']);
-            $data['listing_slug'] = Str::slug($request->listing_name);
-        }
-        if (preg_match('/\s/', $data['listing_slug'])) {
-            return Redirect()->back()->with('error', ERR_SLUG_WHITESPACE);
-        }
-        $obj->fill($data)->save();
+        // dd(request()->all());
 
-
-        // Amenity
-        $existing_amenities_array = array();
-        $arr_amenity = array();
-        $result1 = array();
-        $result2 = array();
-
-        $listing_amenities = ListingAmenity::where('listing_id', $id)->orderBy('id', 'asc')->get();
-        foreach ($listing_amenities as $row) {
-            $existing_amenities_array[] = $row->amenity_id;
-        }
-
-        if ($request->amenity != '') {
-            foreach ($request->amenity as $item) {
-                $arr_amenity[] = $item;
-            }
-        }
-
-        $result1 = array_values(array_diff($existing_amenities_array, $arr_amenity));
-        if (!empty($result1)) {
-            for ($i = 0; $i < count($result1); $i++) {
-                ListingAmenity::where('listing_id', $id)
-                    ->where('amenity_id', $result1[$i])
-                    ->delete();
-            }
-        }
-
-        $result2 = array_values(array_diff($arr_amenity, $existing_amenities_array));
-        if (!empty($result2)) {
-            for ($i = 0; $i < count($result2); $i++) {
-                $obj = new ListingAmenity;
-                $obj->listing_id = $id;
-                $obj->amenity_id = $result2[$i];
-                $obj->save();
-            }
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 422);
         }
 
 
-        // Photo
-        if ($request->photo_list == '') {
-            //echo 'No photo selected';
-        } else {
-            foreach ($request->photo_list as $item) {
-                $file_in_mb = $item->getSize() / 1024 / 1024;
-                $main_file_ext = $item->extension();
-                $main_mime_type = $item->getMimeType();
-
-                if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif') && $file_in_mb <= 2) {
-                    $rand_value = md5(mt_rand(11111111, 99999999));
-                    $final_photo_name = $rand_value . '.' . $main_file_ext;
-                    $item->move(public_path('uploads/listing_photos'), $final_photo_name);
-
-                    $obj = new ListingPhoto;
-                    $obj->listing_id = $id;
-                    $obj->photo = $final_photo_name;
-                    $obj->save();
-                }
-            }
-        }
-
-
-        // Video
-        if ($request->youtube_video_id[0] != '') {
-            $arr_youtube_video_id = array();
-            foreach ($request->youtube_video_id as $item) {
-                $arr_youtube_video_id[] = $item;
-            }
-            for ($i = 0; $i < count($arr_youtube_video_id); $i++) {
-                if ($arr_youtube_video_id[$i] != '') {
-                    $obj = new ListingVideo;
-                    $obj->listing_id = $id;
-                    $obj->youtube_video_id = $arr_youtube_video_id[$i];
-                    $obj->save();
-                }
-            }
-        }
+        $rand_value = md5(mt_rand(11111111, 99999999));
+        $ext = request()->file('listing_featured_photo')->extension();
+        $final_name = $rand_value . '.' . $ext;
+        request()->file('listing_featured_photo')->move(public_path('uploads/listing_featured_photos'), $final_name);
+        $data = request()->all();
+        $data['listing_slug'] = Str::slug(request()->listing_name);
+        $data['listing_featured_photo'] = $final_name;
+        $data['user_id'] = $user_data->id;
+        $data['admin_id'] = 0;
+        $data['listing_status'] = "Active";
+        $listing = Listing::updateOrCreate(['id' => $listing_id], $data); //listing Created
 
 
         // Social Icons
-        if ($request->social_icon[0] != '') {
-            $arr_social_icon = array();
-            $arr_social_url = array();
-            foreach ($request->social_icon as $item) {
-                $arr_social_icon[] = $item;
-            }
-            foreach ($request->social_url as $item) {
-                $arr_social_url[] = $item;
-            }
-            for ($i = 0; $i < count($arr_social_icon); $i++) {
-                if (($arr_social_icon[$i] != '') && ($arr_social_url[$i] != '')) {
-                    $obj = new ListingSocialItem;
-                    $obj->listing_id = $id;
-                    $obj->social_icon = $arr_social_icon[$i];
-                    $obj->social_url = $arr_social_url[$i];
-                    $obj->save();
+        if (is_array(request()->social_media) || isset(request()->social_media)) {
+
+            // dump(request()->social_media);
+            foreach (request()->social_media as $item) {
+                if (is_array($item) && array_key_exists('icon', $item) && array_key_exists('url', $item)) {
+                    ListingSocialItem::updateOrCreate(
+                        ['listing_id' => $listing_id],
+                        [
+                            "listing_id" => $listing->id,
+                            "social_icon" =>  $item['icon'],
+                            "social_url" =>  $item['url'],
+                        ]
+                    );
                 }
             }
         }
+        // Amenity
+
+        if (isset(request()->amenity) && is_array(request()->amenity)) {
+            foreach (request()->amenity as $item) {
+                ListingAmenity::updateOrCreate(
+                    ['listing_id' => $listing_id],
+                    [
+                        'listing_id' => $listing->id,
+                        'amenity_id' => $item
+                    ]
+                );
+            }
+        }
+
+        // Photo
+        if (is_array(request()->photo_list) || isset(request()->photo_list)) {
+            foreach (request()->photo_list as $item) {
+
+                $main_file_ext = $item->extension();
+                $main_mime_type = $item->getMimeType();
+                if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
+                    $rand_value = md5(mt_rand(11111111, 99999999));
+                    $final_photo_name = $rand_value . '.' . $main_file_ext;
+                    $item->move(public_path('uploads/listing_photos'), $final_photo_name);
+                    ListingPhoto::create(['listing_id' => $listing_id], [
+                        'listing_id' => $listing->id,
+                        'photo' => $final_photo_name,
+                    ]);
+                }
+            }
+        }
+
+        // Video
+        // if (is_array(request()->video) || isset(request()->video)) {
+        //     foreach (request()->photo_list as $item) {
+        //         $main_file_ext = $item->extension();
+        //         $main_mime_type = $item->getMimeType();
+        //         if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
+        //             $rand_value = md5(mt_rand(11111111, 99999999));
+        //             $youtube_video_id = $rand_value . '.' . $main_file_ext;
+        //             $item->move(public_path('uploads/listing_video'), $youtube_video_id);
+        //             $obj = new ListingVideo;
+        //             $obj->listing_id = $listing->id;
+        //             $obj->is_mobile_video = true;
+        //             $obj->youtube_video_id = $youtube_video_id;
+        //             $obj->save();
+        //         }
+        //     }
+        // }
+
+
+
 
         // Additional Features
-        if ($request->additional_feature_name[0] != '') {
-            $arr_additional_feature_name = array();
-            $arr_additional_feature_value = array();
-            foreach ($request->additional_feature_name as $item) {
-                $arr_additional_feature_name[] = $item;
-            }
-            foreach ($request->additional_feature_value as $item) {
-                $arr_additional_feature_value[] = $item;
-            }
-            for ($i = 0; $i < count($arr_additional_feature_name); $i++) {
-                if (($arr_additional_feature_name[$i] != '') && ($arr_additional_feature_value[$i] != '')) {
-                    $obj = new ListingAdditionalFeature;
-                    $obj->listing_id = $id;
-                    $obj->additional_feature_name = $arr_additional_feature_name[$i];
-                    $obj->additional_feature_value = $arr_additional_feature_value[$i];
-                    $obj->save();
-                }
+        if (is_array(request()->additional_feature_name) || isset(request()->additional_feature_name)) {
+
+            foreach (request()->additional_feature_name as $item) {
+                ListingAdditionalFeature::create(
+                    ['listing_id' => $listing_id],
+                    [
+                        'listing_id' => $listing->id,
+                        'additional_feature_name' => $item,
+                        'additional_feature_value' => $item,
+                    ]
+                );
             }
         }
-        return redirect()->route('admin_listing_view')->with('success', SUCCESS_ACTION);
-    }
 
+        $getAll = Listing::find($listing->id);
+
+        return response()->json(['message' => "Success!!",  "listing" => $getAll], 200);
+    }
     public function destroy($id)
     {
 
