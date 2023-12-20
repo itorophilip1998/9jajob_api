@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Amenity;
 use Illuminate\Database\Eloquent\Model;
 
 class ListingAmenity extends Model
@@ -10,5 +11,10 @@ class ListingAmenity extends Model
         'listing_id',
         'amenity_id'
     ];
+    protected $with = ['amenity_details'];
 
+    public function amenity_details()
+    {
+        return $this->belongsTo(Amenity::class, 'listing_id');
+    }
 }

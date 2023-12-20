@@ -4,10 +4,11 @@ namespace App\Models;
 
 use App\Models\User;
 use App\Models\Ratings;
+use App\Models\ListingAmenity;
 use App\Models\ListingCategory;
 use App\Models\ListingLocation;
-use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -84,29 +85,29 @@ class Listing extends Model
 
     public function amenities()
     {
-        return $this->hasMany(Amenity::class, 'id');
+        return $this->hasMany(ListingAmenity::class, 'listing_id');
     }
 
     public function reviews()
     {
-        return $this->hasMany(Review::class, 'id');
+        return $this->hasMany(Review::class, 'listing_id');
     }
 
     public function listingsVideos()
     {
-        return $this->hasMany(ListingVideo::class, 'id');
+        return $this->hasMany(ListingVideo::class, 'listing_id');
     }
     public function listingsPhotos()
     {
-        return $this->hasMany(ListingPhoto::class, 'id');
+        return $this->hasMany(ListingPhoto::class, 'listing_id');
     }
     public function listingSocialItem()
     {
-        return $this->hasMany(ListingSocialItem::class, 'id');
+        return $this->hasMany(ListingSocialItem::class, 'listing_id');
     }
     public function listingAdditionalFeatures()
     {
-        return $this->hasMany(ListingAdditionalFeature::class, 'id');
+        return $this->hasMany(ListingAdditionalFeature::class, 'listing_id');
     }
 
     public function boosting()

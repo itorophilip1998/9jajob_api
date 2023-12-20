@@ -112,6 +112,8 @@ class ListingController extends Controller
         // dd(request()->social_media);
 
 
+
+
         $user_data = Auth::user();
         $validator = Validator::make(request()->all(), [
             'listing_name' => 'required|unique:listings',
@@ -131,7 +133,6 @@ class ListingController extends Controller
 
 
         $statement = DB::select("SHOW TABLE STATUS LIKE 'listings'");
-        $listing = $statement[0]->Auto_increment;
         $rand_value = md5(mt_rand(11111111, 99999999));
         $ext = request()->file('listing_featured_photo')->extension();
         $final_name = $rand_value . '.' . $ext;
@@ -145,9 +146,23 @@ class ListingController extends Controller
         $listing = Listing::create($data); //listing Created
 
 
+        // Social Icons
+        if (is_array(request()->social_media) || isset(request()->social_media)) {
+
+            // dump(request()->social_media);
+            foreach (request()->social_media as $item) {
+                if (is_array($item) && array_key_exists('icon', $item) && array_key_exists('url', $item)) {
+                    ListingSocialItem::create([
+                        "listing_id" => $listing->id,
+                        "social_icon" =>  $item['icon'],
+                        "social_url" =>  $item['url'],
+                    ]);
+                }
+            }
+        }
         // Amenity
-        if (is_array(request()->amenity) || is_object(request()->amenity)) {
-            // dd(request()->amenity);
+
+        if (isset(request()->amenity) && is_array(request()->amenity)) {
             foreach (request()->amenity as $item) {
                 ListingAmenity::create(
                     [
@@ -160,7 +175,7 @@ class ListingController extends Controller
 
         // Photo
 
-        if (is_array(request()->photo_list) || is_object(request()->photo_list)) {
+        if (is_array(request()->photo_list) || isset(request()->photo_list)) {
             foreach (request()->photo_list as $item) {
 
                 $main_file_ext = $item->extension();
@@ -176,12 +191,10 @@ class ListingController extends Controller
                     $obj->save();
                 }
             }
-        } else {
-            return response()->json(['error' => "No Photo List Selected"], 422);
         }
 
         // Video
-        if (is_array(request()->video) || is_object(request()->video)) {
+        if (is_array(request()->video) || isset(request()->video)) {
             foreach (request()->photo_list as $item) {
                 $main_file_ext = $item->extension();
                 $main_mime_type = $item->getMimeType();
@@ -189,9 +202,9 @@ class ListingController extends Controller
                     $rand_value = md5(mt_rand(11111111, 99999999));
                     $youtube_video_id = $rand_value . '.' . $main_file_ext;
                     $item->move(public_path('uploads/listing_video'), $youtube_video_id);
-
                     $obj = new ListingVideo;
                     $obj->listing_id = $listing->id;
+                    $obj->is_mobile_video = true;
                     $obj->youtube_video_id = $youtube_video_id;
                     $obj->save();
                 }
@@ -199,24 +212,10 @@ class ListingController extends Controller
         }
 
 
-        // Social Icons
-        if (is_array(request()->social_media) || is_object(request()->social_media)) {
-
-            // dump(request()->social_media);
-            foreach (request()->social_media as $item) {
-                if (is_array($item) && array_key_exists('icon', $item) && array_key_exists('url', $item)) {
-                    ListingSocialItem::create([
-                        "listing_id" => $listing->id,
-                        "social_icon" => $item['icon'],
-                        "social_url" => $item['url'],
-                    ]);
-                }
-            }
-        }
 
 
         // Additional Features
-        if (is_array(request()->additional_feature_name) || is_object(request()->additional_feature_name)) {
+        if (is_array(request()->additional_feature_name) || isset(request()->additional_feature_name)) {
 
             foreach (request()->additional_feature_name as $item) {
                 ListingAdditionalFeature::create([
