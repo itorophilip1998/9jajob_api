@@ -109,21 +109,17 @@ class ListingController extends Controller
 
     public function AddListings()
     {
-        $listing_id = request()->listing_id;
-
-
         $user_data = Auth::user();
         $validator = Validator::make(request()->all(), [
             'listing_name' => 'required|unique:listings',
             'listing_description' => 'required',
             'listing_phone' => 'required',
             'listing_address' => 'required',
-            // 'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
+            'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
             'photo_list' => 'nullable|array',
             'amenity' => 'nullable|array',
             'video' => 'nullable|array',
         ]);
-        // dd(request()->all());
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
@@ -266,18 +262,18 @@ class ListingController extends Controller
         return view('admin.listing_edit', compact('listing', 'listing_category', 'listing_location', 'amenity', 'listing_photos', 'listing_videos', 'listing_additional_features', 'listing_social_items', 'listing_amenities', 'existing_amenities_array'));
     }
 
-    public function update(Request $request, $id)
+    public function update($id)
     {
 
-        $listing_id = request()->listing_id;
+        $listing_id = $id;
 
 
         $user_data = Auth::user();
         $validator = Validator::make(request()->all(), [
-            'listing_name' => 'required|unique:listings',
-            'listing_description' => 'required',
-            'listing_phone' => 'required',
-            'listing_address' => 'required',
+            // 'listing_name' => 'required|unique:listings',
+            'listing_description' => 'nullable',
+            'listing_phone' => 'nullable',
+            'listing_address' => 'nullable',
             // 'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
             'photo_list' => 'nullable|array',
             'amenity' => 'nullable|array',
@@ -312,7 +308,7 @@ class ListingController extends Controller
                     ListingSocialItem::updateOrCreate(
                         ['listing_id' => $listing_id],
                         [
-                            "listing_id" => $listing->id,
+                            "listing_id" => $listing_id,
                             "social_icon" =>  $item['icon'],
                             "social_url" =>  $item['url'],
                         ]
@@ -327,7 +323,7 @@ class ListingController extends Controller
                 ListingAmenity::updateOrCreate(
                     ['listing_id' => $listing_id],
                     [
-                        'listing_id' => $listing->id,
+                        'listing_id' => $listing_id,
                         'amenity_id' => $item
                     ]
                 );
@@ -344,7 +340,7 @@ class ListingController extends Controller
                     $rand_value = md5(mt_rand(11111111, 99999999));
                     $final_photo_name = $rand_value . '.' . $main_file_ext;
                     $item->move(public_path('uploads/listing_photos'), $final_photo_name);
-                    ListingPhoto::create(['listing_id' => $listing_id], [
+                    ListingPhoto::updateOrCreate(['listing_id' => $listing_id], [
                         'listing_id' => $listing->id,
                         'photo' => $final_photo_name,
                     ]);
@@ -362,7 +358,7 @@ class ListingController extends Controller
         //             $youtube_video_id = $rand_value . '.' . $main_file_ext;
         //             $item->move(public_path('uploads/listing_video'), $youtube_video_id);
         //             $obj = new ListingVideo;
-        //             $obj->listing_id = $listing->id;
+        //             $obj->listing_id = $listing_id;
         //             $obj->is_mobile_video = true;
         //             $obj->youtube_video_id = $youtube_video_id;
         //             $obj->save();
@@ -377,7 +373,7 @@ class ListingController extends Controller
         if (is_array(request()->additional_feature_name) || isset(request()->additional_feature_name)) {
 
             foreach (request()->additional_feature_name as $item) {
-                ListingAdditionalFeature::create(
+                ListingAdditionalFeature::updateOrCreate(
                     ['listing_id' => $listing_id],
                     [
                         'listing_id' => $listing->id,
@@ -388,7 +384,7 @@ class ListingController extends Controller
             }
         }
 
-        $getAll = Listing::find($listing->id);
+        $getAll = Listing::find($listing_id);
 
         return response()->json(['message' => "Success!!",  "listing" => $getAll], 200);
     }
