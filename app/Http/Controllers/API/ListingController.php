@@ -219,7 +219,7 @@ class ListingController extends Controller
                 );
             }
         }
-        $listing_creation_amount = 1000;
+        $listing_creation_amount = request()->listing_creation_amount;
         // debit from wallate
         $ref_number = Str::random(10);
         $transaction = [
