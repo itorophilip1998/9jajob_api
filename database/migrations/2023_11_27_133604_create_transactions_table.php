@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('trans_id');
             $table->integer('amount');
             $table->longText('description')->nullable();
-            $table->enum('purpose',['verification', 'packages', 'top-up', 'withdrawal', 'referrals', 'boost']);
+            $table->enum('purpose', ['verification', 'packages', 'top-up', 'withdrawal', 'referrals', 'boost', 'listings']);
             $table->foreignId('package_id')->nullable();
             $table->foreignId('listing_id')->nullable();
             $table->string('referral_code')->nullable();

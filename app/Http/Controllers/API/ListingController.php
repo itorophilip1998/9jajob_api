@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\API;
 
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Amenity;
 use App\Models\Listing;
 use Illuminate\Support\Str;
 use App\Models\ListingPhoto;
 use App\Models\ListingVideo;
+use App\Models\Notification;
+use App\Models\Transactions;
 use App\Models\ListingAmenity;
 use App\Models\ListingCategory;
 use App\Models\ListingLocation;
@@ -79,21 +82,17 @@ class ListingController extends Controller
     function haversineDistance($lat1, $lon1, $lat2, $lon2)
     {
         $R = 6371; // Earth radius in kilometers
-
         // Convert latitude and longitude from degrees to radians
         $radLat1 = deg2rad($lat1);
         $radLon1 = deg2rad($lon1);
         $radLat2 = deg2rad($lat2);
         $radLon2 = deg2rad($lon2);
-
         // Differences in coordinates
         $dLat = $radLat2 - $radLat1;
         $dLon = $radLon2 - $radLon1;
-
         // Haversine formula
         $a = sin($dLat / 2) ** 2 + cos($radLat1) * cos($radLat2) * sin($dLon / 2) ** 2;
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-
         // Distance in kilometers
         $distance = $R * $c;
         $distanceKm = number_format($distance, 1);
@@ -109,6 +108,7 @@ class ListingController extends Controller
 
     public function AddListings()
     {
+
         $user_data = Auth::user();
         $validator = Validator::make(request()->all(), [
             'listing_name' => 'required|unique:listings',
@@ -124,7 +124,6 @@ class ListingController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
         }
-
 
         $rand_value = md5(mt_rand(11111111, 99999999));
         $ext = request()->file('listing_featured_photo')->extension();
@@ -178,7 +177,7 @@ class ListingController extends Controller
                     $rand_value = md5(mt_rand(11111111, 99999999));
                     $final_photo_name = $rand_value . '.' . $main_file_ext;
                     $item->move(public_path('uploads/listing_photos'), $final_photo_name);
-                     ListingPhoto::create( [
+                    ListingPhoto::create([
                         'listing_id' => $listing->id,
                         'photo' => $final_photo_name,
                     ]);
@@ -220,7 +219,48 @@ class ListingController extends Controller
                 );
             }
         }
-
+        $listing_creation_amount = 1000;
+        // debit from wallate
+        $ref_number = Str::random(10);
+        $transaction = [
+            'user_id' => auth()->user()->id,
+            'type' => 'debit',
+            'status' => 'success', //debit, credit
+            'ref_number' => $ref_number,
+            'trans_id' => $ref_number,
+            'amount' => $listing_creation_amount,
+            'description' => "Listings Purchased " . $listing_creation_amount,
+            'purpose' => 'listings', //verification ,packages, top-up, withdrawal,referrals, boost]
+            'listing_id' => $listing->id,
+        ];
+        Transactions::create($transaction);
+        // send invioce
+        $item = [
+            "invoiceNumber" => rand(1111, 9999),
+            "invoiceDate" => Carbon::now()->format("d M, Y"),
+            "user" => auth()->user()->name,
+            "purpose" => $transaction["purpose"],
+            "status" => $transaction["status"],
+            "ref_number" => $transaction["ref_number"],
+            "amount" => $transaction["amount"],
+        ];
+        // notification
+        Notification::create(
+            [
+                'message' =>
+                $transaction['description'],
+                'user_id' => auth()->user()->id
+            ]
+        );
+        // sendmail
+        try {
+            Mail::send('mail.invioce',  ['item' => $item], function ($message) {
+                $message->to(auth()->user()->email);
+                $message->subject('Invioce');
+            });
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
         $getAll = Listing::find($listing->id);
 
         return response()->json(['message' => "Success!!",  "listing" => $getAll], 200);

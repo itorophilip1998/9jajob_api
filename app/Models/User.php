@@ -92,7 +92,6 @@ class User extends Authenticatable implements JWTSubject
      */
 
 
-    // ...
 
     /**
      * Transform the model's attributes to an array.
@@ -101,12 +100,12 @@ class User extends Authenticatable implements JWTSubject
      */
     public function toArray()
     {
-        $attributes = parent::toArray();
-
+        $attributes = parent::toArray(); 
         // Add the 'user_photo' attribute to the array
         $attributes['photo'] =
             $this->photo ? URL::to("/uploads/user_photos") . "/" . $this->photo :  null;
         $attributes['ref_code'] = "ref-" . $this->id;
+        $attributes['listing_creation_amount'] = 1000;
         return $attributes;
     }
 
