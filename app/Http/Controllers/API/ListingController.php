@@ -316,7 +316,7 @@ class ListingController extends Controller
         $data['user_id'] = $user_data->id;
         $data['admin_id'] = 0;
         $data['listing_status'] = "Active";
-        $listing = Listing::updateOrCreate(['id' => $listing_id], $data); //listing Created
+        $listing = Listing::where(['listing_id' => $listing_id])->update($data); //listing Created
 
 
         // Social Icons
@@ -353,14 +353,13 @@ class ListingController extends Controller
         // Photo
         if (is_array(request()->photo_list) || isset(request()->photo_list)) {
             foreach (request()->photo_list as $item) {
-
                 $main_file_ext = $item->extension();
                 $main_mime_type = $item->getMimeType();
                 if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
                     $rand_value = md5(mt_rand(11111111, 99999999));
                     $final_photo_name = $rand_value . '.' . $main_file_ext;
                     $item->move(public_path('uploads/listing_photos'), $final_photo_name);
-                    ListingPhoto::updateOrCreate(['listing_id' => $listing_id], [
+                    ListingPhoto::where(['listing_id' => $listing_id])->update([
                         'listing_id' => $listing->id,
                         'photo' => $final_photo_name,
                     ]);
