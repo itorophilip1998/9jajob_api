@@ -117,8 +117,8 @@ class ListingController extends Controller
         $validator = Validator::make(request()->all(), [
             'listing_name' => 'required|unique:listings',
             'listing_description' => 'required',
-            'listing_phone' => 'required',
-            'listing_address' => 'required',
+            'listing_phone' => 'nullable',
+            'listing_address' => 'nullable',
             'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic,avif',
             'photo_list' => 'nullable|array',
             'amenity' => 'nullable|array',
@@ -129,10 +129,13 @@ class ListingController extends Controller
             return response()->json(['error' => $validator->messages()], 422);
         }
 
-        $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
-         $data = request()->all();
+
+        $data = request()->all();
+        if (request()->hasFile('listing_featured_photo')) {
+            $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
+            $data['listing_featured_photo'] = $final_name;
+        }
         $data['listing_slug'] = Str::slug(request()->listing_name);
-        $data['listing_featured_photo'] = $final_name;
         $data['user_id'] = $user_data->id;
         $data['admin_id'] = 0;
         $data['listing_status'] = "Active";
@@ -303,13 +306,13 @@ class ListingController extends Controller
 
         $user_data = Auth::user();
 
-        $rand_value = md5(mt_rand(11111111, 99999999));
-        $ext = request()->file('listing_featured_photo')->extension();
-        $final_name = $rand_value . '.' . $ext;
-        request()->file('listing_featured_photo')->move(public_path('uploads/listing_featured_photos'), $final_name);
+        if (request()->hasFile('listing_featured_photo')) {
+            $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
+            $data['listing_featured_photo'] = $final_name;
+        }
+
         $data = request()->all();
         $data['listing_slug'] = Str::slug(request()->listing_name);
-        $data['listing_featured_photo'] = $final_name;
         $data['user_id'] = $user_data->id;
         $data['admin_id'] = 0;
         $data['listing_status'] = "Active";
@@ -349,8 +352,7 @@ class ListingController extends Controller
 
         // Photo
         if (is_array(request()->photo_list) || isset(request()->photo_list)) {
-            foreach (request()->photo_list as $item) {
-
+            foreach (request()->photo_list as $item) { 
                 $main_file_ext = $item->extension();
                 $main_mime_type = $item->getMimeType();
                 if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
