@@ -109,13 +109,16 @@ class ListingController extends Controller
     public function AddListings()
     {
 
+
+        // return request()->listing_featured_photo;
+
         $user_data = Auth::user();
         $validator = Validator::make(request()->all(), [
             'listing_name' => 'required|unique:listings',
             'listing_description' => 'required',
             'listing_phone' => 'required',
             'listing_address' => 'required',
-            'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
+            // 'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
             'photo_list' => 'nullable|array',
             'amenity' => 'nullable|array',
             'video' => 'nullable|array',
@@ -170,10 +173,9 @@ class ListingController extends Controller
         // Photo
         if (is_array(request()->photo_list) || isset(request()->photo_list)) {
             foreach (request()->photo_list as $item) {
-
                 $main_file_ext = $item->extension();
                 $main_mime_type = $item->getMimeType();
-                if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
+                if (($main_mime_type == 'image/jpeg'|| $main_mime_type == 'image/jpg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif' || $main_mime_type == 'image/heic')) {
                     $rand_value = md5(mt_rand(11111111, 99999999));
                     $final_photo_name = $rand_value . '.' . $main_file_ext;
                     $item->move(public_path('uploads/listing_photos'), $final_photo_name);
