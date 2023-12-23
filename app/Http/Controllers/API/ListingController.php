@@ -12,6 +12,7 @@ use App\Models\ListingPhoto;
 use App\Models\ListingVideo;
 use App\Models\Notification;
 use App\Models\Transactions;
+use App\Http\services\Upload;
 use App\Models\ListingAmenity;
 use App\Models\ListingCategory;
 use App\Models\ListingLocation;
@@ -110,7 +111,7 @@ class ListingController extends Controller
     {
 
 
-        // return request()->listing_featured_photo;
+        // return request()->all();
 
         $user_data = Auth::user();
         $validator = Validator::make(request()->all(), [
@@ -118,7 +119,7 @@ class ListingController extends Controller
             'listing_description' => 'required',
             'listing_phone' => 'required',
             'listing_address' => 'required',
-            // 'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
+            'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic,avif',
             'photo_list' => 'nullable|array',
             'amenity' => 'nullable|array',
             'video' => 'nullable|array',
@@ -128,11 +129,8 @@ class ListingController extends Controller
             return response()->json(['error' => $validator->messages()], 422);
         }
 
-        $rand_value = md5(mt_rand(11111111, 99999999));
-        $ext = request()->file('listing_featured_photo')->extension();
-        $final_name = $rand_value . '.' . $ext;
-        request()->file('listing_featured_photo')->move(public_path('uploads/listing_featured_photos'), $final_name);
-        $data = request()->all();
+        $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
+         $data = request()->all();
         $data['listing_slug'] = Str::slug(request()->listing_name);
         $data['listing_featured_photo'] = $final_name;
         $data['user_id'] = $user_data->id;
@@ -173,37 +171,30 @@ class ListingController extends Controller
         // Photo
         if (is_array(request()->photo_list) || isset(request()->photo_list)) {
             foreach (request()->photo_list as $item) {
-                $main_file_ext = $item->extension();
-                $main_mime_type = $item->getMimeType();
-                if (($main_mime_type == 'image/jpeg'|| $main_mime_type == 'image/jpg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif' || $main_mime_type == 'image/heic')) {
-                    $rand_value = md5(mt_rand(11111111, 99999999));
-                    $final_photo_name = $rand_value . '.' . $main_file_ext;
-                    $item->move(public_path('uploads/listing_photos'), $final_photo_name);
-                    ListingPhoto::create([
-                        'listing_id' => $listing->id,
-                        'photo' => $final_photo_name,
-                    ]);
-                }
+                $final_photo_name =  (new Upload)->image($item, 'uploads/listing_photos');
+                ListingPhoto::create([
+                    'listing_id' => $listing->id,
+                    'photo' => $final_photo_name,
+                ]);
             }
         }
 
+
         // Video
-        // if (is_array(request()->video) || isset(request()->video)) {
-        //     foreach (request()->photo_list as $item) {
-        //         $main_file_ext = $item->extension();
-        //         $main_mime_type = $item->getMimeType();
-        //         if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
-        //             $rand_value = md5(mt_rand(11111111, 99999999));
-        //             $youtube_video_id = $rand_value . '.' . $main_file_ext;
-        //             $item->move(public_path('uploads/listing_video'), $youtube_video_id);
-        //             $obj = new ListingVideo;
-        //             $obj->listing_id = $listing->id;
-        //             $obj->is_mobile_video = true;
-        //             $obj->youtube_video_id = $youtube_video_id;
-        //             $obj->save();
-        //         }
-        //     }
-        // }
+        if (is_array(request()->video) || isset(request()->video)) {
+
+            foreach (request()->photo_list as $item) {
+                $main_file_ext = $item->extension();
+                $rand_value = md5(mt_rand(11111111, 99999999));
+                $youtube_video_id = $rand_value . '.' . 'mp4';
+                $item->move(public_path('uploads/listing_video'), $youtube_video_id);
+                $obj = new ListingVideo;
+                $obj->listing_id = $listing->id;
+                $obj->is_mobile_video = true;
+                $obj->youtube_video_id = $youtube_video_id;
+                $obj->save();
+            }
+        }
 
 
 
@@ -311,22 +302,6 @@ class ListingController extends Controller
 
 
         $user_data = Auth::user();
-        $validator = Validator::make(request()->all(), [
-            // 'listing_name' => 'required|unique:listings',
-            'listing_description' => 'nullable',
-            'listing_phone' => 'nullable',
-            'listing_address' => 'nullable',
-            // 'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic',
-            'photo_list' => 'nullable|array',
-            'amenity' => 'nullable|array',
-            'video' => 'nullable|array',
-        ]);
-        // dd(request()->all());
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 422);
-        }
-
 
         $rand_value = md5(mt_rand(11111111, 99999999));
         $ext = request()->file('listing_featured_photo')->extension();
