@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Amenity;
 use App\Models\Listing;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use App\Models\ListingPhoto;
 use App\Models\ListingVideo;
@@ -316,7 +317,11 @@ class ListingController extends Controller
         $data['user_id'] = $user_data->id;
         $data['admin_id'] = 0;
         $data['listing_status'] = "Active";
-        $listing = Listing::where(['id' => $listing_id])->update($data); //listing Created
+        $keysToExclude = [
+            'amenity', 'social_media', 'video', 'photo_list'
+        ];
+        $filteredData =   Arr::except($data, $keysToExclude);
+        $listing = Listing::where(['id' => $listing_id])->update($filteredData); //listing Created
 
 
         // Social Icons
@@ -410,9 +415,7 @@ class ListingController extends Controller
     public function destroy($id)
     {
 
-
         $listing = Listing::findOrFail($id);
-
         $listing->delete();
 
         ListingAmenity::where('listing_id', $id)->delete();
