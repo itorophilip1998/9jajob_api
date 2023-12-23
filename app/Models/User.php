@@ -44,11 +44,11 @@ class User extends Authenticatable implements JWTSubject
         'banner',
         'password',
         'token',
-        'status',
-        'ref_code',
+        'status', 
         'expo_token',
         'address_longitude',
-        'address_latitude'
+        'address_latitude',
+        'referrer_code'
     ];
 
     /**
@@ -100,11 +100,10 @@ class User extends Authenticatable implements JWTSubject
      */
     public function toArray()
     {
-        $attributes = parent::toArray(); 
+        $attributes = parent::toArray();
         // Add the 'user_photo' attribute to the array
-        $attributes['photo'] =
-            $this->photo ? URL::to("/uploads/user_photos") . "/" . $this->photo :  null;
-        $attributes['ref_code'] = "ref-" . $this->id;
+        $attributes['photo'] = $this->photo ? URL::to("/uploads/user_photos") . "/" . $this->photo :  null;
+        $attributes['ref_code'] = substr(trim($this->name), 0, 5) . '-' . $this->id;
         $attributes['listing_creation_amount'] = 1000;
         return $attributes;
     }
@@ -139,7 +138,7 @@ class User extends Authenticatable implements JWTSubject
     }
     public function package()
     {
-        return $this->hasOne(PackagePurchase::class, 'user_id')->where('currently_active', '1')->orderBy('created_at','DESC');
+        return $this->hasOne(PackagePurchase::class, 'user_id')->where('currently_active', '1')->orderBy('created_at', 'DESC');
     }
 
     public function chats()

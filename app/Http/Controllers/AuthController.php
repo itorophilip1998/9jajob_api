@@ -54,7 +54,7 @@ class AuthController extends Controller
         $data['password'] = Hash::make(request()->password);
         $data['token'] = $token;
         $data['status'] = 'active';
-        $user = User::create($data);
+         User::create($data);
 
 
         // Send Email
@@ -73,55 +73,6 @@ class AuthController extends Controller
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-        // create referral and transaction if user include the code
-        // if (request()->ref_code !== null) {
-        //     $ref = Referral::create([
-        //         'user_id' => auth()->user()->id,
-        //         'referrer_id' => substr($data['ref_code'], 4),
-        //         'ref_code' => $data['ref_code'],
-        //         'amount_earn' => 150,
-        //     ]);
-        //     $ref_number = Str::random(10);
-        //     $transaction = [
-        //         'user_id' => substr($data['ref_code'], 4),
-        //         'type' => 'credit',
-        //         'status' => 'success', //debit, credit
-        //         'ref_number' => $ref_number,
-        //         'trans_id' => $ref_number,
-        //         'amount' => $ref["amount_earn"],
-        //         'description' => "referrals withdrawal from " . auth()->user()->name,
-        //         'purpose' => 'referrals', //verification ,packages, top-up, withdrawal,referrals, boost]
-        //         'referral_code' => $data['ref_code'],
-        //     ];
-        //     Transactions::create($transaction);
-
-        //     // send invioce
-        //     $referrer_name = User::find(substr($data['ref_code'], 4));
-        //     $item = [
-        //         "invoiceNumber" => rand(1111, 9999),
-        //         "invoiceDate" => Carbon::now()->format("d M, Y"),
-        //         "user" => $referrer_name->name,
-        //         "purpose" => $transaction["purpose"],
-        //         "status" => $transaction["status"],
-        //         "ref_number" => $transaction["ref_number"],
-        //         "amount" => $transaction["amount"],
-        //     ];
-
-        //     Notification::create(
-        //         [
-        //             'message' => 'You Referred ' . $user->name . ' And earn ' . $item['amount'],
-        //             'user_id' => substr($data['ref_code'], 4)
-        //         ]
-        //     );
-        //     try {
-        //         Mail::send('mail.invioce',  ['item' => $item], function ($message) use ($referrer_name) {
-        //             $message->to($referrer_name->email);
-        //             $message->subject('Invioce');
-        //         });
-        //     } catch (\Throwable $th) {
-        //         //throw $th;
-        //     }
-        // }
 
         return $this->respondWithToken($token, "Registered Successfully!, Please check your mail for verification");
     }

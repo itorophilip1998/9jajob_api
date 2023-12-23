@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\services;
 
-use Intervention\Image\ImageManager;
+// use Intervention\Image\ImageManager;
 
 class Upload
 {

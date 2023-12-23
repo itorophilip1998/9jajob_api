@@ -14,6 +14,7 @@ use App\Models\ListingVideo;
 use App\Models\Notification;
 use App\Models\Transactions;
 use App\Http\services\Upload;
+use App\Http\services\Balance;
 use App\Models\ListingAmenity;
 use App\Models\ListingCategory;
 use App\Models\ListingLocation;
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use App\Http\services\ReferralSystem;
 use Illuminate\Support\Facades\Request;
 use App\Models\ListingAdditionalFeature;
 use Illuminate\Support\Facades\Validator;
@@ -110,9 +112,11 @@ class ListingController extends Controller
 
     public function AddListings()
     {
-
-
-        // return request()->all();
+        $listing_creation_amount = request()->listing_creation_amount;
+        // check balance
+        $balance=(new Balance)->check($listing_creation_amount);
+        if ($balance < $listing_creation_amount)
+            return response()->json(['error' => 'Insufficient balance'], 422);
 
         $user_data = Auth::user();
         $validator = Validator::make(request()->all(), [
@@ -124,6 +128,7 @@ class ListingController extends Controller
             'photo_list' => 'nullable|array',
             'amenity' => 'nullable|array',
             'video' => 'nullable|array',
+            'listing_creation_amount' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -216,7 +221,6 @@ class ListingController extends Controller
                 );
             }
         }
-        $listing_creation_amount = request()->listing_creation_amount;
         // debit from wallate
         $ref_number = Str::random(10);
         $transaction = [
@@ -258,6 +262,9 @@ class ListingController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
         }
+        // send referrer funds
+        (new ReferralSystem)->referred();
+
         $getAll = Listing::find($listing->id);
 
         return response()->json(['message' => "Success!!",  "listing" => $getAll], 200);

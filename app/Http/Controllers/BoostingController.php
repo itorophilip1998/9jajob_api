@@ -7,6 +7,7 @@ use App\Models\Boosting;
 use Illuminate\Support\Str;
 use App\Models\Notification;
 use App\Models\Transactions;
+use App\Http\services\Balance;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreBoostingRequest;
@@ -21,6 +22,12 @@ class BoostingController extends Controller
      */
     public function create()
     {
+
+        $amount = request()->amount;
+        // check balance
+        $balance = (new Balance)->check($amount);
+        if ($balance < $amount)
+            return response()->json(['error' => 'Insufficient balance'], 422);
         $validator = Validator::make(request()->all(), [
             'listing_id' => 'required',
             'start_date' => 'required|date',
@@ -75,13 +82,13 @@ class BoostingController extends Controller
         );
         try {
 
-        Mail::send('mail.invioce',  ['item' => $item], function ($message) {
-            $message->to(auth()->user()->email);
-            $message->subject('Invioce');
-        });
-           } catch (\Throwable $th) {
-                //throw $th;
-            }
+            Mail::send('mail.invioce',  ['item' => $item], function ($message) {
+                $message->to(auth()->user()->email);
+                $message->subject('Invioce');
+            });
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
         return response()->json(['message' => 'Booting In Progress!!!'], 200);
     }
 }
