@@ -183,17 +183,17 @@ class ListingController extends Controller
         // Video
         if (is_array(request()->video) || isset(request()->video)) {
 
-            foreach (request()->photo_list as $item) {
-                $main_file_ext = $item->extension();
-                $rand_value = md5(mt_rand(11111111, 99999999));
-                $youtube_video_id = $rand_value . '.' . 'mp4';
-                $item->move(public_path('uploads/listing_video'), $youtube_video_id);
-                $obj = new ListingVideo;
-                $obj->listing_id = $listing->id;
-                $obj->is_mobile_video = true;
-                $obj->youtube_video_id = $youtube_video_id;
-                $obj->save();
-            }
+            // foreach (request()->photo_list as $item) {
+            //     $main_file_ext = $item->extension();
+            //     $rand_value = md5(mt_rand(11111111, 99999999));
+            //     $youtube_video_id = $rand_value . '.' . 'mp4';
+            //     $item->move(public_path('uploads/listing_video'), $youtube_video_id);
+            //     $obj = new ListingVideo;
+            //     $obj->listing_id = $listing->id;
+            //     $obj->is_mobile_video = true;
+            //     $obj->youtube_video_id = $youtube_video_id;
+            //     $obj->save();
+            // }
         }
 
 
