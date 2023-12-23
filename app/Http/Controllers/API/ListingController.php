@@ -316,7 +316,7 @@ class ListingController extends Controller
         $data['user_id'] = $user_data->id;
         $data['admin_id'] = 0;
         $data['listing_status'] = "Active";
-        $listing = Listing::where("listing_id", $listing_id)->update(['id' => $listing_id], $data); //listing Created
+        $listing = Listing::updateOrCreate(['id' => $listing_id], $data); //listing Created
 
 
         // Social Icons
@@ -325,8 +325,8 @@ class ListingController extends Controller
             // dump(request()->social_media);
             foreach (request()->social_media as $item) {
                 if (is_array($item) && array_key_exists('icon', $item) && array_key_exists('url', $item)) {
-                    ListingSocialItem::where("listing_id", $listing_id)->update(
-
+                    ListingSocialItem::updateOrCreate(
+                        ['listing_id' => $listing_id],
                         [
                             "listing_id" => $listing_id,
                             "social_icon" =>  $item['icon'],
@@ -340,8 +340,8 @@ class ListingController extends Controller
 
         if (isset(request()->amenity) && is_array(request()->amenity)) {
             foreach (request()->amenity as $item) {
-                ListingAmenity::where("listing_id", $listing_id)->update(
-
+                ListingAmenity::updateOrCreate(
+                    ['listing_id' => $listing_id],
                     [
                         'listing_id' => $listing_id,
                         'amenity_id' => $item
@@ -353,13 +353,14 @@ class ListingController extends Controller
         // Photo
         if (is_array(request()->photo_list) || isset(request()->photo_list)) {
             foreach (request()->photo_list as $item) {
+
                 $main_file_ext = $item->extension();
                 $main_mime_type = $item->getMimeType();
                 if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
                     $rand_value = md5(mt_rand(11111111, 99999999));
                     $final_photo_name = $rand_value . '.' . $main_file_ext;
                     $item->move(public_path('uploads/listing_photos'), $final_photo_name);
-                    ListingPhoto::where("listing_id", $listing_id)->update(['listing_id' => $listing_id], [
+                    ListingPhoto::updateOrCreate(['listing_id' => $listing_id], [
                         'listing_id' => $listing->id,
                         'photo' => $final_photo_name,
                     ]);
@@ -392,8 +393,8 @@ class ListingController extends Controller
         if (is_array(request()->additional_feature_name) || isset(request()->additional_feature_name)) {
 
             foreach (request()->additional_feature_name as $item) {
-                ListingAdditionalFeature::where("listing_id", $listing_id)->update(
-
+                ListingAdditionalFeature::updateOrCreate(
+                    ['listing_id' => $listing_id],
                     [
                         'listing_id' => $listing->id,
                         'additional_feature_name' => $item,
