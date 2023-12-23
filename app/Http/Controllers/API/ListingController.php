@@ -316,7 +316,7 @@ class ListingController extends Controller
         $data['user_id'] = $user_data->id;
         $data['admin_id'] = 0;
         $data['listing_status'] = "Active";
-        $listing = Listing::where(['listing_id' => $listing_id])->update($data); //listing Created
+        $listing = Listing::where(['id' => $listing_id])->update($data); //listing Created
 
 
         // Social Icons
