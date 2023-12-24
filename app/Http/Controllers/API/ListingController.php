@@ -36,6 +36,7 @@ class ListingController extends Controller
 
     public function index()
     {
+
         $listing_category_id = request()->input('listing_category_id');
         $listing_name = request()->input('listing_name');
         $listing_city = request()->input('listing_city');
@@ -71,16 +72,23 @@ class ListingController extends Controller
             "address_latitude" => request()->address_latitude,
             "address_longitude" => request()->address_longitude
         ];
+
         $listing = $query->get()->map(function ($item) use ($item2) {
             $radLat1 = $item['address_latitude'];
             $radLon1 = $item['address_longitude'];
             $radLat2 = $item2['address_latitude'];
             $radLon2 = $item2['address_longitude'];
-            $item['km'] = $this->haversineDistance($radLat1, $radLon1, $radLat2, $radLon2);
+            $item['km'] = (isset($radLon2) && isset($radLat2)) ? $this->haversineDistance($radLat1, $radLon1, $radLat2, $radLon2) : null;
             return $item;
         });
 
-        return response()->json(['Counts' => count($listing), "listing" => $listing], 200);
+
+
+
+
+
+        $data = ['Counts' => count($listing), "listing" => $listing];
+        return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE);
     }
 
     function haversineDistance($lat1, $lon1, $lat2, $lon2)
@@ -114,7 +122,7 @@ class ListingController extends Controller
     {
         $listing_creation_amount = request()->listing_creation_amount;
         // check balance
-        $balance=(new Balance)->check($listing_creation_amount);
+        $balance = (new Balance)->check($listing_creation_amount);
         if ($balance < $listing_creation_amount)
             return response()->json(['error' => 'Insufficient balance'], 422);
 
