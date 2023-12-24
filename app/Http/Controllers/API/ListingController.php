@@ -73,23 +73,34 @@ class ListingController extends Controller
             "address_longitude" => request()->address_longitude
         ];
 
-        $listing = $query->get()->map(function ($item) use ($item2) {
-            $radLat1 = $item['address_latitude'];
-            $radLon1 = $item['address_longitude'];
-            $radLat2 = $item2['address_latitude'];
-            $radLon2 = $item2['address_longitude'];
-            $item['km'] = (isset($radLon2) && isset($radLat2)) ? $this->haversineDistance($radLat1, $radLon1, $radLat2, $radLon2) : null;
-            return $item;
-        });
+        $listing = $query->paginate(10);
 
 
+        $listing->map(function ($item) use ($item2) {
+                $radLat1 = $item['address_latitude'];
+                $radLon1 = $item['address_longitude'];
+                $radLat2 = $item2['address_latitude'];
+                $radLon2 = $item2['address_longitude'];
+                $item['km'] = (isset($radLon2) && isset($radLat2)) ? $this->haversineDistance($radLat1, $radLon1, $radLat2, $radLon2) : null;
+                return $item;
+            });
 
 
-
-
-        $data = ['Counts' => count($listing), "listing" => $listing];
-        return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE);
+        if (request()->is_auto_complete == 'true') {
+            $data = Listing::select('listing_name', 'listing_location_id', 'listing_category_id')
+                ->withOnly(['rListingLocation', 'rListingCategory'])->get()->map(function ($item) {
+                    $listing_name = $item['listing_name'];
+                    $listing_category_name = $item['rListingCategory'] ? $item['rListingCategory']->listing_category_name : '';
+                    $item = "$listing_name ($listing_category_name)";
+                    return $item;
+                });
+            return response()->json(['counts' => count($data) ,'auto_complete' => $data], 200);
+        } else {
+            $data = ["listing" => $listing];
+            return response()->json($data, 200);
+        }
     }
+
 
     function haversineDistance($lat1, $lon1, $lat2, $lon2)
     {
