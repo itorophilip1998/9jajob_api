@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use App\Models\Notification;
 use App\Models\Transactions;
 use App\Models\Verification;
+use App\Http\services\Balance;
 use Illuminate\Http\Client\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
@@ -19,6 +20,12 @@ class VerificationController extends Controller
 
     public function create()
     {
+        $amount = request()->amount;
+        // check balance
+        $balance = (new Balance)->check($amount);
+        if ($balance < $amount)
+            return response()->json(['error' => 'Insufficient balance'], 422);
+
         $validator = Validator::make(request()->all(), [
             'listing_id' => 'required',
             'reg_number' => 'required',
