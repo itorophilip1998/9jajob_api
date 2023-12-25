@@ -15,7 +15,10 @@ class BookingController extends Controller
     public function index()
     {
         $user_id = auth()->user()->id;
-        $booked = Booking::where("user_id", $user_id)->get(); //TODO: write a query to check people that book my listings
+        $booked = Booking::whereHas('listings', function ($query) use ($user_id) {
+            $query->where('user_id', $user_id);
+        })->get();
+
         $bookings = Booking::where("user_id", $user_id)->get(); //correct
 
         return response()->json([
