@@ -87,7 +87,7 @@ class ListingController extends Controller
 
 
         if (request()->is_auto_complete == 'true') {
-            $data = Listing::select('listing_name', 'listing_location_id', 'listing_category_id')
+            $data = Listing::orderBy('listing_name')->select('listing_name', 'listing_location_id', 'listing_category_id')
                 ->withOnly(['rListingLocation', 'rListingCategory'])->get()->map(function ($item) {
                     $listing_name = $item['listing_name'];
                     $listing_category_name = $item['rListingCategory'] ? $item['rListingCategory']->listing_category_name : '';
