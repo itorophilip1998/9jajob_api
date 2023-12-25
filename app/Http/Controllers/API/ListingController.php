@@ -57,11 +57,12 @@ class ListingController extends Controller
             $query->where('listing_address', 'LIKE', '%' . $listing_city . '%');
         }
 
-        
+
 
         if ($is_trending !== null) {
             $query->has('boosting', '>=', 1)
-                ->OrHas('reviews', '>=', 1);
+                ->OrHas('reviews', '>=', 1)
+                ->OrHas('verified', '>=', 1);
         }
         if ($listing_name !== null) {
             $query->where('listing_name', 'LIKE', '%' . $listing_name . '%')
@@ -75,17 +76,22 @@ class ListingController extends Controller
             "address_longitude" => request()->address_longitude
         ];
 
-        $listing = $query->paginate(10);
+        $listing = $query
+            ->withCount(['boosting', 'reviews', 'verified'])
+            ->orderByDesc('boosting_count')
+            ->orderByDesc('reviews_count')
+            ->orderByDesc('verified_count')
+            ->paginate(10);
 
 
         $listing->map(function ($item) use ($item2) {
-                $radLat1 = $item['address_latitude'];
-                $radLon1 = $item['address_longitude'];
-                $radLat2 = $item2['address_latitude'];
-                $radLon2 = $item2['address_longitude'];
-                $item['km'] = (isset($radLon2) && isset($radLat2)) ? $this->haversineDistance($radLat1, $radLon1, $radLat2, $radLon2) : null;
-                return $item;
-            });
+            $radLat1 = $item['address_latitude'];
+            $radLon1 = $item['address_longitude'];
+            $radLat2 = $item2['address_latitude'];
+            $radLon2 = $item2['address_longitude'];
+            $item['km'] = (isset($radLon2) && isset($radLat2)) ? $this->haversineDistance($radLat1, $radLon1, $radLat2, $radLon2) : null;
+            return $item;
+        });
 
 
         if (request()->is_auto_complete == 'true') {
@@ -96,7 +102,7 @@ class ListingController extends Controller
                     $item = "$listing_name ($listing_category_name)";
                     return $item;
                 });
-            return response()->json(['counts' => count($data) ,'auto_complete' => $data], 200);
+            return response()->json(['counts' => count($data), 'auto_complete' => $data], 200);
         } else {
             $data = ["listing" => $listing];
             return response()->json($data, 200);
