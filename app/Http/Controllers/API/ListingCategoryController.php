@@ -12,7 +12,7 @@ class ListingCategoryController extends Controller
 
     public function index() {
         $url = URL::to("/uploads/listing_category_photos");
-        $listingCategories = ListingCategory::latest()->get();
+        $listingCategories = ListingCategory::orderBy('listing_category_name')->get();
         $listingCategories->each(function ($category) use ($url) {
             $category->listing_category_photo = "$url/$category->listing_category_photo";
         });
@@ -26,4 +26,3 @@ class ListingCategoryController extends Controller
 
 
 }
- 
