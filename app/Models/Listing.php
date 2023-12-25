@@ -118,4 +118,6 @@ class Listing extends Model
     {
         return $this->hasOne(Verification::class, 'listing_id')->select('id', 'status', 'listing_id');
     }
+    
+
 }

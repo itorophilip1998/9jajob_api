@@ -57,6 +57,8 @@ class ListingController extends Controller
             $query->where('listing_address', 'LIKE', '%' . $listing_city . '%');
         }
 
+        
+
         if ($is_trending !== null) {
             $query->has('boosting', '>=', 1)
                 ->OrHas('reviews', '>=', 1);
