@@ -79,8 +79,8 @@ class ListingController extends Controller
         $listing = $query
             ->withCount(['boosting', 'reviews', 'verified'])
             ->orderByDesc('boosting_count')
-            ->orderByDesc('reviews_count')
             ->orderByDesc('verified_count')
+            ->orderByDesc('reviews_count') 
             ->paginate(10);
 
 
