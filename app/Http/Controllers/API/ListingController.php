@@ -38,12 +38,29 @@ class ListingController extends Controller
     {
 
         $listing_category_id = request()->input('listing_category_id');
+        $listing_category_name = request()->input('listing_category_name');
         $listing_name = request()->input('listing_name');
         $listing_city = request()->input('listing_city');
         $is_nearest = request()->input('is_nearest');
         $is_trending = request()->input('is_trending');
+        $is_auto_complete =  request()->input('is_auto_complete');
 
-
+        if ($is_auto_complete == 'true') {
+            $listing_name = Listing::orderBy('listing_name')->select('listing_name')
+                ->withOut(['rListingLocation', 'rListingCategory'])->get()->map(function ($item) {
+                    $listing_name = $item['listing_name'] . " (Business)";
+                    $item = "$listing_name";
+                    return $item;
+                });
+            $listing_category_name = ListingCategory::orderBy('listing_category_name')->select('listing_category_name', 'id')->get()->map(function ($item) {
+                $item = $item['listing_category_name'] . " (Category)";
+                return $item;
+            });
+            return response()->json(['auto_complete' => [
+                'listing_category_name' => $listing_category_name,
+                'listing_name' => $listing_name,
+            ]], 200);
+        }
 
         // Start with a base query
         $query = Listing::query();
@@ -57,18 +74,20 @@ class ListingController extends Controller
             $query->where('listing_address', 'LIKE', '%' . $listing_city . '%');
         }
 
-
-
         if ($is_trending !== null) {
             $query->has('boosting', '>=', 1)
-                ->OrHas('reviews', '>=', 1)
-                ->OrHas('verified', '>=', 1);
+                ->OrHas('verified', '>=', 1)
+                ->OrHas('reviews', '>=', 1);
         }
         if ($listing_name !== null) {
-            $query->where('listing_name', 'LIKE', '%' . $listing_name . '%')
-                ->orWhereHas('rListingCategory', function ($q) use ($listing_name) {
-                    $q->where('listing_category_name', 'LIKE', '%' . $listing_name . '%');
-                });
+            $query->where('listing_name', 'LIKE', '%' . $listing_name);
+        }
+        if ($listing_category_name !== null) {
+
+            $query->whereHas('rListingCategory', function ($q) use ($listing_category_name) {
+                $q->where('listing_category_name', 'LIKE', '%' . $listing_category_name);
+            });
+            return $query->paginate(10);
         }
         // Execute the query
         $item2 = [
@@ -80,7 +99,7 @@ class ListingController extends Controller
             ->withCount(['boosting', 'reviews', 'verified'])
             ->orderByDesc('boosting_count')
             ->orderByDesc('verified_count')
-            ->orderByDesc('reviews_count') 
+            ->orderByDesc('reviews_count')
             ->paginate(10);
 
 
@@ -94,19 +113,9 @@ class ListingController extends Controller
         });
 
 
-        if (request()->is_auto_complete == 'true') {
-            $data = Listing::orderBy('listing_name')->select('listing_name', 'listing_location_id', 'listing_category_id')
-                ->withOnly(['rListingLocation', 'rListingCategory'])->get()->map(function ($item) {
-                    $listing_name = $item['listing_name'];
-                    $listing_category_name = $item['rListingCategory'] ? $item['rListingCategory']->listing_category_name : '';
-                    $item = "$listing_name ($listing_category_name)";
-                    return $item;
-                });
-            return response()->json(['counts' => count($data), 'auto_complete' => $data], 200);
-        } else {
-            $data = ["listing" => $listing];
-            return response()->json($data, 200);
-        }
+
+        $data = ["listing" => $listing];
+        return response()->json($data, 200);
     }
 
 
