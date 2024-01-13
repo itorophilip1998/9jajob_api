@@ -14,39 +14,31 @@ use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
-    public function index()
-    {
-        $g_setting = GeneralSetting::where('id', 1)->first();
-        $contact_data = PageContactItem::where('id', 1)->first();
-        return view('front.contact', compact('contact_data', 'g_setting'));
-    }
+
 
     public function send_email(Request $request)
-    {
+    { 
+        try {
+            $request->validate([
+                'name' => 'nullable',
+                'email' => 'required|email',
+                'message' => 'required',
+                'phone' => 'nullable',
+            ]);
 
 
-
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'message' => 'required'
-        ]);
-
-
-        // Send Email
-        $email_template_data = EmailTemplate::where('id', 1)->first();
-        $subject = $email_template_data->et_subject;
-        $message = $email_template_data->et_content;
-
-        $message = str_replace('[[visitor_name]]', $request->name, $message);
-        $message = str_replace('[[visitor_email]]', $request->email, $message);
-        $message = str_replace('[[visitor_phone]]', $request->phone, $message);
-        $message = str_replace('[[visitor_message]]', $request->message, $message);
-
-        $admin_data = Admin::where('id', 1)->first();
-
-        Mail::to($admin_data->email)->send(new ContactPageMessage($subject, $message));
-
-        // return redirect()->back()->with('success', SUCCESS_CONTACT_MESSAGE);
+            // Send Email
+            $email_template_data = EmailTemplate::where('id', 1)->first();
+            $subject = $email_template_data->et_subject;
+            $message = $email_template_data->et_content;
+            $message = str_replace('[[visitor_name]]', $request->name, $message);
+            $message = str_replace('[[visitor_email]]', $request->email, $message);
+            $message = str_replace('[[visitor_phone]]', $request->phone, $message);
+            $message = str_replace('[[visitor_message]]', $request->message, $message);
+            Mail::to('itorophilip1998@gmail.com')->send(new ContactPageMessage($subject, $message));
+            return response()->json(['message' => 'success']);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 }

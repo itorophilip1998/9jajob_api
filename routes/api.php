@@ -17,6 +17,7 @@ use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\ListingCategoryController;
 use App\Http\Controllers\BoostingController;
 use App\Http\Controllers\ChatsController;
+use App\Http\Controllers\Front\ContactController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\SpamController;
@@ -155,4 +156,12 @@ Route::group([
 ], function ($router) {
     Route::get('/', [SpamController::class, 'index'])->middleware("auth:api");
     Route::post('/', [SpamController::class, 'create'])->middleware("auth:api");
+});
+
+// Spam
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'contact-us'
+], function ($router) {
+    Route::post('/', [ContactController::class, 'send_email']);
 });
