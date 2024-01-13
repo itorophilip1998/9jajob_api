@@ -75,6 +75,7 @@ Route::group([
 ], function ($router) {
     Route::get('/', [BookingController::class, 'index'])->middleware("auth:api");
     Route::post('/', [BookingController::class, 'book'])->middleware("auth:api");
+    Route::post('/update-status', [BookingController::class, 'updateStatus'])->middleware("auth:api");
 });
 
 // Verification

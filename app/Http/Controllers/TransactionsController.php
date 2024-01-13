@@ -45,7 +45,8 @@ class TransactionsController extends Controller
             [
                 'message' =>
                 $transaction['description'],
-                'user_id' => auth()->user()->id
+                'user_id' => auth()->user()->id,
+                'title' => 'Transaction'
             ]
         );
         try {

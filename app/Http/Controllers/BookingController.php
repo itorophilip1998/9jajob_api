@@ -6,6 +6,9 @@ use App\Models\Booking;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
+use App\Models\Listing;
+use App\Models\Notification;
+
 
 class BookingController extends Controller
 {
@@ -27,6 +30,20 @@ class BookingController extends Controller
 
         ], 200);
     }
+    public function updateStatus()
+    {
+
+
+        $bookings = Booking::find(request()->booking_id)->update([
+            'status' => request()->status
+        ]); //correct
+
+        return response()->json([
+            'message' => 'Success',
+            'bookings' => $bookings,
+
+        ], 200);
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -43,7 +60,17 @@ class BookingController extends Controller
         }
         $req = request()->all();
         $req['user_id'] = auth()->user()->id;
-        Booking::create($req);
+        $booking = Booking::create($req);
+        $listing_user_id = Listing::find('listing_id');
+
+        Notification::create(
+            [
+                'message' => "Your just Book",
+                'user_id' => $listing_user_id ? $listing_user_id->pluck('user_id') : 0,
+                'title' => 'Booking',
+                'booking_id' => $booking->id
+            ]
+        );
         return response()->json(['message' => 'Success!!'], 200);
     }
 }

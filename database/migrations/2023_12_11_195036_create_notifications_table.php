@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->longText('message');
+            $table->string('title');
             $table->enum('status', ['read', 'unread'])->default('unread');
+            $table->foreignId("booking_id")->nullable();
             $table->timestamps();
         });
     }

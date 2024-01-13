@@ -13,8 +13,7 @@ class Notification extends Model
         'user_id',
         'message',
         'status',
-        'title',
-        'type', //booking
+        'title', 
         'booking_id',
     ];
 }

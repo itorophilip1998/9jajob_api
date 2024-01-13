@@ -114,7 +114,8 @@ class VerificationController extends Controller
         Notification::create(
             [
                 'message' => $transaction['description'],
-                'user_id' => auth()->user()->id
+                'user_id' => auth()->user()->id,
+                'title' => 'Verification'
             ]
         );
         return response()->json(['message' => 'Verification In Progress!!!'], 200);

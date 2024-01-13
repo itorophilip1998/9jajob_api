@@ -64,20 +64,7 @@ class ChatsController extends Controller
 
         $req['photo'] = json_encode($photos);
         Chats::create($req);
-        $friend = User::where(['id' => request()->friend_id])->first();
-        $user = User::where(['id' => $req['user_id']])->first();
-        Notification::create(
-            [
-                'message' => 'Chats from ' . $friend->name,
-                'user_id' => $user->id
-            ]
-        );
-        Notification::create(
-            [
-                'message' => 'Chats from ' . $user->name,
-                'user_id' => $friend->id
-            ]
-        );
+       
         return response()->json(['message' => "Successfully initiated Chat!!"], 200);
     }
 
