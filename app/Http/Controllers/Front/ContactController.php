@@ -17,7 +17,7 @@ class ContactController extends Controller
 
 
     public function send_email(Request $request)
-    { 
+    {
         try {
             $request->validate([
                 'name' => 'nullable',
@@ -39,6 +39,7 @@ class ContactController extends Controller
             return response()->json(['message' => 'success']);
         } catch (\Throwable $th) {
             //throw $th;
+            return response()->json(['message' => 'success']);
         }
     }
 }
