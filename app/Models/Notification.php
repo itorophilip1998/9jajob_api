@@ -13,7 +13,15 @@ class Notification extends Model
         'user_id',
         'message',
         'status',
-        'title', 
+        'title',
         'booking_id',
     ];
+    protected $with = [
+        'booking',
+    ];
+
+    public function booking()
+    {
+        return $this->belongsTo(Booking::class,'booking_id');
+    }
 }

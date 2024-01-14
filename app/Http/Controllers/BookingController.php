@@ -61,12 +61,12 @@ class BookingController extends Controller
         $req = request()->all();
         $req['user_id'] = auth()->user()->id;
         $booking = Booking::create($req);
-        $listing_user_id = Listing::find('listing_id');
+        $listing_user_id = Listing::find(request()->listing_id);
 
-        Notification::create(
+          Notification::create(
             [
                 'message' => "Your just Book",
-                'user_id' => $listing_user_id ? $listing_user_id->pluck('user_id') : 0,
+                'user_id' => $listing_user_id ? $listing_user_id->user_id : 0,
                 'title' => 'Booking',
                 'booking_id' => $booking->id
             ]
