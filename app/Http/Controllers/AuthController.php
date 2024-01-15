@@ -11,12 +11,14 @@ use Illuminate\Support\Str;
 use App\Models\Notification;
 // use App\Http\Controllers\AuthController;
 use App\Models\Transactions;
+use App\Http\services\Upload;
 use App\Models\EmailTemplate;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 
+use Illuminate\Support\Facades\Mail;
 use function PHPUnit\Framework\isEmpty;
+use Illuminate\Support\Facades\Storage;
 use App\Mail\RegistrationEmailToCustomer;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\ResetPasswordMessageToCustomer;
@@ -54,7 +56,7 @@ class AuthController extends Controller
         $data['password'] = Hash::make(request()->password);
         $data['token'] = $token;
         $data['status'] = 'active';
-         User::create($data);
+        User::create($data);
 
 
         // Send Email
@@ -98,8 +100,8 @@ class AuthController extends Controller
             $data['name'] = $data['name'];
         }
         if (request()->hasFile('photo')) {
-            $photo = request()->file('photo')->getClientOriginalName();
-            request()->file('photo')->move(public_path('uploads/user_photos'), $photo);
+            $item = request()->file('photo');
+            $photo =  (new Upload)->image($item, 'uploads/user_photos/');
             $data['photo'] = $photo;
         }
 
@@ -129,6 +131,7 @@ class AuthController extends Controller
      */
     public function authUser()
     {
+
         return response()->json(auth()->user());
     }
 

@@ -10,6 +10,7 @@ use App\Models\ListingLocation;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Listing extends Model
@@ -60,7 +61,9 @@ class Listing extends Model
     {
         $attributes = parent::toArray();
         // Add the 'user_photo' attribute to the array
-        $attributes['listing_featured_photo'] =  URL::to("/uploads/listing_featured_photos") . "/" . $this->listing_featured_photo;
+        $url = Storage::disk('do_spaces')->url("/uploads/listing_featured_photos" . "/" . $this->listing_featured_photo);
+
+        $attributes['listing_featured_photo'] = $url ?? null;
         $ratings = $this->reviews->pluck('rating')->toArray();
         $count = count($ratings);
         $sum = array_sum($ratings);
@@ -118,6 +121,6 @@ class Listing extends Model
     {
         return $this->hasOne(Verification::class, 'listing_id')->select('id', 'status', 'listing_id');
     }
-    
+
 
 }

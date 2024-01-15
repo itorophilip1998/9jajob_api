@@ -6,6 +6,7 @@ use App\Models\Spam;
 use App\Models\User;
 use App\Models\Chats;
 use App\Models\Notification;
+use App\Http\services\Upload;
 use App\Http\Requests\StoreChatsRequest;
 use App\Http\Requests\UpdateChatsRequest;
 use Illuminate\Support\Facades\Validator;
@@ -56,15 +57,14 @@ class ChatsController extends Controller
             request()->photo
         )) {
             foreach (request()->photo as $item) {
-                $photo = $item->getClientOriginalName();
-                $item->move(public_path('uploads/chats'), $photo);
+                $photo =  (new Upload)->image($item, 'uploads/chats/');
                 $photos[] = $photo;
             }
         }
 
         $req['photo'] = json_encode($photos);
         Chats::create($req);
-       
+
         return response()->json(['message' => "Successfully initiated Chat!!"], 200);
     }
 

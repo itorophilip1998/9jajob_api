@@ -12,7 +12,8 @@ class Review extends Model
         'agent_id',
         'agent_type',
         'rating',
-        'review'
+        'review',
+        'booking_id'
     ];
     protected $with = [
         'user',
