@@ -17,7 +17,7 @@ class Booking extends Model
         'date',
         'time',
         'status',
-        
+
     ];
     protected $with = [
         'listings'
@@ -30,7 +30,7 @@ class Booking extends Model
 
     public function listings()
     {
-        return $this->belongsTo(Listing::class, 'listing_id')->withOnly(['verified'])
-            ->select(['id', 'listing_name', 'listing_address', 'listing_phone']);
+        return $this->belongsTo(Listing::class, 'listing_id')->withOnly(['verified', 'user'])
+            ->select(['id', 'listing_name', 'listing_address', 'listing_phone','user_id']);
     }
 }

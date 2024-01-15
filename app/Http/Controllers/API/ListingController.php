@@ -87,7 +87,7 @@ class ListingController extends Controller
             $query->whereHas('rListingCategory', function ($q) use ($listing_category_name) {
                 $q->where('listing_category_name', 'LIKE', '%' . $listing_category_name);
             });
-            return $query->paginate(10);
+            // return $query->paginate(10);
         }
         // Execute the query
         $item2 = [
