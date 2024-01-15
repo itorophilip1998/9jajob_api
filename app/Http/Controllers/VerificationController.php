@@ -47,29 +47,29 @@ class VerificationController extends Controller
         $req = request()->all();
 
         if (request()->hasFile('id_card_front')) {
-            $id_card_front = request()->file('id_card_front')->getClientOriginalName();
-            request()->file('id_card_front')->move(public_path('uploads/verifications'), $id_card_front);
+            $item = request()->file('id_card_front');
+            $id_card_front =  (new Upload)->image($item, 'uploads/verifications/');
             $req['id_card_front'] = $id_card_front;
         }
         if (request()->hasFile('id_card_back')) {
-            $id_card_back = request()->file('id_card_back')->getClientOriginalName();
-            request()->file('id_card_back')->move(public_path('uploads/verifications'), $id_card_back);
+            $item = request()->file('id_card_back');
+            $id_card_back =  (new Upload)->image($item, 'uploads/verifications/');
             $req['id_card_back'] = $id_card_back;
         }
         if (request()->hasFile('proof_address')) {
-            $proof_address = request()->file('proof_address')->getClientOriginalName();
-            request()->file('proof_address')->move(public_path('uploads/verifications'), $proof_address);
+            $item =   request()->file('proof_address');
+            $proof_address =  (new Upload)->document($item, 'uploads/verifications/');
             $req['proof_address'] = $proof_address;
         }
         if (request()->hasFile('cac_document')) {
             $item = request()->file('cac_document');
-            $cac_document =  (new Upload)->image($item, 'uploads/verifications');
+            $cac_document =  (new Upload)->document($item, 'uploads/verifications/');
             $req['cac_document'] = $cac_document;
         }
 
         if (request()->hasFile('skill_certificate')) {
-            $skill_certificate = request()->file('skill_certificate')->getClientOriginalName();
-            request()->file('skill_certificate')->move(public_path('uploads/verifications'), $skill_certificate);
+            $item = request()->file('skill_certificate');
+            $skill_certificate =  (new Upload)->document($item, 'uploads/verifications/');
             $req['skill_certificate'] = $skill_certificate;
         }
         if (is_array(request()->services)) {
