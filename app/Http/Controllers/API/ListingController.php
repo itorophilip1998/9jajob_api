@@ -176,6 +176,7 @@ class ListingController extends Controller
         if (request()->hasFile('listing_featured_photo')) {
             $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
             $data['listing_featured_photo'] = $final_name;
+           
         }
         $data['listing_slug'] = Str::slug(request()->listing_name);
         $data['user_id'] = $user_data->id;

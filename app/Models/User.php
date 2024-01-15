@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use App\Models\PackagePurchase;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -44,7 +45,7 @@ class User extends Authenticatable implements JWTSubject
         'banner',
         'password',
         'token',
-        'status', 
+        'status',
         'expo_token',
         'address_longitude',
         'address_latitude',
@@ -102,7 +103,8 @@ class User extends Authenticatable implements JWTSubject
     {
         $attributes = parent::toArray();
         // Add the 'user_photo' attribute to the array
-        $attributes['photo'] = $this->photo ? URL::to("/uploads/user_photos") . "/" . $this->photo :  null;
+        $url = Storage::disk('do_spaces')->url("/uploads/user_photos" . "/" . $this->photo);
+        $attributes['photo'] = $this->photo ?  $url :  null;
         $attributes['ref_code'] = substr(trim($this->name), 0, 5) . '-' . $this->id;
         $attributes['listing_creation_amount'] = 1000;
         return $attributes;
