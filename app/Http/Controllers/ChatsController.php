@@ -57,7 +57,7 @@ class ChatsController extends Controller
             request()->photo
         )) {
             foreach (request()->photo as $item) {
-                $photo =  (new Upload)->image($item, 'uploads/chats');
+                $photo =  (new Upload)->image($item, 'uploads/chats/');
                 $photos[] = $photo;
             }
         }

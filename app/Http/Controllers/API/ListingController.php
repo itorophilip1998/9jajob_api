@@ -174,9 +174,8 @@ class ListingController extends Controller
 
         $data = request()->all();
         if (request()->hasFile('listing_featured_photo')) {
-            $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
+            $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos/');
             $data['listing_featured_photo'] = $final_name;
-           
         }
         $data['listing_slug'] = Str::slug(request()->listing_name);
         $data['user_id'] = $user_data->id;
@@ -217,7 +216,7 @@ class ListingController extends Controller
         // Photo
         if (is_array(request()->photo_list) || isset(request()->photo_list)) {
             foreach (request()->photo_list as $item) {
-                $final_photo_name =  (new Upload)->image($item, 'uploads/listing_photos');
+                $final_photo_name =  (new Upload)->image($item, 'uploads/listing_photos/');
                 ListingPhoto::create([
                     'listing_id' => $listing->id,
                     'photo' => $final_photo_name,
@@ -225,22 +224,20 @@ class ListingController extends Controller
             }
         }
 
-
-        // Video
+        //Video
         if (is_array(request()->video) || isset(request()->video)) {
-
-            // foreach (request()->photo_list as $item) {
-            //     $main_file_ext = $item->extension();
-            //     $rand_value = md5(mt_rand(11111111, 99999999));
-            //     $youtube_video_id = $rand_value . '.' . 'mp4';
-            //     $item->move(public_path('uploads/listing_video'), $youtube_video_id);
-            //     $obj = new ListingVideo;
-            //     $obj->listing_id = $listing->id;
-            //     $obj->is_mobile_video = true;
-            //     $obj->youtube_video_id = $youtube_video_id;
-            //     $obj->save();
-            // }
+            foreach (request()->video as $item) {
+                $videoName =  (new Upload)->video($item, 'uploads/listing_videos/');
+                ListingVideo::create([
+                    'listing_id' => $listing->id,
+                    'is_mobile_video' => true,
+                    'youtube_video_id' => $videoName,
+                ]);
+            }
         }
+
+
+
 
 
 
@@ -287,7 +284,8 @@ class ListingController extends Controller
             [
                 'message' =>
                 $transaction['description'],
-                'user_id' => auth()->user()->id
+                'user_id' => auth()->user()->id,
+                'title'=>"Listing "
             ]
         );
         // sendmail
