@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\API;
 
 
@@ -28,7 +29,9 @@ class ReviewController extends Controller
             'review' => 'required'
         ]);
         $isRated = Review::where(['agent_id' => $user_detail->id, 'listing_id' => $request->listing_id])->first();
-        if ($isRated) return response()->json(['message' => 'User Already Rated'], 200);
+        if ($isRated) return response()->json(['message' => 'Listing Already Rated'], 200);
+
+      
 
         $obj = new Review;
         $obj->listing_id = $request->listing_id;
@@ -36,10 +39,10 @@ class ReviewController extends Controller
         $obj->agent_type = 'Customer';
         $obj->rating = $request->rating;
         $obj->review = $request->review;
+        $obj->booking_id = $request->booking_id;
         $obj->save();
 
         return  response()->json(['message' => "Success"], 200);
-
     }
 
 
