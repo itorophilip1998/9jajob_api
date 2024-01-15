@@ -31,7 +31,7 @@ class ReviewController extends Controller
         $isRated = Review::where(['agent_id' => $user_detail->id, 'listing_id' => $request->listing_id])->first();
         if ($isRated) return response()->json(['message' => 'Listing Already Rated'], 200);
 
-      
+
 
         $obj = new Review;
         $obj->listing_id = $request->listing_id;
@@ -44,12 +44,7 @@ class ReviewController extends Controller
 
         return  response()->json(['message' => "Success"], 200);
     }
-
-
-
-
-
-
+ 
     public function delete($id)
     {
 
