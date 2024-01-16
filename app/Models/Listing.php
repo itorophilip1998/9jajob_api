@@ -63,7 +63,7 @@ class Listing extends Model
         // Add the 'user_photo' attribute to the array
         $url = Storage::disk('do_spaces')->url("/uploads/listing_featured_photos" . "/" . $this->listing_featured_photo);
 
-        $attributes['listing_featured_photo'] = $url ?? null;
+        $attributes['listing_featured_photo'] = $this->listing_featured_photo ? $url : null;
         $ratings = $this->reviews->pluck('rating')->toArray();
         $count = count($ratings);
         $sum = array_sum($ratings);
@@ -121,6 +121,4 @@ class Listing extends Model
     {
         return $this->hasOne(Verification::class, 'listing_id')->select('id', 'status', 'listing_id');
     }
-
-
 }
