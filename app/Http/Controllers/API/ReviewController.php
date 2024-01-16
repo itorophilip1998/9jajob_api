@@ -25,9 +25,7 @@ class ReviewController extends Controller
     public function create(Request $request)
     {
         $user_detail = auth()->user();
-        request()->validate([
-            'review' => 'required'
-        ]);
+         
         $isRated = Review::where(['agent_id' => $user_detail->id, 'listing_id' => $request->listing_id])->first();
         if ($isRated) return response()->json(['message' => 'Listing Already Rated'], 200);
 
@@ -44,7 +42,7 @@ class ReviewController extends Controller
 
         return  response()->json(['message' => "Success"], 200);
     }
- 
+
     public function delete($id)
     {
 
