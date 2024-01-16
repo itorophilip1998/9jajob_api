@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('reviews', function (Blueprint $table) {
-            if (!Schema::hasColumn('reviews', 'booking_id')) {
-                $table->bigInteger('booking_id')->unsigned()->nullable();
-            }
+        Schema::table('bookings', function (Blueprint $table) {
+            $table->enum('status', ['pending', 'completed', 'cancelled', 'accepted', 'declined'])->default("pending")->change();
 
         });
     }
@@ -24,8 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('reviews', function (Blueprint $table) {
-            $table->dropColumn('booking_id');
+        Schema::table('booking', function (Blueprint $table) {
+            $table->dropColumn('status');
+
         });
     }
 };
