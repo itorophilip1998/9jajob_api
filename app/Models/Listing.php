@@ -47,7 +47,8 @@ class Listing extends Model
     ];
     protected $with = [
         'rListingCategory',
-        'rListingLocation', 'user',
+        'rListingLocation',
+         'user',
         'amenities',
         'listingAdditionalFeatures',
         'listingSocialItem',
@@ -55,6 +56,7 @@ class Listing extends Model
         'listingsVideos',
         'verified',
         'boosting',
+        'listing_subscription'
     ];
 
     public function toArray()
@@ -120,5 +122,9 @@ class Listing extends Model
     public function verified()
     {
         return $this->hasOne(Verification::class, 'listing_id')->select('id', 'status', 'listing_id');
+    }
+    public function  listing_subscription()
+    {
+        return $this->hasOne(ListingSubscription::class, 'listing_id');
     }
 }

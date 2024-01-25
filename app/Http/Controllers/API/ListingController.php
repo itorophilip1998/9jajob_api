@@ -21,6 +21,7 @@ use App\Models\ListingLocation;
 use Illuminate\Validation\Rule;
 use App\Models\ListingSocialItem;
 use Illuminate\Support\Facades\DB;
+use App\Models\ListingSubscription;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -255,6 +256,15 @@ class ListingController extends Controller
                 );
             }
         }
+        ListingSubscription::create(
+            [
+                "listing_id" => $listing->id,
+                "start_date" => request()->start_date,
+                "end_date" => request()->end_date,
+                "amount" => request()->listing_creation_amount,
+            ]
+        );
+
         // debit from wallate
         $ref_number = Str::random(10);
         $transaction = [
@@ -285,7 +295,7 @@ class ListingController extends Controller
                 'message' =>
                 $transaction['description'],
                 'user_id' => auth()->user()->id,
-                'title'=>"Listing "
+                'title' => "Listing "
             ]
         );
         // sendmail
