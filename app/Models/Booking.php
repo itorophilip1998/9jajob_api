@@ -21,12 +21,13 @@ class Booking extends Model
 
     ];
     protected $with = [
-        'listings'
+        'listings',
+        'user'
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id')->select(['id', 'name', 'email', 'photo']);
+        return $this->belongsTo(User::class, 'user_id')->select(['id', 'name', 'email', 'photo'])->without("package");
     }
 
     public function listings()
