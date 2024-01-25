@@ -47,7 +47,8 @@ class Listing extends Model
     ];
     protected $with = [
         'rListingCategory',
-        'rListingLocation', 'user',
+        'rListingLocation',
+         'user',
         'amenities',
         'listingAdditionalFeatures',
         'listingSocialItem',

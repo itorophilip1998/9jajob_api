@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('listing_subscriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('listing_id');
-            $table->date('start_time');
-            $table->date('end_time');
+            $table->date('start_date');
+            $table->date('end_date');
             $table->integer('amount');
-            $table->enum('status', ['active', 'inactive'])->active();
+            $table->enum('status', ['active', 'inactive'])->default("active");
             $table->timestamps();
         });
     }
