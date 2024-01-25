@@ -11,9 +11,9 @@ class ListingSubscription extends Model
 
  protected $fillable = [
         'listing_id',
-        'start_time',
-        'end_time',
+        'start_date',
+        'end_date',
         'amount',
-        'status', 
+        'status',
     ];
 }
