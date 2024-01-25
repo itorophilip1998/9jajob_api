@@ -48,12 +48,12 @@ class ListingController extends Controller
         if ($is_auto_complete == 'true') {
             $listing_name = Listing::orderBy('listing_name')->select('listing_name')
                 ->withOut(['rListingLocation', 'rListingCategory'])->get()->map(function ($item) {
-                    $listing_name = $item['listing_name'] . " (Business)";
+                    $listing_name = $item['listing_name'];
                     $item = "$listing_name";
                     return $item;
                 });
             $listing_category_name = ListingCategory::orderBy('listing_category_name')->select('listing_category_name', 'id')->get()->map(function ($item) {
-                $item = $item['listing_category_name'] . " (Category)";
+                $item = $item['listing_category_name'];
                 return $item;
             });
             return response()->json(['auto_complete' => [
