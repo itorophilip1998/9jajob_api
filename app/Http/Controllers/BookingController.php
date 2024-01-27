@@ -31,9 +31,7 @@ class BookingController extends Controller
         ], 200);
     }
     public function updateStatus()
-    {
-
-
+    { 
         $bookings = Booking::find(request()->booking_id)->update(
             request()->all()
         ); //correct
