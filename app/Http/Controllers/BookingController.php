@@ -31,12 +31,10 @@ class BookingController extends Controller
         ], 200);
     }
     public function updateStatus()
-    {
-
-
-        $bookings = Booking::find(request()->booking_id)->update([
-            'status' => request()->status
-        ]); //correct
+    { 
+        $bookings = Booking::find(request()->booking_id)->update(
+            request()->all()
+        ); //correct
 
         return response()->json([
             'message' => 'Success',
@@ -63,7 +61,7 @@ class BookingController extends Controller
         $booking = Booking::create($req);
         $listing_user_id = Listing::find(request()->listing_id);
 
-          Notification::create(
+        Notification::create(
             [
                 'message' => "Your just Book",
                 'user_id' => $listing_user_id ? $listing_user_id->user_id : 0,
