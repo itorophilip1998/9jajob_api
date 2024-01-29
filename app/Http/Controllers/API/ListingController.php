@@ -316,7 +316,26 @@ class ListingController extends Controller
     }
 
 
+    public function renewListing()
+    {
+        $listing_creation_amount = request()->listing_creation_amount;
+        // check balance
+        $balance = (new Balance)->check($listing_creation_amount);
+        if ($balance < $listing_creation_amount)
+            return response()->json(['error' => 'Insufficient balance'], 422);
 
+        $oldListing=ListingSubscription::where('listing_id',request()->listing_id);
+        $oldListing && $oldListing->update(['status' => 'inactive']);
+        $renew = ListingSubscription::create(
+            [
+                "listing_id" => request()->listing_id,
+                "start_date" => request()->start_date,
+                "end_date" => request()->end_date,
+                "amount" => request()->listing_creation_amount,
+            ]
+        );
+        return response()->json(['message' => "Listing renewed successfully!!",  "listing" => $renew], 200);
+    }
 
     public function edit($id)
     {

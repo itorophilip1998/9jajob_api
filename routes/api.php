@@ -54,6 +54,7 @@ Route::group([
 });
 
 Route::post('/add-listings', [ListingController::class, 'AddListings'])->middleware("auth:api");
+Route::post('/renew-listings', [ListingController::class, 'renewListing'])->middleware("auth:api");
 Route::post('/update-listings/{id}', [ListingController::class, 'update'])->middleware("auth:api");
 Route::delete('/delete-listings/{id}', [ListingController::class, 'destroy'])->middleware("auth:api");
 
