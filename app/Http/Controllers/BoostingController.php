@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Listing;
 use App\Models\Boosting;
+use App\Services\Notify;
 use Illuminate\Support\Str;
 use App\Models\Notification;
 use App\Models\Transactions;
@@ -41,6 +43,9 @@ class BoostingController extends Controller
 
 
         $isVerified = Boosting::where(['listing_id' => request()->listing_id])->latest()->first();
+        $isMyListing = Listing::find(request()->listing_id);
+
+        if ($isMyListing->user_id != auth()->user()->id) return response()->json(['message' => 'This is not your Boosting!'], 200);
 
         if (isset($isVerified) && $isVerified->status == 'active') return response()->json(['message' => 'Boosting In Progress!'], 200);
         else if (isset($isVerified) &&  $isVerified->status != 'in-active') return response()->json(['message' => 'Boosting Completed Already!'], 200);
@@ -56,7 +61,7 @@ class BoostingController extends Controller
             'ref_number' => $ref_number,
             'trans_id' => $ref_number,
             'amount' => request()->amount,
-            'description' => "Boosting from " . auth()->user()->name,
+            'description' => "Congratulation!!!, You Just Boost your Business($isMyListing->listing_name), this means your business will be enlisted in the top listings of 9jajob",
             'purpose' => 'boost', //verification ,packages, top-up, withdrawal,referrals, boost]
 
         ];
@@ -71,16 +76,19 @@ class BoostingController extends Controller
             "status" => $transaction["status"],
             "ref_number" => $transaction["ref_number"],
             "amount" => $transaction["amount"],
+            "description"=>$transaction['description'],
         ];
 
-        Notification::create(
+        $notification =
             [
                 'message' =>
                 $transaction['description'],
                 'user_id' => auth()->user()->id,
                 'title' => 'Boosting'
-            ]
-        );
+            ];
+
+
+        (new Notify)->trigger($notification);
         try {
 
             Mail::send('mail.invioce',  ['item' => $item], function ($message) {

@@ -5,10 +5,12 @@ namespace App\Http\services;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Referral;
+use App\Services\Notify;
 use Illuminate\Support\Str;
 use App\Models\Notification;
 use App\Models\Transactions;
 use Illuminate\Support\Facades\Mail;
+
 
 class ReferralSystem
 {
@@ -56,14 +58,18 @@ class ReferralSystem
                 "status" => $transaction["status"],
                 "ref_number" => $transaction["ref_number"],
                 "amount" => $transaction["amount"],
+                'description' => 'You Referred ' . auth()->user()->name . ' And earn ' . $ref["amount_earn"],
+
             ];
 
-            Notification::create(
-                [
-                    'message' => 'You Referred ' . auth()->user()->name . ' And earn ' . $item['amount'],
-                    'user_id' => $newCode
-                ]
-            );
+
+            $notification =
+            [
+                'message' => 'You Referred ' . auth()->user()->name . ' And earn ' . $ref["amount_earn"],
+                'user_id' => auth()->user()->id,
+                'title' => "Listing "
+            ];
+            (new Notify)->trigger($notification);
             try {
                 Mail::send('mail.invioce', ['item' => $item], function ($message) use ($referrer_name) {
                     $message->to($referrer_name->email);
