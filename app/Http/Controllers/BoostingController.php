@@ -76,7 +76,7 @@ class BoostingController extends Controller
             "status" => $transaction["status"],
             "ref_number" => $transaction["ref_number"],
             "amount" => $transaction["amount"],
-            "description"=>$transaction['description'],
+            "description" => $transaction['description'],
         ];
 
         $notification =
@@ -98,6 +98,6 @@ class BoostingController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
         }
-        return response()->json(['message' => 'Booting In Progress!!!'], 200);
+        return response()->json(['message' => 'Booting Initiated!!!'], 200);
     }
 }
