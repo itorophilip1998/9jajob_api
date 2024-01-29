@@ -70,7 +70,7 @@ class ListingController extends Controller
         $query = Listing::query();
 
         // update all listing status
-        $today = now();
+        // $today = now();
 
 
         //  $query->whereHas('listing_subscription', function ($q) use ($today) {
@@ -78,7 +78,7 @@ class ListingController extends Controller
         // });
 
 
-         $query->whereHas('listing_subscription', function ($q) use ($today) {
+         $query->whereHas('listing_subscription', function ($q){
             $q->where('status', 'active');
         });
 
