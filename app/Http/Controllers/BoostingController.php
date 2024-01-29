@@ -45,7 +45,7 @@ class BoostingController extends Controller
         $isVerified = Boosting::where(['listing_id' => request()->listing_id])->latest()->first();
         $isMyListing = Listing::find(request()->listing_id);
 
-        if ($isMyListing->user_id != auth()->user()->id) return response()->json(['message' => 'This is not your Boosting!'], 200);
+        if (isset($isMyListing) &&  $isMyListing->user_id != auth()->user()->id) return response()->json(['message' => 'This is not your Boosting!'], 200);
 
         if (isset($isVerified) && $isVerified->status == 'active') return response()->json(['message' => 'Boosting In Progress!'], 200);
         else if (isset($isVerified) &&  $isVerified->status != 'in-active') return response()->json(['message' => 'Boosting Completed Already!'], 200);
