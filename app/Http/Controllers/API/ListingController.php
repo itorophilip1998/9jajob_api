@@ -63,8 +63,27 @@ class ListingController extends Controller
             ]], 200);
         }
 
+
+
+
         // Start with a base query
         $query = Listing::query();
+
+        // update all listing status
+        // $today = now();
+
+
+        //  $query->whereHas('listing_subscription', function ($q) use ($today) {
+        //     $q->whereDate('end_date', 'active');
+        // });
+
+
+         $query->whereHas('listing_subscription', function ($q) use ($today) {
+            $q->where('status', 'active');
+        });
+
+
+
 
         // Add conditions only for parameters with values
         if ($listing_category_id !== null) {
@@ -324,7 +343,7 @@ class ListingController extends Controller
         if ($balance < $listing_creation_amount)
             return response()->json(['error' => 'Insufficient balance'], 422);
 
-        $oldListing=ListingSubscription::where('listing_id',request()->listing_id);
+        $oldListing = ListingSubscription::where('listing_id', request()->listing_id);
         $oldListing && $oldListing->update(['status' => 'inactive']);
         $renew = ListingSubscription::create(
             [
