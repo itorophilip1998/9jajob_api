@@ -56,6 +56,8 @@ class ReferralSystem
                 "status" => $transaction["status"],
                 "ref_number" => $transaction["ref_number"],
                 "amount" => $transaction["amount"],
+                'description' => "referrals withdrawal from " . auth()->user()->name,
+
             ];
 
             Notification::create(
