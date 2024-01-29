@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Services\Notify;
 use App\Models\Notification;
 use App\Models\Transactions;
 use Illuminate\Support\Facades\Mail;
@@ -39,22 +40,25 @@ class TransactionsController extends Controller
             "status" => $transaction["status"],
             "ref_number" => $transaction["ref_number"],
             "amount" => $transaction["amount"],
+            'description' => "You just initiated a transaction for " . $transaction["purpose"]
         ];
 
-        Notification::create(
+        $notification =
             [
                 'message' =>
                 $transaction['description'],
                 'user_id' => auth()->user()->id,
                 'title' => 'Transaction'
-            ]
-        );
+            ];
+
+        (new Notify)->trigger($notification);
+
         try {
 
-        Mail::send('mail.invioce',  ['item' => $item], function ($message) {
-            $message->to(auth()->user()->email);
-            $message->subject('Invioce');
-        });
+            Mail::send('mail.invioce',  ['item' => $item], function ($message) {
+                $message->to(auth()->user()->email);
+                $message->subject('Invioce');
+            });
         } catch (\Throwable $th) {
             //throw $th;
         }
