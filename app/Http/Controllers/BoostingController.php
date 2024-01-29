@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Listing;
 use App\Models\Boosting;
+use App\Services\Notify;
 use Illuminate\Support\Str;
 use App\Models\Notification;
 use App\Models\Transactions;
@@ -41,9 +43,12 @@ class BoostingController extends Controller
 
 
         $isVerified = Boosting::where(['listing_id' => request()->listing_id])->latest()->first();
+        $isMyListing = Listing::find(request()->listing_id);
+    
+        if ($isMyListing->user_id != auth()->user()->id) return response()->json(['message' => 'This is not your Boosting!'], 200);
 
         if (isset($isVerified) && $isVerified->status == 'active') return response()->json(['message' => 'Boosting In Progress!'], 200);
-        else if (isset($isVerified) &&  $isVerified->status != 'in-active') return response()->json(['message' => 'Boosting Completed Already!'], 200);
+         else if (isset($isVerified) &&  $isVerified->status != 'in-active') return response()->json(['message' => 'Boosting Completed Already!'], 200);
         $req = request()->all();
         $req['status'] = 'active';
         Boosting::create($req);
@@ -73,14 +78,16 @@ class BoostingController extends Controller
             "amount" => $transaction["amount"],
         ];
 
-        Notification::create(
+        $notification =
             [
                 'message' =>
                 $transaction['description'],
                 'user_id' => auth()->user()->id,
                 'title' => 'Boosting'
-            ]
-        );
+            ];
+
+
+        (new Notify)->trigger($notification);
         try {
 
             Mail::send('mail.invioce',  ['item' => $item], function ($message) {
