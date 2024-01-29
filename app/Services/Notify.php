@@ -13,10 +13,10 @@ class Notify
 
         $notification = NotificationEvent::create(
             [
-                'message' => $data->message,
-                'user_id' => $data->user_id ?? 0,
-                'title' => $data->title,
-                'booking_id' => $data->booking_id ?? 0
+                'message' => $data['message'],
+                'user_id' => $data['user_id'] ?? 0,
+                'title' => $data['title'],
+                'booking_id' => $data['booking_id'] ?? 0
             ]
         );
 

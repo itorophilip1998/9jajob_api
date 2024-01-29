@@ -32,17 +32,33 @@ class BookingController extends Controller
     }
     public function updateStatus()
     {
+        $validator = Validator::make(request()->all(), [
+            'status' => 'required',
+            'booking_id' => 'required',
+        ]);
+        //Send failed response if request is not valid
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 422);
+        }
         $booking = Booking::find(request()->booking_id);
         $listing_user_id = Listing::find($booking->listing_id) ?? 0;
         $user = User::find($listing_user_id->user_id);
-
-        $notification = [
-            'message' => "You just book $user->name",
+        $authUser = auth()->user();
+        $status = request()->isModify ? 'modify' : request()->status;
+        $user1 = [
+            'message' => "You just $status the booking with $user->name",
+            'user_id' => $authUser->id ?? 0,
+            'title' => "Booking",
+            'booking_id' => $booking->id ?? 0
+        ];
+        $user2 = [
+            'message' => "Booking was $status by $authUser->name",
             'user_id' => $booking->user_id ?? 0,
             'title' => "Booking",
             'booking_id' => $booking->id ?? 0
         ];
-        (new Notify)->trigger($notification);
+        (new Notify)->trigger($user1);
+        (new Notify)->trigger($user2);
 
         $booking->update(
             request()->all()
@@ -73,13 +89,23 @@ class BookingController extends Controller
         $booking = Booking::create($req);
         $listing_user_id = Listing::find(request()->listing_id) ?? 0;
         $user = User::find($listing_user_id->user_id);
-        $notification = [
-            'message' => "You just book $user->name",
-            'user_id' => $user->id ?? 0,
+        $authUser = auth()->user();
+
+        $user1 = [
+            'message' => "You just book $user->name, you have option to cancel booking or modify the booking",
+            'user_id' => $authUser->id ?? 0,
             'title' => "Booking",
             'booking_id' => $booking->id ?? 0
         ];
-        (new Notify)->trigger($notification);
+        $user2 = [
+            'message' => "You where booked by $authUser->name, you have option to decline or accept the booking",
+            'user_id' =>  $user->id ?? 0,
+            'title' => "Booking",
+            'booking_id' => $booking->id ?? 0
+        ];
+
+        (new Notify)->trigger($user1);
+        (new Notify)->trigger($user2);
 
         return response()->json(['message' => 'Success!!'], 200);
     }

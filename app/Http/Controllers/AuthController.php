@@ -157,7 +157,6 @@ class AuthController extends Controller
         try {
             $user = User::find(auth()->user()->id);
             if ($user && $user->expo_token === request()->expo_token) {
-
                 $user->update(['expo_token' => request()->expo_token]);
             }
 
