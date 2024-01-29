@@ -11,7 +11,7 @@ class Notify
     public function trigger($data)
     {
 
-        NotificationEvent::create(
+        $notification = NotificationEvent::create(
             [
                 'message' => $data->message,
                 'user_id' => $data->user_id ?? 0,
@@ -22,13 +22,10 @@ class Notify
 
         $expoURL = 'https://exp.host/--/api/v2/push/send';
 
-        $response = Http::post($expoURL, [
-            'to' => $token,
-            'title' => $title,
-            'body' => $body,
+        return Http::post($expoURL, [
+            'to' => auth()->user()->expo_token,
+            'title' => $notification->title,
+            'body' => $notification->body,
         ]);
-
     }
-
-
 }
