@@ -70,15 +70,12 @@ class ListingController extends Controller
         $query = Listing::query();
 
         // update all listing status
-        // $today = now();
+        $today = now();
+        ListingSubscription::whereDate('end_date', '<', $today)
+            ->update(['status' => 'inactive']);
 
 
-        //  $query->whereHas('listing_subscription', function ($q) use ($today) {
-        //     $q->whereDate('end_date', 'active');
-        // });
-
-
-         $query->whereHas('listing_subscription', function ($q){
+        $query->whereHas('listing_subscription', function ($q) {
             $q->where('status', 'active');
         });
 
