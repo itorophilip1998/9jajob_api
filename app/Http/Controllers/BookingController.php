@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Booking;
+use App\Models\Listing;
+use App\Services\Notify;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
-use App\Models\Listing;
-use App\Models\Notification;
-
 
 class BookingController extends Controller
 {
@@ -27,18 +28,29 @@ class BookingController extends Controller
         return response()->json([
             'booked' => $booked,
             'bookings' => $bookings,
-
         ], 200);
     }
     public function updateStatus()
-    { 
-        $bookings = Booking::find(request()->booking_id)->update(
+    {
+        $booking = Booking::find(request()->booking_id);
+        $listing_user_id = Listing::find($booking->listing_id) ?? 0;
+        $user = User::find($listing_user_id->user_id);
+
+        $notification = [
+            'message' => "You just book $user->name",
+            'user_id' => $booking->user_id ?? 0,
+            'title' => "Booking",
+            'booking_id' => $booking->id ?? 0
+        ];
+        (new Notify)->trigger($notification);
+
+        $booking->update(
             request()->all()
         ); //correct
 
         return response()->json([
             'message' => 'Success',
-            'bookings' => $bookings,
+            'bookings' => $booking,
 
         ], 200);
     }
@@ -59,16 +71,16 @@ class BookingController extends Controller
         $req = request()->all();
         $req['user_id'] = auth()->user()->id;
         $booking = Booking::create($req);
-        $listing_user_id = Listing::find(request()->listing_id);
+        $listing_user_id = Listing::find(request()->listing_id) ?? 0;
+        $user = User::find($listing_user_id->user_id);
+        $notification = [
+            'message' => "You just book $user->name",
+            'user_id' => $user->id ?? 0,
+            'title' => "Booking",
+            'booking_id' => $booking->id ?? 0
+        ];
+        (new Notify)->trigger($notification);
 
-        Notification::create(
-            [
-                'message' => "Your just Book",
-                'user_id' => $listing_user_id ? $listing_user_id->user_id : 0,
-                'title' => 'Booking',
-                'booking_id' => $booking->id
-            ]
-        );
         return response()->json(['message' => 'Success!!'], 200);
     }
 }
