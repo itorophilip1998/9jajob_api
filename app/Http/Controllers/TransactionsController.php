@@ -46,7 +46,7 @@ class TransactionsController extends Controller
         $notification =
             [
                 'message' =>
-                $transaction['description'],
+                $item['description'],
                 'user_id' => auth()->user()->id,
                 'title' => 'Transaction'
             ];
