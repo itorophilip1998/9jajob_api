@@ -65,6 +65,7 @@ class ChatsController extends Controller
 
         $req['photo'] = json_encode($photos);
         $chats = Chats::create($req);
+        // friends
         $friends = [
             'user_id'  => $req["friend_id"],
             'friend_id' =>   $req['user_id'],
@@ -72,21 +73,21 @@ class ChatsController extends Controller
             'status' => 'unread',
         ];
         friends::updateOrCreate([
-            'user_id' => $chats->user_id,
-            'friend_id' => $chats->friend_id,
+            'user_id' => $req['friend_id'],
+            'friend_id' => $req['user_id'],
         ], $friends);
 
-
-        // $user = [
-        //     'user_id' => $chats->friend_id,
-        //     'friend_id' => $chats->user_id,
-        //     'chat_id' => $chats->id,
-        //     'status' => 'unread',
-        // ];
-        // friends::updateOrCreate([
-        //     'user_id' => $chats->friend_id,
-        //     'friend_id' => $chats->user_id,
-        // ], $user);
+        // users
+        $user = [
+            'user_id' =>   $req['user_id'],
+            'friend_id' => $req['friend_id'],
+            'chat_id' => $chats->id,
+            'status' => 'unread',
+        ];
+        friends::updateOrCreate([
+            'user_id' =>   $req['user_id'],
+            'friend_id' => $req['friend_id'],
+        ], $user);
         return response()->json(['message' => "Successfully initiated Chat!!", 'chats' => $chats], 200);
     }
 
