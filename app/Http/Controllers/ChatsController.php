@@ -65,7 +65,7 @@ class ChatsController extends Controller
 
         $req['photo'] = json_encode($photos);
         $chats = Chats::create($req);
-        // friends
+        // friends side
         $friends = [
             'user_id'  => $req["friend_id"],
             'friend_id' =>   $req['user_id'],
@@ -77,12 +77,12 @@ class ChatsController extends Controller
             'friend_id' => $req['user_id'],
         ], $friends);
 
-        // users
+        // users auth user side
         $user = [
             'user_id' =>   $req['user_id'],
             'friend_id' => $req['friend_id'],
             'chat_id' => $chats->id,
-            'status' => 'unread',
+            'status' => 'read',
         ];
         friends::updateOrCreate([
             'user_id' =>   $req['user_id'],
@@ -107,11 +107,9 @@ class ChatsController extends Controller
         if (request()->unread_all) {
             friends::where(['user_id' => auth()->user()->id])
                 ->update(['status' => 'read']);
-            Chats::where(['user_id' => auth()->user()->id])
-                ->update(['status' => 'read']);
+
         }
-        Chats::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
-            ->update(['status' => 'read']);
+        
         friends::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
             ->update(['status' => 'read']);
 

@@ -20,10 +20,16 @@ class friends extends Model
     ];
     public function friend()
     {
-        return $this->belongsTo(User::class, 'friend_id')->without(['package'])->select(['id', 'name', 'email', 'photo','phone']);
+        return $this->belongsTo(User::class, 'friend_id')->without(['package'])->select(['id', 'name', 'email', 'photo', 'phone']);
     }
     public function chat()
     {
-        return $this->belongsTo(Chats::class, 'chat_id')->without(['friend']);
+        return $this->belongsTo(Chats::class, 'chat_id')->without(['friend'])->select([
+            'user_id',
+            'friend_id',
+            'message',
+            'photo',
+            'id'
+        ]);
     }
 }
