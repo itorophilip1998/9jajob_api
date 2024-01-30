@@ -92,13 +92,13 @@ class BookingController extends Controller
         $authUser = auth()->user();
 
         $user1 = [
-            'message' => "You just book $user->name, you have option to cancel booking or modify the booking",
+            'message' => "You just book $user->name, you have an option to cancel booking or modify the booking",
             'user_id' => $authUser->id ?? 0,
             'title' => "Booking",
             'booking_id' => $booking->id ?? 0
         ];
         $user2 = [
-            'message' => "You where booked by $authUser->name, you have option to decline or accept the booking",
+            'message' => "You where booked by $authUser->name, you have an option to decline or accept the booking",
             'user_id' =>  $user->id ?? 0,
             'title' => "Booking",
             'booking_id' => $booking->id ?? 0
