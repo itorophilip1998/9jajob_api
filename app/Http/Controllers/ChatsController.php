@@ -70,13 +70,27 @@ class ChatsController extends Controller
             'friend_id' => $chats->friend_id,
             'chat_id' => $chats->id
         ];
-        friends::create($friends);
+        friends::updateOrCreate([
+            'user_id' => $chats->user_id,
+            'friend_id' => $chats->friend_id,
+        ], $friends);
+
+
+        $user = [
+            'user_id' => $chats->friend_id,
+            'friend_id' => $chats->user_id,
+            'chat_id' => $chats->id
+        ];
+        friends::updateOrCreate([
+            'user_id' => $chats->friend_id,
+            'friend_id' => $chats->user_id,
+        ], $user);
         return response()->json(['message' => "Successfully initiated Chat!!", 'chats' => $chats], 200);
     }
 
     public function userChats()
     {
-        $friends = friends::where('user_id', auth()->id)->latest()->get();
+        $friends = friends::where('user_id', auth()->user()->id)->latest()->get();
         return response()->json(['chatted_users' => $friends], 200);
     }
 
