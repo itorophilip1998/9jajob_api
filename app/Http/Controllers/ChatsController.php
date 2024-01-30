@@ -66,9 +66,10 @@ class ChatsController extends Controller
         $req['photo'] = json_encode($photos);
         $chats = Chats::create($req);
         $friends = [
-            'user_id' => $chats->user_id,
-            'friend_id' => $chats->friend_id,
-            'chat_id' => $chats->id
+            'user_id'  => $req["friend_id"],
+            'friend_id' =>   $req['user_id'],
+            'chat_id' => $chats->id,
+            'status' => 'unread',
         ];
         friends::updateOrCreate([
             'user_id' => $chats->user_id,
@@ -76,15 +77,16 @@ class ChatsController extends Controller
         ], $friends);
 
 
-        $user = [
-            'user_id' => $chats->friend_id,
-            'friend_id' => $chats->user_id,
-            'chat_id' => $chats->id
-        ];
-        friends::updateOrCreate([
-            'user_id' => $chats->friend_id,
-            'friend_id' => $chats->user_id,
-        ], $user);
+        // $user = [
+        //     'user_id' => $chats->friend_id,
+        //     'friend_id' => $chats->user_id,
+        //     'chat_id' => $chats->id,
+        //     'status' => 'unread',
+        // ];
+        // friends::updateOrCreate([
+        //     'user_id' => $chats->friend_id,
+        //     'friend_id' => $chats->user_id,
+        // ], $user);
         return response()->json(['message' => "Successfully initiated Chat!!", 'chats' => $chats], 200);
     }
 
@@ -101,16 +103,17 @@ class ChatsController extends Controller
 
     public function updateStatus()
     {
-        Chats::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
-            ->update(['status' => 'read']);
-        friends::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
-            ->update(['status' => 'read']);
-        if (request()->unread_all == true) {
+        if (request()->unread_all) {
             friends::where(['user_id' => auth()->user()->id])
                 ->update(['status' => 'read']);
             Chats::where(['user_id' => auth()->user()->id])
                 ->update(['status' => 'read']);
         }
+        Chats::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
+            ->update(['status' => 'read']);
+        friends::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
+            ->update(['status' => 'read']);
+
         return response()->json(['message' => 'Updated Successfully'], 200);
     }
 
