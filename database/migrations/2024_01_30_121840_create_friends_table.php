@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId("user_id");
             $table->foreignId("friend_id");
             $table->foreignId("chat_id");
+            $table->enum('status', ['read', 'unread', 'spam'])->default('unread');
 
             $table->timestamps();
         });
