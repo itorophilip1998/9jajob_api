@@ -90,7 +90,12 @@ class ChatsController extends Controller
 
     public function userChats()
     {
-        $friends = friends::where('user_id', auth()->user()->id)->latest()->get();
+        $friends = friends::where('user_id', auth()->user()->id)->orderBy('updated_at', 'Desc')->get()
+        ->map(function ($item) {
+            $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $item->friend_id])->without('friend')->first();
+            $item['spam'] = ($spam) ? $spam->status : null;
+            return $item;
+        });
         return response()->json(['chatted_users' => $friends], 200);
     }
 
