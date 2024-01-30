@@ -65,7 +65,12 @@ class ChatsController extends Controller
 
         $req['photo'] = json_encode($photos);
         $chats = Chats::create($req);
-
+        $friends = [
+            'user_id' => $chats->user_id,
+            'friend_id' => $chats->friend_id,
+            'chat_id' => $chats->id
+        ];
+        friends::create($friends);
         return response()->json(['message' => "Successfully initiated Chat!!", 'chats' => $chats], 200);
     }
 
