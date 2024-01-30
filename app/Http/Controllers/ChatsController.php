@@ -91,11 +91,11 @@ class ChatsController extends Controller
     public function userChats()
     {
         $friends = friends::where('user_id', auth()->user()->id)->orderBy('updated_at', 'Desc')->get()
-        ->map(function ($item) {
-            $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $item->friend_id])->without('friend')->first();
-            $item['spam'] = ($spam) ? $spam->status : null;
-            return $item;
-        });
+            ->map(function ($item) {
+                $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $item->friend_id])->without('friend')->first();
+                $item['spam'] = ($spam) ? $spam->status : null;
+                return $item;
+            });
         return response()->json(['chatted_users' => $friends], 200);
     }
 
@@ -107,6 +107,8 @@ class ChatsController extends Controller
             ->update(['status' => 'read']);
         if (request()->unread_all == true) {
             friends::where(['user_id' => auth()->user()->id])
+                ->update(['status' => 'read']);
+            Chats::where(['user_id' => auth()->user()->id])
                 ->update(['status' => 'read']);
         }
         return response()->json(['message' => 'Updated Successfully'], 200);
