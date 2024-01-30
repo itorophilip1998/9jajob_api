@@ -63,17 +63,19 @@ class ChatsController extends Controller
         }
 
         $req['photo'] = json_encode($photos);
-        Chats::create($req);
-
+        Chats::create($req); 
         return response()->json(['message' => "Successfully initiated Chat!!"], 200);
     }
 
     public function userChats()
     {
         $authUser = auth()->user();
-        $chattedUsers = User::select('id', 'name', 'email', 'phone', 'photo')->whereHas('chats', function ($query) use ($authUser) {
-            $query->where('user_id', $authUser->id)->latest();
-        })->withOnly('chats')->get()
+        $chattedUsers = User::where('id',"!=", $authUser->id)->select('id', 'name', 'email', 'phone', 'photo')
+        ->whereHas('chats', function ($query) use ($authUser) {
+            $query->where('user_id', $authUser->id)
+            ->orWhere('friend_id', $authUser->id);
+        })->withOnly('chats')
+        ->get()
             ->map(function ($item) {
                 $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $item->id])->without('friend')->first();
                 $item['spam'] = ($spam) ? $spam->status : null;
