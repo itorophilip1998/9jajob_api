@@ -9,6 +9,7 @@ use App\Models\Notification;
 use App\Http\services\Upload;
 use App\Http\Requests\StoreChatsRequest;
 use App\Http\Requests\UpdateChatsRequest;
+use App\Models\friends;
 use Illuminate\Support\Facades\Validator;
 
 class ChatsController extends Controller
@@ -70,69 +71,8 @@ class ChatsController extends Controller
 
     public function userChats()
     {
-        $authUser = auth()->user();
-
-        // User::where('id', "!=", $authUser->id)->select('id', 'name', 'email', 'phone', 'photo')
-        //     ->whereHas('chats', function ($query) use ($authUser) {
-        //         $query->where('user_id', $authUser->id)
-        //             ->orWhere('friend_id', $authUser->id);
-        //     })->withOnly('chats')
-        //     ->get()
-        //     ->map(function ($item) {
-        //         $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $item->id])->without('friend')->first();
-        //         $item['spam'] = ($spam) ? $spam->status : null;
-        //         return $item;
-        //     });
-
-        $collection = Chats::where('user_id', $authUser->id)
-            ->orWhere('friend_id', $authUser->id)
-            ->latest()
-            ->get();
-
-        // Assuming $chatMessages is an array
-        $chatMessages = collect($collection); 
-
-        // Normalize user_id and friend_id pairs
-        $normalized = $chatMessages->map(function ($message) {
-            return [
-                'user_id' => min($message['user_id'], $message['friend_id']),
-                'friend_id' => max($message['user_id'], $message['friend_id']),
-                'message' => $message['message'],
-                // Add other fields as needed
-            ];
-        });
-
-        // Group the collection by normalized user_id and friend_id pairs
-        $grouped = $normalized->groupBy(function ($item) {
-                return $item['user_id'] . '-' . $item['friend_id'];
-            });
-
-        // Get the latest message from each group along with the original chat messages
-        $latestMessages = $grouped->map(function ($group) use ($chatMessages) {
-            $latest = $group->sortByDesc('created_at')->first();
-
-            // Find the corresponding original chat message
-            $originalMessage = $chatMessages->where('user_id', $latest['user_id'])
-            ->where('friend_id', $latest['friend_id'])
-            ->first();
-
-            // Check if $originalMessage is not null before converting to an array
-            $originalMessageArray = $originalMessage ? $originalMessage->toArray() : [];
-
-            // Merge the latest message with the original chat message
-            return array_merge($originalMessageArray, $latest);
-        })->values();
-
-        // Resulting array of the latest messages with all data and relationships
-        $latestMessagesArray = $latestMessages->toArray();
-
-
-
-        $latestMessagesArray = $latestMessages->toArray();
-
-
-
-        return response()->json(['chatted_users' => $latestMessagesArray], 200);
+        $friends = friends::where('user_id', auth()->id)->latest()->get();
+        return response()->json(['chatted_users' => $friends], 200);
     }
 
     public function updateStatus()
