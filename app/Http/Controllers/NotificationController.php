@@ -31,7 +31,6 @@ class NotificationController extends Controller
     {
         $notification = Notification::where(['user_id' => auth()->user()->id, 'status' => 'unread'])->count();
         $messages = Chats::where(['friend_id' => auth()->user()->id, 'status' => 'unread'])
-      
         ->count();
         return response()->json(['notifications' =>  $notification, 'messages' =>  $messages], 200);
     }
