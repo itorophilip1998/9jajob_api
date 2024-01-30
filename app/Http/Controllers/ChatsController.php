@@ -52,7 +52,7 @@ class ChatsController extends Controller
 
 
         $req = request()->all();
-        $req['user_id'] = request()->user_id;
+        $req['user_id'] = request()->user_id ?? auth()->user()->id;
         $photos = [];
         if (is_array(request()->photo) || is_object(
             request()->photo
@@ -98,7 +98,12 @@ class ChatsController extends Controller
     {
         Chats::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
             ->update(['status' => 'read']);
-
+        friends::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
+            ->update(['status' => 'read']);
+        if (request()->unread_all == true) {
+            friends::where(['user_id' => auth()->user()->id])
+                ->update(['status' => 'read']);
+        }
         return response()->json(['message' => 'Updated Successfully'], 200);
     }
 
