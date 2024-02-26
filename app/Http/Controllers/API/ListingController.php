@@ -167,10 +167,11 @@ class ListingController extends Controller
     public function AddListings()
     {
         $listing_creation_amount = request()->listing_creation_amount;
+
         // check balance
-        $balance = (new Balance)->check($listing_creation_amount);
-        if ($balance < $listing_creation_amount)
-            return response()->json(['error' => 'Insufficient balance'], 422);
+        // $balance = (new Balance)->check($listing_creation_amount);
+        // if ($balance < $listing_creation_amount )
+        //     return response()->json(['error' => 'Insufficient balance'], 422);
 
         $user_data = Auth::user();
         $validator = Validator::make(request()->all(), [
@@ -253,11 +254,6 @@ class ListingController extends Controller
                 ]);
             }
         }
-
-
-
-
-
 
 
         // Additional Features
