@@ -65,8 +65,6 @@ class ListingController extends Controller
         }
 
 
-
-
         // Start with a base query
         $query = Listing::query();
 
@@ -280,7 +278,18 @@ class ListingController extends Controller
 
         // debit from wallate
         $ref_number = Str::random(10);
-        $transaction = [
+        $credit = [
+            'user_id' => auth()->user()->id,
+            'type' => 'credit',
+            'status' => 'success', //debit, credit
+            'ref_number' => $ref_number,
+            'trans_id' => $ref_number,
+            'amount' => $listing_creation_amount,
+            'description' => "Top Up " . $listing_creation_amount,
+            'purpose' => 'top-up', //verification ,packages, top-up, withdrawal,referrals, boost]
+            'listing_id' => $listing->id,
+        ];
+        $listing_debit = [
             'user_id' => auth()->user()->id,
             'type' => 'debit',
             'status' => 'success', //debit, credit
@@ -291,16 +300,17 @@ class ListingController extends Controller
             'purpose' => 'listings', //verification ,packages, top-up, withdrawal,referrals, boost]
             'listing_id' => $listing->id,
         ];
-        Transactions::create($transaction);
+        Transactions::create($credit);
+        Transactions::create($listing_debit);
         // send invioce
         $item = [
             "invoiceNumber" => rand(1111, 9999),
             "invoiceDate" => Carbon::now()->format("d M, Y"),
             "user" => auth()->user()->name,
-            "purpose" => $transaction["purpose"],
-            "status" => $transaction["status"],
-            "ref_number" => $transaction["ref_number"],
-            "amount" => $transaction["amount"],
+            "purpose" => $listing_debit["purpose"],
+            "status" => $listing_debit["status"],
+            "ref_number" => $listing_debit["ref_number"],
+            "amount" => $listing_debit["amount"],
             'description' => "Congratulation!!!, You Just enlisted your Business($listing->listing_name) for 1 year",
 
         ];
@@ -308,7 +318,7 @@ class ListingController extends Controller
         $notification =
             [
                 'message' =>
-                $transaction['description'],
+                $listing_debit['description'],
                 'user_id' => auth()->user()->id,
                 'title' => "Listing "
             ];
