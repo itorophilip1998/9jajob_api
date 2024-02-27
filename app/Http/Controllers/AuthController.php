@@ -114,7 +114,11 @@ class AuthController extends Controller
 
     public function login()
     {
-
+        $user = User::where('email', request()->email)->first();
+        // return $user?->status;
+        if ($user?->status !== 'active') {
+            return response()->json(['error' => 'Your Account is activated'], 422);
+        }
         $credentials = request(['email', 'password']);
 
         if (!$token = auth()->attempt($credentials)) {
@@ -122,6 +126,14 @@ class AuthController extends Controller
         }
 
         return $this->respondWithToken($token, "Login Successfully!");
+    }
+    public function statusCheck()
+    {
+        $status = request()->status;
+        $user = User::find(request()->user_id);
+
+        $user->update(['status' => request()->status]);
+        return response()->json(["message" => "User is $status!"]);
     }
 
     /**

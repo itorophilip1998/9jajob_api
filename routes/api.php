@@ -35,8 +35,8 @@ Route::group([
     Route::post('edit-user',  [AuthController::class, 'editUser'])->middleware("auth:api");
     Route::post('forgot-password',  [AuthController::class, 'forgotPassword']);
     Route::post('reset-password',  [AuthController::class, 'resetPassword']);
+    Route::post('de-activate-account',  [AuthController::class, 'statusCheck']);
 });
-
 
 // Amenities
 Route::get('amenities', [AmenityController::class, 'index']);
