@@ -115,7 +115,7 @@ class AuthController extends Controller
         $user = User::where('email', request()->email)->first();
         // return $user?->status;
         if ($user?->status !== 'active') {
-            return response()->json(['error' => 'Your Account is activated'], 422);
+            return response()->json(['error' => 'User not found!'], 404);
         }
         $credentials = request(['email', 'password']);
 
