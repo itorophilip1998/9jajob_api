@@ -4,23 +4,24 @@ use Illuminate\Http\Request;
 use App\Models\ListingCategory;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SpamController;
+use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\RatingsController;
+use App\Http\Controllers\BoostingController;
+use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\API\ReviewController;
 use App\Http\Controllers\API\AmenityController;
 use App\Http\Controllers\API\ListingController;
+use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\DynamicFormsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\VerificationController;
-use App\Http\Controllers\API\PackageController;
-use App\Http\Controllers\API\ListingCategoryController;
-use App\Http\Controllers\BoostingController;
-use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\Front\ContactController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\ReferralController;
-use App\Http\Controllers\SpamController;
+use App\Http\Controllers\API\ListingCategoryController;
 
 // authentication
 Route::group([
@@ -40,6 +41,8 @@ Route::group([
 
 // Amenities
 Route::get('amenities', [AmenityController::class, 'index']);
+// Dynamic Forms
+Route::get('dynamic-forms', [DynamicFormsController::class, 'index']);
 
 // Listing Category
 Route::group([
