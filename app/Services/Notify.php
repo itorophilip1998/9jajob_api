@@ -11,7 +11,7 @@ class Notify
     public function trigger($data)
     {
 
-        $notification = Notification::create(
+        Notification::create(
             [
                 'message' => $data['message'],
                 'user_id' => $data['user_id'] ?? 0,
@@ -24,19 +24,19 @@ class Notify
 
         return Http::post($expoURL, [
             'to' => auth()->user()->expo_token,
-            'title' => $notification->title,
-            'body' => $notification->body,
+            'title' => $data["title"],
+            'body' => $data["message"],
         ]);
     }
 
-    public function chatTrigger($notification)
+    public function chatTrigger($data)
     {
         $expoURL = 'https://exp.host/--/api/v2/push/send';
 
         return Http::post($expoURL, [
             'to' => auth()->user()->expo_token,
-            'title' => $notification->title,
-            'body' => $notification->body,
+            'title' => $data['title'],
+            'body' => $data['body'],
         ]);
     }
 }
