@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Spam;
 use App\Models\User;
 use App\Models\Chats;
+use App\Models\friends;
+use App\Services\Notify;
 use App\Models\Notification;
 use App\Http\services\Upload;
 use App\Http\Requests\StoreChatsRequest;
 use App\Http\Requests\UpdateChatsRequest;
-use App\Models\friends;
 use Illuminate\Support\Facades\Validator;
 
 class ChatsController extends Controller
@@ -88,6 +89,10 @@ class ChatsController extends Controller
             'user_id' =>   $req['user_id'],
             'friend_id' => $req['friend_id'],
         ], $user);
+        (new Notify)->chatTrigger([
+            'title' => "Chat",
+            'body' => "You got a new chat",
+        ]);
         return response()->json(['message' => "Successfully initiated Chat!!", 'chats' => $chats], 200);
     }
 
@@ -107,9 +112,8 @@ class ChatsController extends Controller
         if (request()->unread_all) {
             friends::where(['user_id' => auth()->user()->id])
                 ->update(['status' => 'read']);
-
         }
-        
+
         friends::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
             ->update(['status' => 'read']);
 
