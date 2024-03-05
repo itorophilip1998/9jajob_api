@@ -43,6 +43,7 @@ Route::group([
 Route::get('amenities', [AmenityController::class, 'index']);
 // Dynamic Forms
 Route::get('dynamic-forms', [DynamicFormsController::class, 'index']);
+Route::post('update-expo-token', [DynamicFormsController::class, 'UpdateToken'])->middleware("auth:api");
 
 // Listing Category
 Route::group([
