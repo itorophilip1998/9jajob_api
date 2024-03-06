@@ -21,6 +21,6 @@ class Review extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'agent_id')->select(['id', 'name', 'email', 'photo'])->withOut("package");
+        return $this->belongsTo(User::class, 'agent_id')->select(['id', 'name', 'email', 'photo']);
     }
 }

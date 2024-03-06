@@ -35,12 +35,12 @@ class ReviewController extends Controller
         $user = User::find($listing_user_id?->user_id);
         $user_name = auth()->user()->name;
         $obj = new Review;
-        $obj->listing_id = $request->listing_id;
+        $obj->listing_id = $request->listing_id ?? 0;
         $obj->agent_id = $user_detail->id;
         $obj->agent_type = 'Customer';
         $obj->rating = $request->rating;
         $obj->review = $request->review;
-        $obj->booking_id = $request->booking_id;
+        $obj->booking_id = $request?->booking_id ?? 0;
         $obj->save();
         (new Notify)->trigger([
             'message' =>   $request->review,
