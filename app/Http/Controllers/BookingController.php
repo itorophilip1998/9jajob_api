@@ -53,7 +53,7 @@ class BookingController extends Controller
         ];
         $user2 = [
             'message' => "Booking was $status by $authUser->name",
-            'user_id' => $booking->user_id ?? 0,
+            'user_id' => $booking->user_id ??    $user?->id,
             'title' => "Booking",
             'booking_id' => $booking->id ?? 0
         ];
