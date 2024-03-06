@@ -88,7 +88,7 @@ class BookingController extends Controller
         $req['user_id'] = auth()->user()->id;
         $booking = Booking::create($req);
         $listing_user_id = Listing::find(request()->listing_id) ?? 0;
-        $user = User::find($listing_user_id->user_id);
+        $user = User::find($listing_user_id?->user_id);
         $authUser = auth()->user();
 
         $user1 = [
