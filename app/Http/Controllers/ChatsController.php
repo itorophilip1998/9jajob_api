@@ -54,6 +54,7 @@ class ChatsController extends Controller
 
         $req = request()->all();
         $req['user_id'] = request()->user_id ?? auth()->user()->id;
+        $req['status'] = 'unread';
         $photos = [];
         if (is_array(request()->photo) || is_object(
             request()->photo
