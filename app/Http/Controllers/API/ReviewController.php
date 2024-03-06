@@ -4,8 +4,10 @@ namespace App\Http\Controllers\API;
 
 
 use DB;
+use App\Models\User;
 use App\Models\Review;
 use App\Models\Listing;
+use App\Services\Notify;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -25,12 +27,13 @@ class ReviewController extends Controller
     public function create(Request $request)
     {
         $user_detail = auth()->user();
-         
+
         $isRated = Review::where(['agent_id' => $user_detail->id, 'listing_id' => $request->listing_id])->first();
         if ($isRated) return response()->json(['message' => 'Listing Already Rated'], 200);
 
-
-
+        $listing_user_id = Listing::find(request()->listing_id) ?? 0;
+        $user = User::find($listing_user_id?->user_id);
+        $user_name = auth()->user()->name;
         $obj = new Review;
         $obj->listing_id = $request->listing_id;
         $obj->agent_id = $user_detail->id;
@@ -39,7 +42,12 @@ class ReviewController extends Controller
         $obj->review = $request->review;
         $obj->booking_id = $request->booking_id;
         $obj->save();
-
+        (new Notify)->trigger([
+            'message' =>   $request->review,
+            'user_id' => $user?->id ?? 0,
+            'title' => "New message from $user_name",
+            'booking_id' => 0
+        ]);
         return  response()->json(['message' => "Success"], 200);
     }
 
