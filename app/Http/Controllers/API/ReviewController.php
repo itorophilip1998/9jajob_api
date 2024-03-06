@@ -36,8 +36,7 @@ class ReviewController extends Controller
         $user = 0;
         if ($listing_user_id) {
             $user = User::find($listing_user_id?->user_id);
-        }
-        else if ($booking_user_id) {
+        } else if ($booking_user_id) {
             $user = User::find($booking_user_id?->user_id);
         }
         $user_name = auth()->user()->name;
@@ -51,7 +50,7 @@ class ReviewController extends Controller
         $obj->save();
         (new Notify)->trigger([
             'message' =>   $request->review,
-            'user_id' => $user?->id ?? 0,
+            'user_id' => auth()->user()->id ?? 0,
             'title' => "New Review from $user_name",
             'booking_id' => 0
         ]);
