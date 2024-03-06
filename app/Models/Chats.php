@@ -26,7 +26,6 @@ class Chats extends Model
     protected $with = [
         // 'user',
         'friend',
-        "chatted_user"
     ];
 
     public function user()
@@ -40,7 +39,7 @@ class Chats extends Model
     }
     public function chatted_user()
     {
-        return $this->belongsTo(friends::class, 'chat_id','id');
+        return $this->belongsTo(friends::class, 'chat_id');
     }
 
     public function toArray()
