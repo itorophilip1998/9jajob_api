@@ -46,7 +46,7 @@ class BookingController extends Controller
         $authUser = auth()->user();
         $status = request()->isModify ? 'modify' : request()->status;
         $user1 = [
-            'message' => "You just $status the booking with $user->name",
+            'message' => "You just $status a booking ($listing_user_id?->listing_name)",
             'user_id' => $authUser->id ?? 0,
             'title' => "Booking",
             'booking_id' => $booking->id ?? 0
