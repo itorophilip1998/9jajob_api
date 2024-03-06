@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+ 
 use App\Models\Report;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReportRequest;

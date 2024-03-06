@@ -98,6 +98,6 @@ class BoostingController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
         }
-        return response()->json(['message' => 'Booting Initiated!!!'], 200);
+        return response()->json(['message' => 'Boosting Initiated!!!'], 200);
     }
 }
