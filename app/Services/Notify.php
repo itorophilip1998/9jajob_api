@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -21,9 +22,9 @@ class Notify
         );
 
         $expoURL = 'https://exp.host/--/api/v2/push/send';
-
+        $user = User::find($data['user_id']);
         return Http::post($expoURL, [
-            'to' => auth()->user()->expo_token,
+            'to' => $user?->expo_token,
             'title' => $data["title"],
             'body' => $data["message"],
         ]);
@@ -34,9 +35,9 @@ class Notify
         $expoURL = 'https://exp.host/--/api/v2/push/send';
 
         return Http::post($expoURL, [
-            'to' => auth()->user()->expo_token,
+            'to' => $data['expo_token'],
             'title' => $data['title'],
-            'body' => $data['body'],
+            'body' => $data['message'],
         ]);
     }
 }
