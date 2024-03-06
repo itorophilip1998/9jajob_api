@@ -39,7 +39,7 @@ class Chats extends Model
     }
     public function chatted_user()
     {
-        return $this->hasOne(friends::class, 'chat_id')->select(["id", "status", 'chat_id'])->latest();
+        return $this->hasOne(friends::class, 'chat_id')->select(["id", "status", 'chat_id'])->withOut(["chat", "friend"])->latest();
     }
 
     public function toArray()
