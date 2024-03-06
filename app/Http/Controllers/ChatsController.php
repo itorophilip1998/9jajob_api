@@ -84,7 +84,7 @@ class ChatsController extends Controller
             'user_id' =>   $req['user_id'],
             'friend_id' => $req['friend_id'],
             'chat_id' => $chats->id,
-            'status' => 'read',
+            'status' => 'unread',
         ];
         friends::updateOrCreate([
             'user_id' =>   $req['user_id'],
