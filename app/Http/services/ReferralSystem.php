@@ -66,7 +66,7 @@ class ReferralSystem
             $notification =
             [
                 'message' => 'You Referred ' . auth()->user()->name . ' And earn ' . $ref["amount_earn"],
-                'user_id' => auth()->user()->id,
+                'user_id' => $newCode,
                 'title' => "Listing "
             ];
             (new Notify)->trigger($notification);
