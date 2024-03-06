@@ -32,7 +32,7 @@ class Booking extends Model
 
     public function listings()
     {
-        return $this->belongsTo(Listing::class, 'listing_id')->withOnly(['verified', 'user'])
+        return $this->belongsTo(Listing::class, 'listing_id')->withOnly(['verified', 'user', 'reviews'])
             ->select(['id', 'listing_name', 'listing_address', 'listing_phone', 'user_id']);
     }
 }
