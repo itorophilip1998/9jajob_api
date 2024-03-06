@@ -25,7 +25,8 @@ class Chats extends Model
 
     protected $with = [
         // 'user',
-        'friend'
+        'friend',
+        "chatted_user"
     ];
 
     public function user()
