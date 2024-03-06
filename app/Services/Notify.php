@@ -35,7 +35,7 @@ class Notify
         $expoURL = 'https://exp.host/--/api/v2/push/send';
 
         return Http::post($expoURL, [
-            'to' => $data['expo_token'],
+            'to' => $data['to'],
             'title' => $data['title'],
             'body' => $data['message'],
         ]);
