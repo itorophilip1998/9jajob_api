@@ -37,7 +37,7 @@ class Notify
         return Http::post($expoURL, [
             'to' => $data['to'],
             'title' => $data['title'],
-            'body' => $data['message'],
+            'body' => $data['body'],
         ]);
     }
 }
