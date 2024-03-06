@@ -90,7 +90,7 @@ class ChatsController extends Controller
             'friend_id' => $req['friend_id'],
         ], $user);
 
-        $friend = User::find(auth()->user()->id);
+        $friend = User::find(request()->friend_id);
 
         (new Notify)->chatTrigger([
             'to' => $friend?->expo_token,
