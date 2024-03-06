@@ -89,9 +89,13 @@ class ChatsController extends Controller
             'user_id' =>   $req['user_id'],
             'friend_id' => $req['friend_id'],
         ], $user);
+
+        $friend = User::find(request()->friend_id);
+
         (new Notify)->chatTrigger([
-            'title' => "Chat",
-            'body' => "You got a new chat",
+            'to' => $friend?->expo_token,
+            'title' => "You got a new message from $friend?->name",
+            'body' => request()->message,
         ]);
         return response()->json(['message' => "Successfully initiated Chat!!", 'chats' => $chats], 200);
     }
