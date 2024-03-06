@@ -120,7 +120,9 @@ class ChatsController extends Controller
         }
 
         friends::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
+        ->orWhere(['user_id' => request()->friend_id, 'friend_id' => auth()->user()->id])
             ->update(['status' => 'read']);
+
 
         return response()->json(['message' => 'Updated Successfully'], 200);
     }
