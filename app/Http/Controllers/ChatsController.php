@@ -27,7 +27,7 @@ class ChatsController extends Controller
         })->orWhere(function ($query) use ($user_id, $friend_id) {
             $query->where('user_id', $friend_id)
                 ->where('friend_id', $user_id);
-        })->get()
+        })->with("chatted_user")->get()
             ->map(function ($item) use ($friend_id) {
                 $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $friend_id])->without('friend')->first();
                 $item['spam'] = ($spam) ? $spam->status : null;
@@ -120,7 +120,7 @@ class ChatsController extends Controller
         }
 
         friends::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
-        
+
             ->update(['status' => 'read']);
 
 
