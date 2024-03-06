@@ -19,7 +19,7 @@ class ReferralSystem
     public function referred()
     {
 
-        $dynamic_forms = DB::table("extra_forms")->first();
+        $dynamic_forms = DB::table("extra_details")->first();
         // create referral and transaction if user include the code
         $ref_code = auth()->user()->referrer_code;
         if (!$ref_code) {
