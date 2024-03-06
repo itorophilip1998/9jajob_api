@@ -91,7 +91,8 @@ class PackageController extends Controller
                 [
                     'message' =>
                     $transaction['description'],
-                    'user_id' => auth()->user()->id
+                    'user_id' => auth()->user()->id,
+                    'status' => 'unread'
                 ]
             );
             try {

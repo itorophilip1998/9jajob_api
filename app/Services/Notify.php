@@ -17,7 +17,8 @@ class Notify
                 'message' => $data['message'],
                 'user_id' => $data['user_id'] ?? 0,
                 'title' => $data['title'],
-                'booking_id' => $data['booking_id'] ?? 0
+                'booking_id' => $data['booking_id'] ?? 0,
+                'status' => 'unread'
             ]
         );
 
