@@ -39,7 +39,7 @@ class Chats extends Model
     }
     public function chatted_user()
     {
-        return $this->belongsTo(friends::class, 'friend_id')->where('user_id', auth()->user()->id);
+        return $this->belongsTo(friends::class, 'friend_id')->where('user_id', auth()->user()->id)->get();
     }
 
     public function toArray()
