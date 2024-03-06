@@ -76,7 +76,7 @@ class ChatsController extends Controller
         ];
         friends::updateOrCreate([
             'user_id' => $req['friend_id'],
-            'friend_id' => $req[' user_id'],
+            'friend_id' => $req['user_id'],
         ], $friends);
 
         // users auth user side
