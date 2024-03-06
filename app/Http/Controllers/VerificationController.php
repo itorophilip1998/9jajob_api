@@ -116,7 +116,8 @@ class VerificationController extends Controller
             [
                 'message' => $transaction['description'],
                 'user_id' => auth()->user()->id,
-                'title' => 'Verification'
+                'title' => 'Verification',
+                'status'=>'unread'
             ]
         );
         return response()->json(['message' => 'Verification In Progress!!!'], 200);
