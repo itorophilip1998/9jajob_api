@@ -155,7 +155,7 @@ class AuthController extends Controller
         $user = User::where('email', request()->email)->first();
         // return $user?->status;
 
-        if ($user->status && strtolower($user->status) !== 'active') {
+        if ($user?->status && strtolower($user?->status) !== 'active') {
             $token = ['token'=>hash('sha256', time())];
             $user->update($token);
              if($user)$this->sendMail($user);

@@ -127,8 +127,8 @@ class CustomerAuthController extends Controller
         $data['token'] = '';
         $user=User::where('email',$email_from_url)->first();
 
-      if($user->status && strtolower($user->status) !== 'active'){
-        $user->update($data);
+      if($user?->status && strtolower($user?->status) !== 'active'){
+        $user?->update($data);
 
         $welcomeMail=[
             'subject'=>'Welcome to 9jajob',
