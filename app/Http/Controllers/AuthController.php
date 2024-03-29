@@ -44,6 +44,7 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
             're_password' => 'required|same:password',
+            'phone'=>'required|unique:users'
         ]);
 
         //Send failed response if request is not valid
@@ -100,6 +101,7 @@ class AuthController extends Controller
         $validator = Validator::make(request()->all(), [
             'password' => 'nullable|min:8',
             're_password' => 'nullable|same:password',
+            'phone'=>'nullable|unique:users'
         ]);
 
         //Send failed response if request is not valid
@@ -140,7 +142,7 @@ class AuthController extends Controller
         ];
         Mail::to($user['email'])->queue(new SystemMailNotification($confirmationMail)); //confirmationMail
 
-       
+
 
      } catch (\Throwable $th) {
         //  throw $th;
