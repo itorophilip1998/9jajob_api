@@ -30,7 +30,7 @@ class ReviewController extends Controller
         $user_detail = auth()->user();
 
         $isRated = Review::where(['agent_id' => $user_detail->id, 'listing_id' => $request->listing_id])->first();
-        if ($isRated) return response()->json(['message' => 'Listing Already Rated'], 200);
+        if ($isRated) return response()->json(['message' => 'Listing already reviewed!'], 200);
         $listing_user_id = Listing::find(request()->listing_id) ?? 0;
         $booking_user_id = Booking::find(request()->booking_id) ?? 0;
         $user = 0;
@@ -50,8 +50,8 @@ class ReviewController extends Controller
         $obj->save();
         (new Notify)->trigger([
             'message' =>   $request->review,
-            'user_id' => auth()->user()->id ?? 0,
-            'title' => "New Review from $user_name",
+            'user_id' => $request?->id ?? 0,
+            'title' => "Review",
             'booking_id' => 0
         ]);
         return  response()->json(['message' => "Success"], 200);
