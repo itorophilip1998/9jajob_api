@@ -46,10 +46,12 @@ class Notify
     {
         $expoURL = 'https://exp.host/--/api/v2/push/send';
 
-        return Http::post($expoURL, [
+       $expoResponse=  Http::post($expoURL, [
             'to' => $data['to'],
             'title' => $data['title'],
             'body' => $data['body'],
         ]);
+        dump($expoResponse);
+        return $expoResponse;
     }
 }
