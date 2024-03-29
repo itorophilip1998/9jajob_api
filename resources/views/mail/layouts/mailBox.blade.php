@@ -1,10 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice</title>
+    <title>Mail Notification</title>
     <style>
+
+.button-container {
+    text-align: center;
+    margin: 1rem 0;
+
+}
+
+.button_confirm {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #086c0a; /* Green */
+    color: white !important;
+    border: 2px solid #086c0a; /* Green border */
+    border-radius: 5px;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow */
+    transition: all 0.3s ease;
+}
+p,h2{
+    color:black !important
+}
+.button_confirm:hover {
+    background-color: #45a049; /* Darker green on hover */
+    border-color: #45a049; /* Darker green border on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Larger shadow on hover */
+}
+
+
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -33,7 +61,7 @@
             background:white;
         }
 
-        .header {
+        header {
             text-align: center;
             margin-bottom: 20px;
         }
@@ -81,70 +109,14 @@
 </head>
 <body>
   <div class="mailBox">
-        <div class="header">
-                        <img src="https://i.ibb.co/564KHgf/9jajob.png" alt="Company Logo" class="logo">
+    {{-- header --}}
+   @include('mail.layouts.mail_header')
 
-        </div>
+     @yield('content')
 
-    <div class="container">
-        <div class="header">
-            <h2>Invoice</h2>
-            <p>Hello {{  $item["user"] }} </p>
-            {{-- <p>{{ $item['description'] }}</p> --}}
-        </div>
+    {{-- footer --}}
+    @include('mail.layouts.mail_footer')
 
-        {{-- <div class="invoice-details">
-            <div>
-                <strong>Invoice Number:</strong> {{ $item["invoiceNumber"] }}
-            </div>
-
-        </div> --}}
-
-        {{-- <div class="invoice-details">
-
-            <div>
-                <strong>Invoice Date:</strong> {{ $item["invoiceDate"] }}
-            </div>
-        </div>
-
-        <div class="invoice-details">
-
-            <div>
-                <strong>Refrence Number:</strong> {{ $item["ref_number"] }}
-            </div>
-        </div>
-
-        <table class="items">
-            <thead>
-                <tr>
-                    <th>Purpose</th>
-                    <th>Transaction Status</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                    <tr>
-                        <td>{{ $item['purpose'] }}</td>
-                        <td>{{ $item['status'] }}</td>
-                        <td>{{ $item['amount'] }}</td>
-                    </tr>
-            </tbody>
-        </table>
-
-        <div class="total">
-            <strong>Total Amount:</strong> {{ $item["amount"] }}
-        </div> --}}
-
-
-
-    </div>
-
-
-    <footer>
-        <p>Thank you for your using 9jajob service!</p>
-        © 2023 9jajob. All rights reserved.
-
-    </footer>
   </div>
 </body>
 </html>

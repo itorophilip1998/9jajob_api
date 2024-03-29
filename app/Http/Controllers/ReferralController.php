@@ -16,17 +16,18 @@ class ReferralController extends Controller
      */
     public function index()
     {
-        $referral = Referral::where('referrer_id',auth()->user()->id)->latest()->get();
+        $pending = Referral::where(['referrer_id' => auth()->user()->id, 'amount_earn' => 0])->count();
+        $referral = Referral::where('referrer_id', auth()->user()->id)->withOut('referrer')->latest()->get();
+        $completed = Referral::where(['referrer_id' => auth()->user()->id])
+        ->where('amount_earn', '!=', 0)->count();
 
-       $data=[
-        "completed"=>count($referral),
-        "pending"=>0,
-        'code'=> "ref-".auth()->user()->id,
-        'total_earn'=> $referral->sum('amount_earn'),
-        'referrals_list'=> $referral
-       ];
+        $data = [
+            "completed" => $completed,
+            "pending" =>  $pending,
+            'code' => "ref-" . auth()->user()->id,
+            'total_earn' => $referral->sum('amount_earn'),
+            'referrals_list' => $referral
+        ];
         return response()->json(['referral' => $data], 200);
     }
-
-
 }
