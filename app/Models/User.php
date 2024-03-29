@@ -105,7 +105,7 @@ class User extends Authenticatable implements JWTSubject
         $url = Storage::disk('do_spaces')->url("/uploads/user_photos" . "/" . $this->photo);
         $attributes['photo'] = $this->photo ?  $url :  null;
 
-        $attributes['ref_code'] = substr(str_replace(' ', '', $this->name), 0, 5) . '-' . $this->id;
+        $attributes['ref_code'] = substr(str_replace(' ', '', $this->email), 0, 5) . '-' . $this->id;
         $attributes['listing_creation_amount'] = 1000;
         return $attributes;
     }

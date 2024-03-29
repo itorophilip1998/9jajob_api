@@ -101,10 +101,10 @@ class AuthController extends Controller
         $validator = Validator::make(request()->all(), [
             'password' => 'nullable|min:8',
             're_password' => 'nullable|same:password',
-            'phone'=>'nullable|unique:users'
+
         ]);
 
-        //Send failed response if request is not valid
+
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
         }
@@ -123,6 +123,10 @@ class AuthController extends Controller
         }
 
         $user = User::find(auth()->user()->id);
+            //Send failed response if request is not valid
+            if ($user?->phone ) {
+                return response()->json(['error' => $validator->messages()], 422);
+            }
         $user->update($data);
 
         return response()->json(['message' => 'Successfully edited User'], 200);
