@@ -33,7 +33,7 @@ class Notify
             ]
         );
 
-        $expoURL = 'https://exp.host/--/api/v2/push/send';
+        $expoURL = 'https://exp.host/--/api/v2/push/send?useFcmV1=true';
         $user = User::find($data['user_id']);
         return Http::post($expoURL, [
             'to' => $user?->expo_token,
@@ -44,7 +44,7 @@ class Notify
 
     public function chatTrigger($data)
     {
-        $expoURL = 'https://exp.host/--/api/v2/push/send';
+        $expoURL = 'https://exp.host/--/api/v2/push/send?useFcmV1=true';
 
        $expoResponse=  Http::post($expoURL, [
             'to' => $data['to'],
