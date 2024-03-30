@@ -1,23 +1,24 @@
 <?php
 namespace App\Http\Controllers\Front;
-use App\Http\Controllers\Controller;
-use App\Models\LanguageMenuText;
-use App\Models\LanguageNotificationText;
-use App\Models\LanguageWebsiteText;
+use DB;
+use Auth;
+use Hash;
 use App\Models\User;
 use App\Models\Review;
-use App\Models\GeneralSetting;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\Models\EmailTemplate;
+use App\Models\GeneralSetting;
+use Illuminate\Validation\Rule;
+use App\Models\LanguageMenuText;
+use App\Models\LanguageWebsiteText;
+use App\Http\Controllers\Controller;
+use App\Mail\SystemMailNotification;
+use Illuminate\Support\Facades\Mail;
+use App\Models\LanguageNotificationText;
 use App\Mail\RegistrationEmailToCustomer;
 use App\Mail\ResetPasswordMessageToCustomer;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use DB;
-use Hash;
-use Auth;
-use Illuminate\Support\Facades\Mail;
 
 
 class CustomerAuthController extends Controller
@@ -111,10 +112,7 @@ class CustomerAuthController extends Controller
 
     public function registration_verify() {
 
-        if(env('PROJECT_MODE') == 0) {
-            return redirect()->back()->with('error', env('PROJECT_NOTIFICATION'));
-        }
-
+       try {
         $email_from_url = request()->segment(count(request()->segments()));
         $aa = User::where('email', $email_from_url)->first();
         if(!$aa) {
@@ -127,8 +125,24 @@ class CustomerAuthController extends Controller
         }
         $data['status'] = 'Active';
         $data['token'] = '';
-        User::where('email',$email_from_url)->update($data);
-        return redirect()->route('customer_login')->with('success', SUCCESS_REGISTRATION_VERIFY_DONE);
+        $user=User::where('email',$email_from_url)->first();
+
+      if($user->status && strtolower($user->status) !== 'active'){
+        $user->update($data);
+
+        $welcomeMail=[
+            'subject'=>'Welcome to 9jajob',
+            'view'=>'mail.welcomeMail',
+            'user'=>$user['name']
+        ];
+        Mail::to($user['email'])->queue(new SystemMailNotification($welcomeMail));
+      }
+
+        return redirect('https://www.9jajob.com/customer/login')->with('success', 'User Successfully Verifiied');
+       } catch (\Throwable $th) {
+        return redirect('https://www.9jajob.com/customer/login')->with('success', 'User Successfully Verifiied');
+
+       }
     }
 
 

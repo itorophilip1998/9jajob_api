@@ -11,9 +11,11 @@ use App\Models\Notification;
 use App\Models\Transactions;
 use App\Http\services\Upload;
 use App\Models\EmailTemplate;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
 
+use App\Mail\SystemMailNotification;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use function PHPUnit\Framework\isEmpty;
 use Illuminate\Support\Facades\Storage;
@@ -53,28 +55,43 @@ class AuthController extends Controller
         $data = request()->all();
         $data['password'] = Hash::make(request()->password);
         $data['token'] = $token;
-        $data['status'] = 'active';
+        $data['status'] = 'pending';
         User::create($data);
-
-
-        // Send Email
-        $et_data = EmailTemplate::where('id', 6)->first();
-        $subject = $et_data->et_subject;
-        $message = $et_data->et_content;
-        $verification_link = url('customer/registration/verify/' . $token . '/' . request()->email);
-        $message = str_replace('[[verification_link]]', $verification_link, $message);
-        try {
-            Mail::to(request()->email)->send(new RegistrationEmailToCustomer($subject, $message));
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
-
         $credentials = request(['email', 'password']);
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return $this->respondWithToken($token, "Registered Successfully!, Please check your mail for verification");
+        $ref_code = auth()->user()->referrer_code;
+        if (!$ref_code) {
+            return false;
+        }
+        $newCode = substr($ref_code, 6);
+
+        Referral::updateOrCreate([
+            "user_id" => auth()->user()->id,
+            'referrer_id' => $newCode,
+        ], [
+            'user_id' => auth()->user()->id,
+            'referrer_id' => $newCode,
+            'ref_code' => $ref_code,
+            'amount_earn' => 0,
+        ]);
+        $newUser = auth()->user()->name;
+        DB::table('admin_notifications')->insert(
+            [
+                'description' => "$newUser Just Registered in the system.",
+                'title' => "User Registration",
+                'status' => 'unread',
+                'created_at'=>Carbon::now()
+
+            ]
+        );
+
+        // send mails
+         $this->sendMail($data);
+
+        return response()->json(['message'=>"Registered Successfully!, Please check your mail for verification"],200);
     }
 
     public function editUser()
@@ -110,12 +127,37 @@ class AuthController extends Controller
     }
 
 
+
+    public function sendMail($user){
+
+     try {
+      // ConfirmationMail
+        $confirmationMail=[
+            'subject'=>'Confirm Your Email Address',
+            'link'=>url('customer/registration/verify/' . $user['token'] . '/' . $user['email']),
+            'view'=>'mail.emailConfirmation',
+            'user'=>$user['name']
+        ];
+        Mail::to($user['email'])->queue(new SystemMailNotification($confirmationMail)); //confirmationMail
+
+       
+
+     } catch (\Throwable $th) {
+        //  throw $th;
+     }
+
+    }
+
     public function login()
     {
         $user = User::where('email', request()->email)->first();
         // return $user?->status;
-        if ($user?->status !== 'active') {
-            return response()->json(['error' => 'User not found!'], 404);
+
+        if ($user->status && strtolower($user->status) !== 'active') {
+            $token = ['token'=>hash('sha256', time())];
+            $user->update($token);
+             if($user)$this->sendMail($user);
+            return response()->json(['error' => 'User not active, please verify your account!'], 404);
         }
         $credentials = request(['email', 'password']);
 
@@ -223,7 +265,7 @@ class AuthController extends Controller
 
                 Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message, $token));
             } catch (\Throwable $th) {
-                //throw $th;
+                throw $th;
             }
         }
 

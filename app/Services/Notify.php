@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class Notify
@@ -19,6 +21,15 @@ class Notify
                 'title' => $data['title'],
                 'booking_id' => $data['booking_id'] ?? 0,
                 'status' => 'unread'
+            ]
+        );
+
+        DB::table('admin_notifications')->insert(
+            [
+                'description' => $data['title']."\n A new" . $data['title'] .  "was initiated, You receive this notification as an evidence for further investigation",
+                'title' => $data['title'],
+                'status' => 'unread',
+                'created_at'=>Carbon::now()
             ]
         );
 

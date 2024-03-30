@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use App\Models\Notification;
 use App\Models\Transactions;
 use Illuminate\Support\Facades\DB;
+use App\Mail\SystemMailNotification;
 use Illuminate\Support\Facades\Mail;
 
 
@@ -27,14 +28,13 @@ class ReferralSystem
         }
         $newCode = substr($ref_code, 6);
         if ($ref_code !== null) {
-            $ref = Referral::updateOrCreate([
+            $ref = Referral::where([
                 "user_id" => auth()->user()->id,
                 'referrer_id' => $newCode,
-            ], [
-                'user_id' => auth()->user()->id,
-                'referrer_id' => $newCode,
-                'ref_code' => $ref_code,
-                'amount_earn' => $dynamic_forms->referrals_bonus_amount,
+            ]);
+            // update amount
+            $ref->update([
+                'amount_earn' => $dynamic_forms->referrals_bonus_amount +  $ref->amount_earn,
             ]);
             $ref_number = Str::random(10);
             $transaction = [
@@ -71,10 +71,22 @@ class ReferralSystem
                 ];
             (new Notify)->trigger($notification);
             try {
-                Mail::send('mail.invioce', ['item' => $item], function ($message) use ($referrer_name) {
-                    $message->to($referrer_name->email);
-                    $message->subject('Invioce');
-                });
+                // Mail::send('mail.invioce', ['item' => $item], function ($message) use ($referrer_name) {
+                //     $message->to($referrer_name->email);
+                //     $message->subject('Invioce');
+                // });
+
+                 //referrerMail
+        $referrerMail=[
+            'subject'=>'Confirm Your Email Address',
+            'user'=>$referrer_name?->name,
+            'referrer_username'=>auth()->user()->name,
+            'amount'=>$referrer_name->amount_earn,
+            'view'=>'mail.referralBonus',
+        ];
+
+
+         Mail::to($referrer_name->email)->send(new SystemMailNotification($referrerMail)); //referrerMail
             } catch (\Throwable $th) {
                 //throw $th;
             }

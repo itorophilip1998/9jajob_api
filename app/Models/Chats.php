@@ -28,6 +28,11 @@ class Chats extends Model
         'friend',
     ];
 
+    protected $hidden = [
+        // 'user',
+        'status',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id')->without(['package'])->select(['id', 'name', 'email', 'photo']);
