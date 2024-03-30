@@ -171,3 +171,5 @@ Route::group([
 ], function ($router) {
     Route::post('/', [ContactController::class, 'send_email']);
 });
+
+ 

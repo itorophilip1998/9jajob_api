@@ -51,7 +51,7 @@ class Notify
             'title' => $data['title'],
             'body' => $data['body'],
         ]);
-        dump($expoResponse);
+        // dump($expoResponse);
         return $expoResponse;
     }
 }
