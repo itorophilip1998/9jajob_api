@@ -50,8 +50,8 @@ class ReviewController extends Controller
         $obj->save();
         (new Notify)->trigger([
             'message' =>   $request->review,
-            'user_id' => $user?->id ?? 0,
-            'title' => "New Review from $user_name",
+            'user_id' => $request?->id ?? 0,
+            'title' => "Review",
             'booking_id' => 0
         ]);
         return  response()->json(['message' => "Success"], 200);
