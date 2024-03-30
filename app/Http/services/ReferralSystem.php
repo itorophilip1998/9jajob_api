@@ -71,22 +71,18 @@ class ReferralSystem
                 ];
             (new Notify)->trigger($notification);
             try {
-                // Mail::send('mail.invioce', ['item' => $item], function ($message) use ($referrer_name) {
-                //     $message->to($referrer_name->email);
-                //     $message->subject('Invioce');
-                // });
 
                  //referrerMail
         $referrerMail=[
-            'subject'=>'Confirm Your Email Address',
+            'subject'=>'Referral Bonus',
             'user'=>$referrer_name?->name,
             'referrer_username'=>auth()->user()->name,
-            'amount'=>$referrer_name->amount_earn,
+            'amount'=>$referrer_name?->amount_earn,
             'view'=>'mail.referralBonus',
         ];
 
 
-         Mail::to($referrer_name->email)->send(new SystemMailNotification($referrerMail)); //referrerMail
+         Mail::to($referrer_name?->email)->send(new SystemMailNotification($referrerMail)); //referrerMail
             } catch (\Throwable $th) {
                 //throw $th;
             }

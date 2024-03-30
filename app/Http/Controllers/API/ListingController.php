@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\ListingSubscription;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
+use App\Mail\SystemMailNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Http\services\ReferralSystem;
@@ -131,6 +132,8 @@ class ListingController extends Controller
 
 
         $data = ["listing" => $listing];
+
+
         return response()->json($data, 200);
     }
 
@@ -326,10 +329,16 @@ class ListingController extends Controller
 
         // sendmail
         try {
-            Mail::send('mail.invioce',  ['item' => $item], function ($message) {
-                $message->to(auth()->user()->email);
-                $message->subject('Invioce');
-            });
+
+                 //referrerMail
+        $listingsMail=[
+            'subject'=>'Congratulations on Successfully Listing Your Service on 9jajob',
+            'user'=>auth()->user()->name,
+            'view'=>'mail.listingMail',
+        ];
+
+            Mail::to(auth()->user()->email)->send(new SystemMailNotification($listingsMail)); //referrerMail
+
         } catch (\Throwable $th) {
             //throw $th;
         }
