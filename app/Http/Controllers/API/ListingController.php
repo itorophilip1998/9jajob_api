@@ -325,17 +325,16 @@ class ListingController extends Controller
                 'user_id' => auth()->user()->id,
                 'title' => "Listing "
             ];
-        (new Notify)->trigger($notification);
 
         // sendmail
         try {
 
-                 //referrerMail
+           //referrerMail
         $listingsMail=[
             'subject'=>'Congratulations on Successfully Listing Your Service on 9jajob',
             'user'=>auth()->user()->name,
             'view'=>'mail.listingMail',
-        ];
+         ];
 
             Mail::to(auth()->user()->email)->send(new SystemMailNotification($listingsMail)); //referrerMail
 
@@ -344,6 +343,7 @@ class ListingController extends Controller
         }
         // send referrer funds
         (new ReferralSystem)->referred();
+        (new Notify)->trigger($notification);
 
         $getAll = Listing::find($listing->id);
 
