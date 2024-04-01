@@ -14,6 +14,7 @@ class Notify
     public function trigger($data)
     {
 
+      try {
         Notification::create(
             [
                 'message' => $data['message'],
@@ -23,7 +24,7 @@ class Notify
                 'status' => 'unread'
             ]
         );
-
+   
         DB::table('admin_notifications')->insert(
             [
                 'description' => $data['title']."\n A new" . $data['title'] .  "was initiated, You receive this notification as an evidence for further investigation",
@@ -35,11 +36,16 @@ class Notify
 
         $expoURL = 'https://exp.host/--/api/v2/push/send?useFcmV1=true';
         $user = User::find($data['user_id']);
-        return Http::post($expoURL, [
+        $expoResponse= Http::post($expoURL, [
             'to' => $user?->expo_token,
             'title' => $data["title"],
             'body' => $data["message"],
         ]);
+
+        return  $expoResponse;
+      } catch (\Throwable $th) {
+        //throw $th;
+      }
     }
 
     public function chatTrigger($data)

@@ -28,7 +28,7 @@ class Referral extends Model
     }
     public function bonus()
     {
-        return $this->belongsTo(ReferralBonus::class, 'referral_id')->select('id','name');
+        return $this->belongsTo(ReferralBonus::class, 'referrer_id')->select('id','name');
     }
     public function user()
     {

@@ -1,19 +1,20 @@
 <!-- resources/views/your-page.blade.php -->
-@extends('layouts.mailBox')
+@extends('mail.layouts.mailBox')
 
 @section('content')
     <div class="container">
         <h2>Dear {{  $item["user"] }},</h2>
 
 <p>{{ $item['mailInfo'] }}</p>
-<p>
 
+
+{{-- <p>
  <h4>Booking Details:</h4>
-- Date Booked: {{ $item['date'] }} <br/>
-- Time:{{ $item['time'] }}  <br/>
-- Location: {{ $item['location'] }}  <br/>
-- Phone: {{ $item['phone'] }} <br/>
-</p>
+- Date Booked: {{ $item?['booking']?['date'] }} <br/>
+- Time:{{ $item?['booking']?['time'] }}  <br/>
+- Location: {{ $item?['booking']?['location'] }}  <br/>
+- Phone: {{ $item?['booking']?['phone'] }} <br/>
+</p> --}}
 
 
 <p>

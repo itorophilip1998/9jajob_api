@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mail Notification</title>
     <style>
+             /* Reset default margin and padding */
+             body  {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Make all elements box-sizing border-box */
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
 
 .button-container {
     text-align: center;
@@ -24,7 +34,11 @@
     transition: all 0.3s ease;
 }
 p,h2{
-    color:black !important
+    color:black !important;
+    margin-bottom: 1.5rem !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+   /* line-height: .4rem; */
+
 }
 .button_confirm:hover {
     background-color: #45a049; /* Darker green on hover */
@@ -40,8 +54,7 @@ p,h2{
 
         }
         .mailBox{
-                box-sizing: border-box;
-    font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';
+     box-sizing: border-box;
     background-color: #edf2f7 !important;
     border-bottom: 1px solid #edf2f7;
     border-top: 1px solid #edf2f7;
@@ -53,8 +66,9 @@ p,h2{
 
         .container {
             max-width: 600px;
+
             margin: 20px auto;
-            padding: 20px;
+            padding: 4rem 20px ;
             /* border: 1px solid #ccc; */
             border-radius: 5px;
             /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */

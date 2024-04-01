@@ -328,18 +328,16 @@ class ListingController extends Controller
 
         // sendmail
         try {
-
            //referrerMail
         $listingsMail=[
             'subject'=>'Congratulations on Successfully Listing Your Service on 9jajob',
             'user'=>auth()->user()->name,
             'view'=>'mail.listingMail',
          ];
-
             Mail::to(auth()->user()->email)->send(new SystemMailNotification($listingsMail)); //referrerMail
 
         } catch (\Throwable $th) {
-            //throw $th;
+            // throw $th;
         }
         // send referrer funds
         (new ReferralSystem)->referred();

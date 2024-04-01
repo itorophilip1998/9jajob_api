@@ -23,19 +23,25 @@ class ReferralSystem
         $referrals_bonus_amount = DB::table("extra_details")->first()?->referrals_bonus_amount ?? 150;
         // create referral and transaction if user include the code
         $ref_code = auth()->user()->referrer_code;
+
         if (!$ref_code) {
             return false;
         }
+
         $newCode = substr($ref_code, 6);
+
         if ($ref_code !== null) {
             $ref = Referral::where([
                 "user_id" => auth()->user()->id,
                 'referrer_id' => $newCode,
-            ]);
+            ])->first();
+
             // update amount
             $ref->update([
-                'amount_earn' => $referrals_bonus_amount,
+                'amount_earn' => $referrals_bonus_amount + $ref?->amount_earn,
             ]);
+
+
             $ref_number = Str::random(10);
             $transaction = [
                 'user_id' => $newCode,
@@ -58,6 +64,8 @@ class ReferralSystem
             (new Notify)->trigger($notification);
             try {
 
+
+
                  //referrerMail
         $referrerMail=[
             'subject'=>'Referral Bonus',
@@ -68,9 +76,9 @@ class ReferralSystem
         ];
 
 
-         Mail::to($$ref?->referrer?->email)->queue(new SystemMailNotification($referrerMail)); //referrerMail
+                Mail::to($ref?->referrer?->email)->queue(new SystemMailNotification($referrerMail)); //referrerMail
             } catch (\Throwable $th) {
-                //throw $th;
+                // throw $th;
             }
 
     }
