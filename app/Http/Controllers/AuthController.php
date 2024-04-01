@@ -146,8 +146,6 @@ class AuthController extends Controller
         ];
         Mail::to($user['email'])->queue(new SystemMailNotification($confirmationMail)); //confirmationMail
 
-
-
      } catch (\Throwable $th) {
         //  throw $th;
      }

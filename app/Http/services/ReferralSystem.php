@@ -20,7 +20,7 @@ class ReferralSystem
     public function referred()
     {
 
-        $dynamic_forms = DB::table("extra_details")->first();
+        $referrals_bonus_amount = DB::table("extra_details")->first()?->referrals_bonus_amount ?? 150;
         // create referral and transaction if user include the code
         $ref_code = auth()->user()->referrer_code;
         if (!$ref_code) {
@@ -34,7 +34,7 @@ class ReferralSystem
             ]);
             // update amount
             $ref->update([
-                'amount_earn' => $dynamic_forms->referrals_bonus_amount +  $ref->amount_earn,
+                'amount_earn' => $referrals_bonus_amount,
             ]);
             $ref_number = Str::random(10);
             $transaction = [
@@ -43,29 +43,15 @@ class ReferralSystem
                 'status' => 'success', //debit, credit
                 'ref_number' => $ref_number,
                 'trans_id' => $ref_number,
-                'amount' => $ref["amount_earn"],
+                'amount' =>  $referrals_bonus_amount,
                 'description' => "referrals withdrawal from " . auth()->user()->name,
                 'purpose' => 'referrals', //verification ,packages, top-up, withdrawal,referrals, boost]
                 'referral_code' => $ref_code,
             ];
             Transactions::create($transaction);
-
-            // send invioce
-            $referrer_name = User::find($newCode);
-            $item = [
-                "invoiceNumber" => rand(1111, 9999),
-                "invoiceDate" => Carbon::now()->format("d M, Y"),
-                "user" => $referrer_name->name,
-                "purpose" => $transaction["purpose"],
-                "status" => $transaction["status"],
-                "ref_number" => $transaction["ref_number"],
-                "amount" => $transaction["amount"],
-                'description' => 'You Referred ' . auth()->user()->name . ' And earn ' . $ref["amount_earn"],
-            ];
-
             $notification =
                 [
-                    'message' => 'You Referred ' . auth()->user()->name . ' And earn ' . $ref["amount_earn"],
+                    'message' => 'You Referred ' . auth()->user()->name . ' And earn ' .  $referrals_bonus_amount,
                     'user_id' => $newCode,
                     'title' => "Listing "
                 ];
@@ -75,17 +61,18 @@ class ReferralSystem
                  //referrerMail
         $referrerMail=[
             'subject'=>'Referral Bonus',
-            'user'=>$referrer_name?->name,
+            'user'=>$ref?->referrer->name,
             'referrer_username'=>auth()->user()->name,
-            'amount'=>$referrer_name?->amount_earn,
+            'amount'=>$referrals_bonus_amount,
             'view'=>'mail.referralBonus',
         ];
 
 
-         Mail::to($referrer_name?->email)->send(new SystemMailNotification($referrerMail)); //referrerMail
+         Mail::to($$ref?->referrer?->email)->queue(new SystemMailNotification($referrerMail)); //referrerMail
             } catch (\Throwable $th) {
                 //throw $th;
             }
-        }
+
     }
+}
 }
