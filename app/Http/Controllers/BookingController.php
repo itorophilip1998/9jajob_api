@@ -34,62 +34,66 @@ class BookingController extends Controller
     }
     public function updateStatus()
     {
-        $validator = Validator::make(request()->all(), [
-            'status' => 'required',
-            'booking_id' => 'required',
-        ]);
-        //Send failed response if request is not valid
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 422);
+        try {
+            $validator = Validator::make(request()->all(), [
+                'status' => 'required',
+                'booking_id' => 'required',
+            ]);
+            //Send failed response if request is not valid
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->messages()], 422);
+            }
+            $booking = Booking::find(request()->booking_id);
+            $listing_user_id = Listing::find($booking?->listing_id) ;
+            $user = User::find($listing_user_id?->user_id);
+            $client = User::find($booking?->user_id);
+
+            $status = request()->isModify ? 'modify' : request()->status;
+            $userDetails = [
+                'message' => "You just $status a booking $client?->listing_name",
+                'user_id' => $user->id ?? 0,
+                'title' => "Booking",
+                'booking_id' => $booking->id ?? 0
+            ];
+            $clientDetails = [
+                'message' => "Booking was $status by $user->name",
+                'user_id' => $client?->id,
+                'title' => "Booking",
+                'booking_id' => $booking->id ?? 0
+            ];
+            (new Notify)->trigger($userDetails);
+            (new Notify)->trigger($clientDetails);
+
+            $booking->update(
+                request()->all()
+            ); //correct
+
+            switch (request()->status) {
+                case 'pending':
+                    $this->pendingBook($client, $user, $booking);
+                    break;
+                case 'accepted':
+                    $this->acceptBooking($client, $user, $booking);
+                    break;
+                case 'cancelled':
+                    $this->canceledBooking($user, $client, $booking);
+                    break;
+                case 'completed':
+                    $this->completeBooking($client, $user, $booking);
+                    break;
+                default:
+                    # code...
+                    break;
+            }
+
+            return response()->json([
+                'message' => 'Success',
+                'bookings' => $booking,
+
+            ], 200);
+        } catch (\Throwable $th) {
+            // throw $th;
         }
-        $booking = Booking::find(request()->booking_id);
-        $listing_user_id = Listing::find($booking->listing_id) ?? 0;
-        $user = User::find($listing_user_id->user_id);
-        $client = User::find($booking->user_id);
-
-        $status = request()->isModify ? 'modify' : request()->status;
-        $userDetails = [
-            'message' => "You just $status a booking $client?->listing_name",
-            'user_id' => $user->id ?? 0,
-            'title' => "Booking",
-            'booking_id' => $booking->id ?? 0
-        ];
-        $clientDetails = [
-            'message' => "Booking was $status by $user->name",
-            'user_id' => $client?->id,
-            'title' => "Booking",
-            'booking_id' => $booking->id ?? 0
-        ];
-        (new Notify)->trigger($userDetails);
-        (new Notify)->trigger($clientDetails);
-
-        $booking->update(
-            request()->all()
-        ); //correct
-
-        switch (request()->status) {
-            case 'pending':
-                $this->pendingBook($client, $user, $booking);
-                break;
-            case 'accepted':
-                $this->acceptBooking($client, $user, $booking);
-                break;
-            case 'cancelled':
-                $this->canceledBooking($client, $user, $booking);
-                break;
-            case 'completed':
-                $this->completeBooking($client, $user, $booking);
-                break;
-            default:
-                # code...
-                break;
-        }
-
-        return response()->json([
-            'message' => 'Success',
-            'bookings' => $booking,
-
-        ], 200);
     }
 
     /**
