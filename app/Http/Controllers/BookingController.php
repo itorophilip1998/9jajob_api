@@ -109,8 +109,8 @@ class BookingController extends Controller
         $req['user_id'] = auth()->user()->id;
         $booking = Booking::create($req);
         $listing_user_id = Listing::find(request()->listing_id) ?? 0;
-        $user = User::find($listing_user_id?->user_id);
-        $client = auth()->user();
+        $client = User::find($listing_user_id?->user_id);
+        $user = auth()->user();
 
         $clientDetails = [
             'message' => "You just book $user->name, you have an option to cancel booking or modify the booking",
@@ -127,7 +127,7 @@ class BookingController extends Controller
 
         (new Notify)->trigger($clientDetails);
         (new Notify)->trigger($userDetails);
-       return $this->pendingBook($client, $user, $booking);
+         $this->pendingBook($client, $user, $booking);
         return response()->json(['message' => 'Success!!'], 200);
     }
 
@@ -145,7 +145,7 @@ class BookingController extends Controller
                'booking'=> $booking
             ];
             // return $user->email;
-            Mail::to($user->email)->queue(new SystemMailNotification($item));
+            Mail::to($user?->email)->queue(new SystemMailNotification($item));
         } catch (\Throwable $th) {
             // throw $th;
         }
