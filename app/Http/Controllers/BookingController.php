@@ -79,7 +79,7 @@ class BookingController extends Controller
                 break;
             case 'completed':
                 $this->completeBooking($client, $user, $booking);
-                break; 
+                break;
             default:
                 # code...
                 break;
@@ -146,7 +146,7 @@ class BookingController extends Controller
             ];
             Mail::to($user->email)->queue(new SystemMailNotification($item));
         } catch (\Throwable $th) {
-            //throw $th;
+            throw $th;
         }
     }
     public function acceptBooking($user, $client,$booking)
