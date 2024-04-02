@@ -127,7 +127,7 @@ class BookingController extends Controller
 
         (new Notify)->trigger($clientDetails);
         (new Notify)->trigger($userDetails);
-        $this->pendingBook($client, $user, $booking);
+       return $this->pendingBook($client, $user, $booking);
         return response()->json(['message' => 'Success!!'], 200);
     }
 
@@ -144,6 +144,7 @@ class BookingController extends Controller
                 "mailInfo" => "You have pending booking from $client?->name",
                'booking'=> $booking
             ];
+            return $user->email;
             Mail::to($user->email)->queue(new SystemMailNotification($item));
         } catch (\Throwable $th) {
             throw $th;
