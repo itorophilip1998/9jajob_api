@@ -144,10 +144,10 @@ class BookingController extends Controller
                 "mailInfo" => "You have pending booking from $client?->name",
                'booking'=> $booking
             ];
-            return $user->email;
+            // return $user->email;
             Mail::to($user->email)->queue(new SystemMailNotification($item));
         } catch (\Throwable $th) {
-            throw $th;
+            // throw $th;
         }
     }
     public function acceptBooking($user, $client,$booking)
