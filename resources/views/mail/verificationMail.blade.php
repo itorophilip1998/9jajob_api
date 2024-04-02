@@ -1,5 +1,5 @@
 <!-- resources/views/your-page.blade.php -->
-@extends('layouts.mailBox')
+@extends('mail.layouts.mailBox')
 
 @section('content')
     <div class="container">

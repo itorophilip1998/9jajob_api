@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use App\Models\Notification;
 use App\Models\Transactions;
 use App\Http\services\Balance;
+use App\Mail\SystemMailNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreBoostingRequest;
@@ -24,6 +25,7 @@ class BoostingController extends Controller
      */
     public function create()
     {
+
 
         $amount = request()->amount;
         // check balance
@@ -45,10 +47,10 @@ class BoostingController extends Controller
         $isVerified = Boosting::where(['listing_id' => request()->listing_id])->latest()->first();
         $isMyListing = Listing::find(request()->listing_id);
 
-        if (isset($isMyListing) &&  $isMyListing->user_id != auth()->user()->id) return response()->json(['message' => 'This is not your Boosting!'], 200);
+        if (!$isMyListing) return response()->json(['message' => 'No Listing Found!'], 200);
+        if (isset($isMyListing) &&  $isMyListing->user_id != auth()->user()->id) return response()->json(['message' => 'This is not your Listing!'], 200);
+        if (isset($isVerified) && $isVerified->status == 'active') return response()->json(['message' => 'Boosting already existed!'], 200);
 
-        if (isset($isVerified) && $isVerified->status == 'active') return response()->json(['message' => 'Boosting In Progress!'], 200);
-        else if (isset($isVerified) &&  $isVerified->status != 'in-active') return response()->json(['message' => 'Boosting Completed Already!'], 200);
         $req = request()->all();
         $req['status'] = 'active';
         Boosting::create($req);
@@ -61,23 +63,11 @@ class BoostingController extends Controller
             'ref_number' => $ref_number,
             'trans_id' => $ref_number,
             'amount' => request()->amount,
-            'description' => "Congratulation!!!, You Just Boost your Business($isMyListing->listing_name), this means your business will be enlisted in the top listings of 9jajob",
+            'description' => "Congratulation!!!, You Just Boost your Business($isMyListing?->listing_name), this means your business will be enlisted in the top listings of 9jajob",
             'purpose' => 'boost', //verification ,packages, top-up, withdrawal,referrals, boost]
 
         ];
         Transactions::create($transaction);
-
-        // send invioce
-        $item = [
-            "invoiceNumber" => rand(1111, 9999),
-            "invoiceDate" => Carbon::now()->format("d M, Y"),
-            "user" => auth()->user()->name,
-            "purpose" => $transaction["purpose"],
-            "status" => $transaction["status"],
-            "ref_number" => $transaction["ref_number"],
-            "amount" => $transaction["amount"],
-            "description" => $transaction['description'],
-        ];
 
         $notification =
             [
@@ -91,13 +81,23 @@ class BoostingController extends Controller
         (new Notify)->trigger($notification);
         try {
 
-            Mail::send('mail.invioce',  ['item' => $item], function ($message) {
-                $message->to(auth()->user()->email);
-                $message->subject('Invioce');
-            });
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
+
+            $start_date=Carbon::parse(request()->start_date);
+            $end_date=Carbon::parse(request()->end_date);
+            $boostingMail=[
+             'subject'=>'Business Boost Successfully Activated on 9jajob',
+             'user'=>auth()->user()->name,
+             'view'=>'mail.boostingMail',
+             'start_date'=>$start_date?->format('jS F, Y'),
+             'end_date'=>$end_date?->format('jS F, Y'),
+          ];
+        //   dump($boostingMail);
+
+             Mail::to(auth()->user()->email)->queue(new SystemMailNotification($boostingMail));
+
+         } catch (\Throwable $th) {
+            //  throw $th;
+         }
         return response()->json(['message' => 'Boosting Initiated!!!'], 200);
     }
 }

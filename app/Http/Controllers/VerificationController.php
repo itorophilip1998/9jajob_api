@@ -11,6 +11,7 @@ use App\Http\services\Upload;
 use App\Http\services\Balance;
 use Illuminate\Http\Client\Request;
 use App\Http\Controllers\Controller;
+use App\Mail\SystemMailNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreVerificationRequest;
@@ -108,10 +109,10 @@ class VerificationController extends Controller
             "ref_number" => $transaction["ref_number"],
             "amount" => $transaction["amount"],
         ];
-        Mail::send('mail.invioce',  ['item' => $item], function ($message) {
-            $message->to(auth()->user()->email);
-            $message->subject('Invioce');
-        });
+
+
+
+
         Notification::create(
             [
                 'message' => $transaction['description'],
@@ -143,7 +144,7 @@ class VerificationController extends Controller
 
     public function updateVerifications($id)
     {
-        Verification::where('listing_id', $id)->update(request()->all());
+        Verification::where('listing_id', $id)->update(request()->all()); 
         return response()->json(["message" => 'Verification Updated!!'], 200);
     }
 }

@@ -102,7 +102,7 @@ class AuthController extends Controller
             'password' => 'nullable|min:8',
             're_password' => 'nullable|same:password',
 
-        ]);
+        ] );
 
 
         if ($validator->fails()) {
@@ -124,9 +124,9 @@ class AuthController extends Controller
 
         $user = User::find(auth()->user()->id);
             //Send failed response if request is not valid
-            if ($user?->phone ) {
-                return response()->json(['error' => $validator->messages()], 422);
-            }
+            // if ($user?->phone ) {
+            //     return response()->json(['error' => $validator->messages()], 422);
+            // }
         $user->update($data);
 
         return response()->json(['message' => 'Successfully edited User'], 200);
@@ -247,7 +247,6 @@ class AuthController extends Controller
 
         $validator = Validator::make(request()->all(), [
             'email' => 'required|email'
-
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
@@ -259,7 +258,7 @@ class AuthController extends Controller
         } else {
             $et_data = EmailTemplate::where('id', 7)->first();
             $subject = $et_data->et_subject;
-            $message = 'Hello ' . $check_email->name . ", \n to reset your password copy the OTP bellow:";
+            $message = 'Dear ' . $check_email->name . ", \n to reset your password copy the OTP bellow:";
             $token = rand(10000, 99999);
             // $reset_link = url('customer/reset-password/' . $token . '/' . request()->email);
 
@@ -269,7 +268,7 @@ class AuthController extends Controller
 
                 Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message, $token));
             } catch (\Throwable $th) {
-                throw $th;
+                // throw $th;
             }
         }
 
