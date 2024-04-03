@@ -8,13 +8,13 @@
 <p>{{ $item['mailInfo'] }}</p>
 
 
-{{-- <p>
+  <p>
  <h4>Booking Details:</h4>
-- Date Booked: {{ $item?['booking']?['date'] }} <br/>
-- Time:{{ $item?['booking']?['time'] }}  <br/>
-- Location: {{ $item?['booking']?['location'] }}  <br/>
-- Phone: {{ $item?['booking']?['phone'] }} <br/>
-</p> --}}
+- Date Booked: <b> {{ \Carbon\Carbon::parse($item['booking']['date'])->format('jS F, Y') ?? "-"}}</b> <br/>
+- Time: <b>{{ $item['booking']['time'] ?? "-"}}</b>  <br/>
+- Location: <b>{{ $item['booking']['location'] ?? "-"}} </b> <br/>
+- Phone: <b>{{ $item['booking']['phone']  ?? "-"}}</b> <br/>
+</p>
 
 
 <p>
