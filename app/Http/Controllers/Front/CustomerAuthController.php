@@ -138,9 +138,9 @@ class CustomerAuthController extends Controller
         Mail::to($user['email'])->queue(new SystemMailNotification($welcomeMail));
       }
 
-        return redirect('https://www.9jajob.com/customer/login')->with('success', 'User Successfully Verifiied');
+        return redirect('https://www.9jajob.com/verified')->with('success', 'User Successfully Verifiied');
        } catch (\Throwable $th) {
-        return redirect('https://www.9jajob.com/customer/login')->with('success', 'User Successfully Verifiied');
+        return redirect('https://www.9jajob.com/login')->with('success', 'User Successfully Verifiied');
 
        }
     }
