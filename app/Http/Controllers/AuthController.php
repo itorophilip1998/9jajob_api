@@ -101,15 +101,17 @@ class AuthController extends Controller
         $validator = Validator::make(request()->all(), [
             'password' => 'nullable|min:8',
             're_password' => 'nullable|same:password',
-
+            'phone'=>'required|unique:users'
         ] );
-
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
         }
 
         $data = request()->all();
+        if (request()->password !== null) {
+            $data['password'] = Hash::make($data['password']);
+        }
         if (request()->password !== null) {
             $data['password'] = Hash::make($data['password']);
         }
