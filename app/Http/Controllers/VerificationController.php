@@ -29,7 +29,7 @@ class VerificationController extends Controller
             return response()->json(['error' => 'Insufficient balance'], 422);
 
         $validator = Validator::make(request()->all(), [
-            'listing_id' => 'required', 
+            'listing_id' => 'required',
             'id_card_front' => 'required|file',
         ]);
         if ($validator->fails()) {
@@ -80,7 +80,7 @@ class VerificationController extends Controller
         if (isset($isVerified) && $isVerified->status == 'pending') return response()->json(['message' => 'Verification In Progress!'], 200);
         else if (isset($isVerified) &&  $isVerified->status != 'completed') return response()->json(['message' => 'Verification Completed Already!'], 200);
 
-
+        if(!request()->reg_number || request()->reg_number===NULL)  $req['reg_number']="N/A";
         Verification::create($req);
         // send transaction
         $ref_number = Str::random(10);
