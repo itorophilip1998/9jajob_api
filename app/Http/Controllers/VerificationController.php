@@ -29,9 +29,8 @@ class VerificationController extends Controller
             return response()->json(['error' => 'Insufficient balance'], 422);
 
         $validator = Validator::make(request()->all(), [
-            'listing_id' => 'required',
-            'reg_number' => 'required',
-            'id_card_front' => 'required|file', 
+            'listing_id' => 'required', 
+            'id_card_front' => 'required|file',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
