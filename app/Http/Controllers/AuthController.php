@@ -104,7 +104,6 @@ class AuthController extends Controller
             'phone'=>'required|unique:users'
         ] );
 
-
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
         }
