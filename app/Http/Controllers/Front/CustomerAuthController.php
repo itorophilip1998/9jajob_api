@@ -140,7 +140,7 @@ class CustomerAuthController extends Controller
 
         return redirect('https://www.9jajob.com/verified')->with('success', 'User Successfully Verifiied');
        } catch (\Throwable $th) {
-        return redirect('https://www.9jajob.com/login')->with('success', 'User Successfully Verifiied');
+        return redirect('https://www.9jajob.com/verified')->with('success', 'User Successfully Verifiied');
 
        }
     }
