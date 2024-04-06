@@ -404,17 +404,6 @@ class ListingController extends Controller
             ];
         (new Notify)->trigger($notification);
 
-
-        // sendmail
-        try {
-            Mail::send('mail.invioce',  ['item' => $item], function ($message) {
-                $message->to(auth()->user()->email);
-                $message->subject('Invioce');
-            });
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
-
         return response()->json(['message' => "Listing renewed successfully!!",  "listing" => $renew], 200);
     }
 
@@ -458,11 +447,11 @@ class ListingController extends Controller
 
 
         $user_data = Auth::user();
+       if (request()->hasFile('listing_featured_photo')) {
+          $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
+          $data['listing_featured_photo'] = $final_name;
+       }
 
-        if (request()->hasFile('listing_featured_photo')) {
-            $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
-            $data['listing_featured_photo'] = $final_name;
-        }
 
         $data = request()->all();
         $data['listing_slug'] = Str::slug(request()->listing_name);
@@ -507,41 +496,36 @@ class ListingController extends Controller
             }
         }
 
-        // Photo
-        if (is_array(request()->photo_list) || isset(request()->photo_list)) {
-            foreach (request()->photo_list as $item) {
-                $main_file_ext = $item->extension();
-                $main_mime_type = $item->getMimeType();
-                if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
-                    $rand_value = md5(mt_rand(11111111, 99999999));
-                    $final_photo_name = $rand_value . '.' . $main_file_ext;
-                    $item->move(public_path('uploads/listing_photos'), $final_photo_name);
-                    ListingPhoto::where(['listing_id' => $listing_id])->update([
-                        'listing_id' => $listing->id,
-                        'photo' => $final_photo_name,
-                    ]);
-                }
-            }
-        }
 
-        // Video
-        // if (is_array(request()->video) || isset(request()->video)) {
+        // Photo
+        // if (is_array(request()->photo_list) || isset(request()->photo_list)) {
         //     foreach (request()->photo_list as $item) {
         //         $main_file_ext = $item->extension();
         //         $main_mime_type = $item->getMimeType();
         //         if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
         //             $rand_value = md5(mt_rand(11111111, 99999999));
-        //             $youtube_video_id = $rand_value . '.' . $main_file_ext;
-        //             $item->move(public_path('uploads/listing_video'), $youtube_video_id);
-        //             $obj = new ListingVideo;
-        //             $obj->listing_id = $listing_id;
-        //             $obj->is_mobile_video = true;
-        //             $obj->youtube_video_id = $youtube_video_id;
-        //             $obj->save();
+        //             $final_photo_name = $rand_value . '.' . $main_file_ext;
+        //             $item->move(public_path('uploads/listing_photos'), $final_photo_name);
+        //             ListingPhoto::where(['listing_id' => $listing_id])->update([
+        //                 'listing_id' => $listing->id,
+        //                 'photo' => $final_photo_name,
+        //             ]);
         //         }
         //     }
         // }
 
+
+        //Video
+        // if (is_array(request()->video) || isset(request()->video)) {
+        //     foreach (request()->video as $item) {
+        //         $videoName =  (new Upload)->video($item, 'uploads/listing_videos/');
+        //         $listing?->listingsVideos()->update([
+        //             'listing_id' => $listing->id,
+        //             'is_mobile_video' => true,
+        //             'youtube_video_id' => $videoName,
+        //         ]);
+        //     }
+        // }
 
 
 
