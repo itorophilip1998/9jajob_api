@@ -62,7 +62,7 @@ class AuthController extends Controller
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
+        
         $ref_code = auth()->user()->referrer_code;
         if (!$ref_code) {
             return false;

@@ -24,10 +24,10 @@ class Notify
                 'status' => 'unread'
             ]
         );
-   
+
         DB::table('admin_notifications')->insert(
             [
-                'description' => $data['title']."\n A new" . $data['title'] .  "was initiated, You receive this notification as an evidence for further investigation",
+                'description' => $data['title']."\n A new " . $data['title'] .  " was initiated, You receive this notification as an evidence for further investigation",
                 'title' => $data['title'],
                 'status' => 'unread',
                 'created_at'=>Carbon::now()

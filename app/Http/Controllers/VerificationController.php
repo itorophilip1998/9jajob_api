@@ -9,6 +9,7 @@ use App\Models\Transactions;
 use App\Models\Verification;
 use App\Http\services\Upload;
 use App\Http\services\Balance;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Client\Request;
 use App\Http\Controllers\Controller;
 use App\Mail\SystemMailNotification;
@@ -36,9 +37,7 @@ class VerificationController extends Controller
             return response()->json(['error' => $validator->messages()], 422);
         }
 
-
         // check balance
-
         $totalBalance = Transactions::where(['user_id' => auth()->user()->id])->get()->sum('amount');
         if ($totalBalance < 1000) {
             return response()->json(['message' => 'insufficient fund'], 200);
@@ -78,9 +77,11 @@ class VerificationController extends Controller
         $isVerified = Verification::where('listing_id', $req['listing_id'])->first();
 
         if (isset($isVerified) && $isVerified->status == 'pending') return response()->json(['message' => 'Verification In Progress!'], 200);
+
         else if (isset($isVerified) &&  $isVerified->status != 'completed') return response()->json(['message' => 'Verification Completed Already!'], 200);
 
         if(!request()->reg_number || request()->reg_number===NULL)  $req['reg_number']="N/A";
+
         Verification::create($req);
         // send transaction
         $ref_number = Str::random(10);
@@ -108,9 +109,6 @@ class VerificationController extends Controller
             "amount" => $transaction["amount"],
         ];
 
-
-
-
         Notification::create(
             [
                 'message' => $transaction['description'],
@@ -119,8 +117,18 @@ class VerificationController extends Controller
                 'status'=>'unread'
             ]
         );
+
+        DB::table('admin_notifications')->insert(
+            [
+                'description' =>  $transaction['description'],
+                'title' => "Verification",
+                'status' => 'unread',
+                'created_at'=>Carbon::now()
+            ]
+        );
         return response()->json(['message' => 'Verification In Progress!!!'], 200);
     }
+
     public function listOfVerifications()
     {
         $status = request()->input('status');
