@@ -447,13 +447,14 @@ class ListingController extends Controller
 
 
         $user_data = Auth::user();
-       if (request()->hasFile('listing_featured_photo')) {
-          $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
-          $data['listing_featured_photo'] = $final_name;
-       }
 
 
         $data = request()->all();
+        if (request()->hasFile('listing_featured_photo')) {
+            $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
+            $data['listing_featured_photo'] = $final_name;
+         }
+
         $data['listing_slug'] = Str::slug(request()->listing_name);
         $data['user_id'] = $user_data->id;
         $data['admin_id'] = 0;
@@ -462,7 +463,7 @@ class ListingController extends Controller
             'amenity', 'social_media', 'video', 'photo_list'
         ];
         $filteredData =   Arr::except($data, $keysToExclude);
-        $listing = Listing::where(['id' => $listing_id])->update($filteredData); //listing Created
+         Listing::where(['id' => $listing_id])->update($filteredData); //listing Created
 
 
         // Social Icons
@@ -495,38 +496,28 @@ class ListingController extends Controller
                 );
             }
         }
+   // Photo
+   if (is_array(request()->photo_list) || isset(request()->photo_list)) {
+    foreach (request()->photo_list as $item) {
+        $final_photo_name =  (new Upload)->image($item, 'uploads/listing_photos/');
+        ListingPhoto::create([
+            'listing_id' => $listing_id,
+            'photo' => $final_photo_name,
+        ]);
+    }
+}
 
-
-        // Photo
-        // if (is_array(request()->photo_list) || isset(request()->photo_list)) {
-        //     foreach (request()->photo_list as $item) {
-        //         $main_file_ext = $item->extension();
-        //         $main_mime_type = $item->getMimeType();
-        //         if (($main_mime_type == 'image/jpeg' || $main_mime_type == 'image/png' || $main_mime_type == 'image/gif')) {
-        //             $rand_value = md5(mt_rand(11111111, 99999999));
-        //             $final_photo_name = $rand_value . '.' . $main_file_ext;
-        //             $item->move(public_path('uploads/listing_photos'), $final_photo_name);
-        //             ListingPhoto::where(['listing_id' => $listing_id])->update([
-        //                 'listing_id' => $listing->id,
-        //                 'photo' => $final_photo_name,
-        //             ]);
-        //         }
-        //     }
-        // }
-
-
-        //Video
-        // if (is_array(request()->video) || isset(request()->video)) {
-        //     foreach (request()->video as $item) {
-        //         $videoName =  (new Upload)->video($item, 'uploads/listing_videos/');
-        //         $listing?->listingsVideos()->update([
-        //             'listing_id' => $listing->id,
-        //             'is_mobile_video' => true,
-        //             'youtube_video_id' => $videoName,
-        //         ]);
-        //     }
-        // }
-
+//Video
+if (is_array(request()->video) || isset(request()->video)) {
+    foreach (request()->video as $item) {
+        $videoName =  (new Upload)->video($item, 'uploads/listing_videos/');
+        ListingVideo::create([
+            'listing_id' => $listing_id,
+            'is_mobile_video' => true,
+            'youtube_video_id' => $videoName,
+        ]);
+    }
+}
 
 
         // Additional Features
@@ -536,7 +527,7 @@ class ListingController extends Controller
                 ListingAdditionalFeature::updateOrCreate(
                     ['listing_id' => $listing_id],
                     [
-                        'listing_id' => $listing->id,
+                        'listing_id' => $listing_id,
                         'additional_feature_name' => $item,
                         'additional_feature_value' => $item,
                     ]
