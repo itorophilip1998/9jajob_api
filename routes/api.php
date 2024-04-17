@@ -1,8 +1,10 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Http\services\Upload;
 use App\Models\ListingCategory;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SpamController;
 use App\Http\Controllers\ChatsController;
@@ -172,4 +174,20 @@ Route::group([
     Route::post('/', [ContactController::class, 'send_email']);
 });
 
- 
+
+
+
+ Route::post('/delete-file', function()
+ {
+     // Extract the filename from the URL
+     $filename =  request()->url;
+
+     // Delete the file from DigitalOcean Spaces
+     Storage::disk('do_spaces')->delete($filename);
+
+     return "File '$filename' deleted successfully.";
+ });
+
+
+
+

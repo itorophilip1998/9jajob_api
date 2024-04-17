@@ -424,7 +424,6 @@ class ListingController extends Controller
         $listing_category = ListingCategory::orderBy('id', 'asc')->get();
         $listing_location = ListingLocation::orderBy('id', 'asc')->get();
         $amenity = Amenity::orderBy('id', 'asc')->get();
-
         $existing_amenities_array = array();
         $listing_amenities = ListingAmenity::where('listing_id', $id)->orderBy('id', 'asc')->get();
         foreach ($listing_amenities as $row) {
@@ -442,18 +441,9 @@ class ListingController extends Controller
 
     public function update($id)
     {
-
         $listing_id = $id;
-
-
         $user_data = Auth::user();
-
-
         $data = request()->all();
-        if (request()->hasFile('listing_featured_photo')) {
-            $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos');
-            $data['listing_featured_photo'] = $final_name;
-         }
 
         $data['listing_slug'] = Str::slug(request()->listing_name);
         $data['user_id'] = $user_data->id;
@@ -462,9 +452,13 @@ class ListingController extends Controller
         $keysToExclude = [
             'amenity', 'social_media', 'video', 'photo_list'
         ];
+        if (request()->hasFile('listing_featured_photo')) { 
+            $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos/');
+            $data['listing_featured_photo'] = $final_name;
+         }
+
         $filteredData =   Arr::except($data, $keysToExclude);
          Listing::where(['id' => $listing_id])->update($filteredData); //listing Created
-
 
         // Social Icons
         if (is_array(request()->social_media) || isset(request()->social_media)) {
@@ -558,20 +552,15 @@ if (is_array(request()->video) || isset(request()->video)) {
             }
         } catch (\Throwable $th) {
         }
-
-
         // Success Message and redirect
         return response()->json(['message' => "deleted"], 200);
     }
 
-
     public function delete_social_item($id)
     {
-
         if (env('PROJECT_MODE') == 0) {
             return redirect()->back()->with('error', env('PROJECT_NOTIFICATION'));
         }
-
         $listing_social_item = ListingSocialItem::findOrFail($id);
         $listing_social_item->delete();
         return Redirect()->back()->with('success', SUCCESS_ACTION);
