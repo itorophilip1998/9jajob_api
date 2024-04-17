@@ -62,7 +62,7 @@ class AuthController extends Controller
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-        
+
         $ref_code = auth()->user()->referrer_code;
         if (!$ref_code) {
             return false;
@@ -101,7 +101,7 @@ class AuthController extends Controller
         $validator = Validator::make(request()->all(), [
             'password' => 'nullable|min:8',
             're_password' => 'nullable|same:password',
-            'phone'=>'required|unique:users'
+            // 'phone'=>'required|unique:users'
         ] );
 
         if ($validator->fails()) {
