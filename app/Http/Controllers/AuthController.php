@@ -268,7 +268,7 @@ class AuthController extends Controller
             User::where('email', request()->email)->update($data);
             try {
 
-                Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message, $token));
+                Mail::to(request()->email)->queue(new ResetPasswordMessageToCustomer($subject, $message, $token));
             } catch (\Throwable $th) {
                 // throw $th;
             }
