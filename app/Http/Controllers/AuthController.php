@@ -173,6 +173,7 @@ class AuthController extends Controller
 
         return $this->respondWithToken($token, "Login Successfully!");
     }
+    
     public function statusCheck()
     {
         $status = request()->status;
@@ -254,7 +255,7 @@ class AuthController extends Controller
             return response()->json(['error' => $validator->messages()], 422);
         }
         $check_email = User::where('email', request()->email)->where('status', 'Active')->first();
-
+  
         if (!$check_email) {
             return response()->json(['error' => 'Email Not Found !'], 422);
         } else {
@@ -264,18 +265,31 @@ class AuthController extends Controller
 
             $data['token'] = $token;
             User::where('email', request()->email)->update($data);
-            $confirmationMail = [
-                'subject' => 'Confirm Your Email Address',
-                'link' => url('customer/registration/verify/'),
-                'view' => 'mail.emailConfirmation',
-                'user' => 'itoro'
-            ];
+<<<<<<< HEAD
+               $confirmationMail=[
+            'subject'=>'Confirm Your Email Address',
+            'link'=>url('customer/registration/verify/'),
+            'view'=>'mail.emailConfirmation',
+            'user'=>'itoro'
+        ];
+       
+                Mail::to(request()->email)->queue(new SystemMailNotification($confirmationMail)); 
+            
+=======
             try {
-                //code...
+                // ConfirmationMail
+                $confirmationMail = [
+                    'subject' => $et_data->et_subject,
+                    'message' => 'Dear ' . $check_email->name . ", \n to reset your password copy the OTP bellow:",
+                    'view' => 'mail.passwordReset',
+                    'token' => rand(10000, 99999),
+                    'user' => $check_email->name,
+                ];
                 Mail::to(request()->email)->queue(new SystemMailNotification($confirmationMail));
             } catch (\Throwable $th) {
                 //throw $th;
             }
+>>>>>>> refs/remotes/origin/production
         }
 
         $email = request()->email;
