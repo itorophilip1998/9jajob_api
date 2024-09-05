@@ -21,7 +21,19 @@
     margin: 1rem 0;
 
 }
-
+.button_token{
+     display: inline-block;
+    padding: 10px 20px;
+    background-color: #fff; /* Green */
+    color: #086c0a !important;
+    border: 2px solid #086c0a; /* Green border */
+    border-radius: 5px;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow */
+    transition: all 0.3s ease;
+    font-size: 24px !important;
+    word-spacing: 3px
+}
 .button_confirm {
     display: inline-block;
     padding: 10px 20px;

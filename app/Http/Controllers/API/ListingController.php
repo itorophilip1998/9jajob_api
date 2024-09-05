@@ -328,13 +328,13 @@ class ListingController extends Controller
 
         // sendmail
         try {
-           //referrerMail
-        $listingsMail=[
-            'subject'=>'Congratulations on Successfully Listing Your Service on 9jajob',
-            'user'=>auth()->user()->name,
-            'view'=>'mail.listingMail',
-         ];
-            Mail::to(auth()->user()->email)->send(new SystemMailNotification($listingsMail)); //referrerMail
+            //referrerMail
+            $listingsMail = [
+                'subject' => 'Congratulations on Successfully Listing Your Service on 9jajob',
+                'user' => auth()->user()->name,
+                'view' => 'mail.listingMail',
+            ];
+            Mail::to(auth()->user()->email)->queue(new SystemMailNotification($listingsMail)); //referrerMail
 
         } catch (\Throwable $th) {
             // throw $th;
@@ -452,13 +452,13 @@ class ListingController extends Controller
         $keysToExclude = [
             'amenity', 'social_media', 'video', 'photo_list'
         ];
-        if (request()->hasFile('listing_featured_photo')) { 
+        if (request()->hasFile('listing_featured_photo')) {
             $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos/');
             $data['listing_featured_photo'] = $final_name;
-         }
+        }
 
         $filteredData =   Arr::except($data, $keysToExclude);
-         Listing::where(['id' => $listing_id])->update($filteredData); //listing Created
+        Listing::where(['id' => $listing_id])->update($filteredData); //listing Created
 
         // Social Icons
         if (is_array(request()->social_media) || isset(request()->social_media)) {
@@ -490,28 +490,28 @@ class ListingController extends Controller
                 );
             }
         }
-   // Photo
-   if (is_array(request()->photo_list) || isset(request()->photo_list)) {
-    foreach (request()->photo_list as $item) {
-        $final_photo_name =  (new Upload)->image($item, 'uploads/listing_photos/');
-        ListingPhoto::create([
-            'listing_id' => $listing_id,
-            'photo' => $final_photo_name,
-        ]);
-    }
-}
+        // Photo
+        if (is_array(request()->photo_list) || isset(request()->photo_list)) {
+            foreach (request()->photo_list as $item) {
+                $final_photo_name =  (new Upload)->image($item, 'uploads/listing_photos/');
+                ListingPhoto::create([
+                    'listing_id' => $listing_id,
+                    'photo' => $final_photo_name,
+                ]);
+            }
+        }
 
-//Video
-if (is_array(request()->video) || isset(request()->video)) {
-    foreach (request()->video as $item) {
-        $videoName =  (new Upload)->video($item, 'uploads/listing_videos/');
-        ListingVideo::create([
-            'listing_id' => $listing_id,
-            'is_mobile_video' => true,
-            'youtube_video_id' => $videoName,
-        ]);
-    }
-}
+        //Video
+        if (is_array(request()->video) || isset(request()->video)) {
+            foreach (request()->video as $item) {
+                $videoName =  (new Upload)->video($item, 'uploads/listing_videos/');
+                ListingVideo::create([
+                    'listing_id' => $listing_id,
+                    'is_mobile_video' => true,
+                    'youtube_video_id' => $videoName,
+                ]);
+            }
+        }
 
 
         // Additional Features
