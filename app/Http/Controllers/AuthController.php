@@ -173,6 +173,7 @@ class AuthController extends Controller
 
         return $this->respondWithToken($token, "Login Successfully!");
     }
+    
     public function statusCheck()
     {
         $status = request()->status;
@@ -254,7 +255,7 @@ class AuthController extends Controller
             return response()->json(['error' => $validator->messages()], 422);
         }
         $check_email = User::where('email', request()->email)->where('status', 'Active')->first();
-
+  
         if (!$check_email) {
             return response()->json(['error' => 'Email Not Found !'], 422);
         } else {
@@ -266,12 +267,15 @@ class AuthController extends Controller
 
             $data['token'] = $token;
             User::where('email', request()->email)->update($data);
-            try {
-
-                Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message, $token));
-            } catch (\Throwable $th) {
-                // throw $th;
-            }
+               $confirmationMail=[
+            'subject'=>'Confirm Your Email Address',
+            'link'=>url('customer/registration/verify/'),
+            'view'=>'mail.emailConfirmation',
+            'user'=>'itoro'
+        ];
+       
+                Mail::to(request()->email)->queue(new SystemMailNotification($confirmationMail)); 
+            
         }
 
         $email = request()->email;
