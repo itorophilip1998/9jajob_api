@@ -264,18 +264,17 @@ class AuthController extends Controller
 
             $data['token'] = $token;
             User::where('email', request()->email)->update($data);
+            $confirmationMail = [
+                'subject' => 'Confirm Your Email Address',
+                'link' => url('customer/registration/verify/'),
+                'view' => 'mail.emailConfirmation',
+                'user' => 'itoro'
+            ];
             try {
-                // ConfirmationMail
-                $confirmationMail = [
-                    'subject' => $et_data->et_subject,
-                    'message' => 'Dear ' . $check_email->name . ", \n to reset your password copy the OTP bellow:",
-                    'view' => 'mail.passwordReset',
-                    'token' => rand(10000, 99999),
-                    'user' => $check_email->name,
-                ];
+                //code...
                 Mail::to(request()->email)->queue(new SystemMailNotification($confirmationMail));
             } catch (\Throwable $th) {
-                // throw $th;
+                //throw $th;
             }
         }
 
