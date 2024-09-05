@@ -44,7 +44,7 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
             're_password' => 'required|same:password',
-            'phone'=>'required|unique:users'
+            'phone' => 'required|unique:users'
         ]);
 
         //Send failed response if request is not valid
@@ -84,15 +84,15 @@ class AuthController extends Controller
                 'description' => "$newUser Just Registered in the system.",
                 'title' => "User Registration",
                 'status' => 'unread',
-                'created_at'=>Carbon::now()
+                'created_at' => Carbon::now()
 
             ]
         );
 
         // send mails
-         $this->sendMail($data);
+        $this->sendMail($data);
 
-        return response()->json(['message'=>"Registered Successfully!, Please check your mail for verification"],200);
+        return response()->json(['message' => "Registered Successfully!, Please check your mail for verification"], 200);
     }
 
     public function editUser()
@@ -102,7 +102,7 @@ class AuthController extends Controller
             'password' => 'nullable|min:8',
             're_password' => 'nullable|same:password',
             // 'phone'=>'required|unique:users'
-        ] );
+        ]);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
@@ -125,10 +125,10 @@ class AuthController extends Controller
         }
 
         $user = User::find(auth()->user()->id);
-            //Send failed response if request is not valid
-            // if ($user?->phone ) {
-            //     return response()->json(['error' => $validator->messages()], 422);
-            // }
+        //Send failed response if request is not valid
+        // if ($user?->phone ) {
+        //     return response()->json(['error' => $validator->messages()], 422);
+        // }
         $user->update($data);
 
         return response()->json(['message' => 'Successfully edited User'], 200);
@@ -136,22 +136,22 @@ class AuthController extends Controller
 
 
 
-    public function sendMail($user){
+    public function sendMail($user)
+    {
 
-     try {
-      // ConfirmationMail
-        $confirmationMail=[
-            'subject'=>'Confirm Your Email Address',
-            'link'=>url('customer/registration/verify/' . $user['token'] . '/' . $user['email']),
-            'view'=>'mail.emailConfirmation',
-            'user'=>$user['name']
-        ];
-        Mail::to($user['email'])->queue(new SystemMailNotification($confirmationMail)); //confirmationMail
+        try {
+            // ConfirmationMail
+            $confirmationMail = [
+                'subject' => 'Confirm Your Email Address',
+                'link' => url('customer/registration/verify/' . $user['token'] . '/' . $user['email']),
+                'view' => 'mail.emailConfirmation',
+                'user' => $user['name']
+            ];
+            Mail::to($user['email'])->queue(new SystemMailNotification($confirmationMail)); //confirmationMail
 
-     } catch (\Throwable $th) {
-        //  throw $th;
-     }
-
+        } catch (\Throwable $th) {
+            //  throw $th;
+        }
     }
 
     public function login()
@@ -160,9 +160,9 @@ class AuthController extends Controller
         // return $user?->status;
 
         if ($user?->status && strtolower($user?->status) !== 'active') {
-            $token = ['token'=>hash('sha256', time())];
+            $token = ['token' => hash('sha256', time())];
             $user->update($token);
-             if($user)$this->sendMail($user);
+            if ($user) $this->sendMail($user);
             return response()->json(['error' => 'User not active, please verify your account!'], 404);
         }
         $credentials = request(['email', 'password']);
@@ -260,13 +260,12 @@ class AuthController extends Controller
             return response()->json(['error' => 'Email Not Found !'], 422);
         } else {
             $et_data = EmailTemplate::where('id', 7)->first();
-            $subject = $et_data->et_subject;
-            $message = 'Dear ' . $check_email->name . ", \n to reset your password copy the OTP bellow:";
             $token = rand(10000, 99999);
             // $reset_link = url('customer/reset-password/' . $token . '/' . request()->email);
 
             $data['token'] = $token;
             User::where('email', request()->email)->update($data);
+<<<<<<< HEAD
                $confirmationMail=[
             'subject'=>'Confirm Your Email Address',
             'link'=>url('customer/registration/verify/'),
@@ -276,6 +275,21 @@ class AuthController extends Controller
        
                 Mail::to(request()->email)->queue(new SystemMailNotification($confirmationMail)); 
             
+=======
+            try {
+                // ConfirmationMail
+                $confirmationMail = [
+                    'subject' => $et_data->et_subject,
+                    'message' => 'Dear ' . $check_email->name . ", \n to reset your password copy the OTP bellow:",
+                    'view' => 'mail.passwordReset',
+                    'token' => rand(10000, 99999),
+                    'user' => $check_email->name,
+                ];
+                Mail::to(request()->email)->queue(new SystemMailNotification($confirmationMail));
+            } catch (\Throwable $th) {
+                // throw $th;
+            }
+>>>>>>> refs/remotes/origin/production
         }
 
         $email = request()->email;
