@@ -351,60 +351,64 @@ class ListingController extends Controller
 
     public function renewListing()
     {
-        $listing_creation_amount = request()->listing_creation_amount;
-        // check balance
-        $balance = (new Balance)->check($listing_creation_amount);
-        if ($balance < $listing_creation_amount)
-            return response()->json(['error' => 'Insufficient balance'], 422);
+        try {
+            $listing_creation_amount = request()->listing_creation_amount;
+            // check balance
+            $balance = (new Balance)->check($listing_creation_amount);
+            if ($balance < $listing_creation_amount)
+                return response()->json(['error' => 'Insufficient balance'], 422);
 
-        $oldListing = ListingSubscription::where('listing_id', request()->listing_id);
-        $oldListing && $oldListing->update(['status' => 'inactive']);
-        $renew = ListingSubscription::create(
-            [
-                "listing_id" => request()->listing_id,
-                "start_date" => request()->start_date,
-                "end_date" => request()->end_date,
-                "amount" => request()->listing_creation_amount,
-            ]
-        );
-        $businessName = Listing::find(request()->listing_id);
+            $oldListing = ListingSubscription::where('listing_id', request()->listing_id);
+            $oldListing && $oldListing->update(['status' => 'inactive']);
+            $renew = ListingSubscription::create(
+                [
+                    "listing_id" => request()->listing_id,
+                    "start_date" => request()->start_date,
+                    "end_date" => request()->end_date,
+                    "amount" => request()->listing_creation_amount,
+                ]
+            );
+            $businessName = Listing::find(request()->listing_id);
 
-        // debit from wallate
-        $ref_number = Str::random(10);
-        $transaction = [
-            'user_id' => auth()->user()->id,
-            'type' => 'debit',
-            'status' => 'success', //debit, credit
-            'ref_number' => $ref_number,
-            'trans_id' => $ref_number,
-            'amount' => $listing_creation_amount,
-            'description' => "Congratulation!!!, You Just Resubscribe your Business($businessName->listing_name) for 1 year",
-            'purpose' => 'listings', //verification ,packages, top-up, withdrawal,referrals, boost]
-            'listing_id' => request()->listing_id,
-        ];
-        Transactions::create($transaction);
-        // notification
-        // send invioce
-        $item = [
-            "invoiceNumber" => rand(1111, 9999),
-            "invoiceDate" => Carbon::now()->format("d M, Y"),
-            "user" => auth()->user()->name,
-            "purpose" => $transaction["purpose"],
-            "status" => $transaction["status"],
-            "ref_number" => $transaction["ref_number"],
-            "amount" => $transaction["amount"],
-            'description' => "Congratulation!!!, You Just Resubscribe your Business($businessName->listing_name) for 1 year",
-        ];
-
-        $notification =
-            [
-                'message' => $item['description'],
+            // debit from wallate
+            $ref_number = Str::random(10);
+            $transaction = [
                 'user_id' => auth()->user()->id,
-                'title' => 'Listing'
+                'type' => 'debit',
+                'status' => 'success', //debit, credit
+                'ref_number' => $ref_number,
+                'trans_id' => $ref_number,
+                'amount' => $listing_creation_amount,
+                'description' => "Congratulation!!!, You Just Resubscribe your Business($businessName->listing_name) for 1 year",
+                'purpose' => 'listings', //verification ,packages, top-up, withdrawal,referrals, boost]
+                'listing_id' => request()->listing_id,
             ];
-        (new Notify)->trigger($notification);
+            Transactions::create($transaction);
+            // notification
+            // send invioce
+            $item = [
+                "invoiceNumber" => rand(1111, 9999),
+                "invoiceDate" => Carbon::now()->format("d M, Y"),
+                "user" => auth()->user()->name,
+                "purpose" => $transaction["purpose"],
+                "status" => $transaction["status"],
+                "ref_number" => $transaction["ref_number"],
+                "amount" => $transaction["amount"],
+                'description' => "Congratulation!!!, You Just Resubscribe your Business($businessName->listing_name) for 1 year",
+            ];
 
-        return response()->json(['message' => "Listing renewed successfully!!",  "listing" => $renew], 200);
+            $notification =
+                [
+                    'message' => $item['description'],
+                    'user_id' => auth()->user()->id,
+                    'title' => 'Listing'
+                ];
+            (new Notify)->trigger($notification);
+
+            return response()->json(['message' => "Listing renewed successfully!!",  "listing" => $renew], 200);
+        } catch (\Throwable $th) {
+            dd($th);
+        }
     }
 
     public function edit($id)
