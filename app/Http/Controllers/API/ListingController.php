@@ -167,6 +167,7 @@ class ListingController extends Controller
 
     public function AddListings()
     {
+        try {
         $listing_creation_amount = request()->listing_creation_amount;
 
         // check balance
@@ -346,6 +347,9 @@ class ListingController extends Controller
         $getAll = Listing::find($listing->id);
 
         return response()->json(['message' => "Success!!",  "listing" => $getAll], 200);
+        } catch (\Throwable $th) {
+            dd($th);
+        }
     }
 
 
@@ -407,7 +411,7 @@ class ListingController extends Controller
 
             return response()->json(['message' => "Listing renewed successfully!!",  "listing" => $renew], 200);
         } catch (\Throwable $th) {
-            dd($th);
+            // dd($th);
         }
     }
 
