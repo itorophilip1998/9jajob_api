@@ -246,8 +246,6 @@ class AuthController extends Controller
 
     public function forgotPassword()
     {
-
-
         $validator = Validator::make(request()->all(), [
             'email' => 'required|email'
         ]);
@@ -271,7 +269,7 @@ class AuthController extends Controller
                     'subject' => $et_data->et_subject,
                     'message' => 'Dear ' . $check_email->name . ", \n to reset your password copy the OTP bellow:",
                     'view' => 'mail.passwordReset',
-                    'token' => rand(10000, 99999),
+                    'token' => $token,
                     'user' => $check_email->name,
                 ];
                 Mail::to(request()->email)->queue(new SystemMailNotification($confirmationMail));
