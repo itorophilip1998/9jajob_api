@@ -24,10 +24,13 @@ class VerificationController extends Controller
     public function create()
     {
         $amount = request()->amount;
+        $extra_details = DB::table("extra_details")->first() ?? 150;
         // check balance
         $balance = (new Balance)->check($amount);
-        if ($balance < $amount)
+        // $systemData=
+        if ($balance <= $amount && $extra_details?->system_payment_mode === "payment")
             return response()->json(['error' => 'Insufficient balance'], 422);
+
 
         $validator = Validator::make(request()->all(), [
             'listing_id' => 'required',
@@ -80,7 +83,7 @@ class VerificationController extends Controller
 
         else if (isset($isVerified) &&  $isVerified->status != 'completed') return response()->json(['message' => 'Verification Completed Already!'], 200);
 
-        if(!request()->reg_number || request()->reg_number===NULL)  $req['reg_number']="N/A";
+        if (!request()->reg_number || request()->reg_number === NULL)  $req['reg_number'] = "N/A";
 
         Verification::create($req);
         // send transaction
@@ -114,7 +117,7 @@ class VerificationController extends Controller
                 'message' => $transaction['description'],
                 'user_id' => auth()->user()->id,
                 'title' => 'Verification',
-                'status'=>'unread'
+                'status' => 'unread'
             ]
         );
 
@@ -123,7 +126,7 @@ class VerificationController extends Controller
                 'description' =>  $transaction['description'],
                 'title' => "Verification",
                 'status' => 'unread',
-                'created_at'=>Carbon::now()
+                'created_at' => Carbon::now()
             ]
         );
         return response()->json(['message' => 'Verification In Progress!!!'], 200);
