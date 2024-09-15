@@ -18,7 +18,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
- 
+Route::get('/delete-my-account/{email}', function () {
+    $email = request()->email;
+    return "$email deleted successfully";
+});
+
+
 
 Route::get('customer/registration/verify/{token}/{email}', [CustomerAuthController::class, 'registration_verify'])
     ->name('customer_registration_verify');
