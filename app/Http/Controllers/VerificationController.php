@@ -79,7 +79,7 @@ class VerificationController extends Controller
 
         $isVerified = Verification::where('listing_id', $req['listing_id'])->first();
 
-        if (isset($isVerified) && $isVerified->status == 'pending') return response()->json(['message' => 'Verification In Progress!'], 200);
+        if (isset($isVerified) && $isVerified->status == 'pending') return response()->json(['message' => 'There is an existing verification!'], 200);
 
         else if (isset($isVerified) &&  $isVerified->status != 'completed') return response()->json(['message' => 'Verification Completed Already!'], 200);
 
