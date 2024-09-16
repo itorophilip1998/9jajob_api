@@ -23,11 +23,12 @@ class VerificationController extends Controller
 
     public function create()
     {
-        $amount = request()->amount;
-        $extra_details = DB::table("extra_details")->first() ?? 150;
+
+        $extra_details = DB::table("extra_details")->first();
+        $amount = $extra_details?->verification_amount;
         // check balance
         $balance = (new Balance)->check($amount);
-        dump($extra_details?->system_payment_mode, $balance , $amount);
+        dump($extra_details?->system_payment_mode, $balance, $amount);
         if ($balance <= $amount && $extra_details?->system_payment_mode === "payment")
             return response()->json(['error' => 'Insufficient balance'], 422);
 
