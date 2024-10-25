@@ -40,101 +40,105 @@ class ListingController extends Controller
     public function index()
     {
 
-        $listing_category_id = request()->input('listing_category_id');
-        $listing_category_name = request()->input('listing_category_name');
-        $listing_name = request()->input('listing_name');
-        $listing_city = request()->input('listing_city');
-        $is_nearest = request()->input('is_nearest');
-        $is_trending = request()->input('is_trending');
-        $is_auto_complete =  request()->input('is_auto_complete');
+        try {
+            $listing_category_id = request()->input('listing_category_id');
+            $listing_category_name = request()->input('listing_category_name');
+            $listing_name = request()->input('listing_name');
+            $listing_city = request()->input('listing_city');
+            $is_nearest = request()->input('is_nearest');
+            $is_trending = request()->input('is_trending');
+            $is_auto_complete =  request()->input('is_auto_complete');
 
-        if ($is_auto_complete == 'true') {
-            $listing_name = Listing::orderBy('listing_name')->select('listing_name')
-                ->withOut(['rListingLocation', 'rListingCategory'])->get()->map(function ($item) {
-                    $listing_name = $item['listing_name'];
-                    $item = "$listing_name";
+            if ($is_auto_complete == 'true') {
+                $listing_name = Listing::orderBy('listing_name')->select('listing_name')
+                    ->withOut(['rListingLocation', 'rListingCategory'])->get()->map(function ($item) {
+                        $listing_name = $item['listing_name'];
+                        $item = "$listing_name";
+                        return $item;
+                    });
+                $listing_category_name = ListingCategory::orderBy('listing_category_name')->select('listing_category_name', 'id')->get()->map(function ($item) {
+                    $item = $item['listing_category_name'];
                     return $item;
                 });
-            $listing_category_name = ListingCategory::orderBy('listing_category_name')->select('listing_category_name', 'id')->get()->map(function ($item) {
-                $item = $item['listing_category_name'];
+                return response()->json(['auto_complete' => [
+                    'listing_category_name' => $listing_category_name,
+                    'listing_name' => $listing_name,
+                ]], 200);
+            }
+
+
+            // Start with a base query
+            $query = Listing::query();
+
+            // update all listing status
+            $today = now();
+            ListingSubscription::whereDate('end_date', '<', $today)
+                ->update(['status' => 'inactive']);
+
+
+            $query->whereHas('listing_subscription', function ($q) {
+                $q->where('status', 'active');
+            });
+
+
+
+
+            // Add conditions only for parameters with values
+            if ($listing_category_id !== null) {
+                $query->where('listing_category_id', $listing_category_id);
+            }
+
+            if ($listing_city !== null) {
+                $query->where('listing_address', 'LIKE', '%' . $listing_city . '%');
+            }
+
+            if ($is_trending !== null) {
+                $query->has('boosting', '>=', 1)
+                    ->OrHas('verified', '>=', 1)
+                    ->OrHas('reviews', '>=', 1);
+            }
+            if ($listing_name !== null) {
+                $query->where('listing_name', 'LIKE', '%' . $listing_name);
+            }
+            if ($listing_category_name !== null) {
+
+                $query->whereHas('rListingCategory', function ($q) use ($listing_category_name) {
+                    $q->where('listing_category_name', 'LIKE', '%' . $listing_category_name);
+                });
+                // return $query->paginate(10);
+            }
+            // Execute the query
+            $item2 = [
+                "address_latitude" => request()->address_latitude,
+                "address_longitude" => request()->address_longitude
+            ];
+
+            $listing = $query
+                ->withCount(['boosting', 'reviews', 'verified'])
+                ->orderByDesc('boosting_count')
+                ->orderByDesc('verified_count')
+                ->orderByDesc('reviews_count')
+                ->paginate(10);
+
+
+            $listing->map(function ($item) use ($item2) {
+                $radLat1 = $item['address_latitude'];
+                $radLon1 = $item['address_longitude'];
+                $radLat2 = $item2['address_latitude'];
+                $radLon2 = $item2['address_longitude'];
+                $item['km'] = (isset($radLon2) && isset($radLat2)) ? $this->haversineDistance($radLat1, $radLon1, $radLat2, $radLon2) : null;
                 return $item;
             });
-            return response()->json(['auto_complete' => [
-                'listing_category_name' => $listing_category_name,
-                'listing_name' => $listing_name,
-            ]], 200);
+
+
+
+            $data = ["listing" => $listing];
+
+
+            return response()->json($data, 200);
+        } catch (\Throwable $error) {
+            throw $error;
         }
-
-
-        // Start with a base query
-        $query = Listing::query();
-
-        // update all listing status
-        $today = now();
-        ListingSubscription::whereDate('end_date', '<', $today)
-            ->update(['status' => 'inactive']);
-
-
-        $query->whereHas('listing_subscription', function ($q) {
-            $q->where('status', 'active');
-        });
-
-
-
-
-        // Add conditions only for parameters with values
-        if ($listing_category_id !== null) {
-            $query->where('listing_category_id', $listing_category_id);
-        }
-
-        if ($listing_city !== null) {
-            $query->where('listing_address', 'LIKE', '%' . $listing_city . '%');
-        }
-
-        if ($is_trending !== null) {
-            $query->has('boosting', '>=', 1)
-                ->OrHas('verified', '>=', 1)
-                ->OrHas('reviews', '>=', 1);
-        }
-        if ($listing_name !== null) {
-            $query->where('listing_name', 'LIKE', '%' . $listing_name);
-        }
-        if ($listing_category_name !== null) {
-
-            $query->whereHas('rListingCategory', function ($q) use ($listing_category_name) {
-                $q->where('listing_category_name', 'LIKE', '%' . $listing_category_name);
-            });
-            // return $query->paginate(10);
-        }
-        // Execute the query
-        $item2 = [
-            "address_latitude" => request()->address_latitude,
-            "address_longitude" => request()->address_longitude
-        ];
-
-        $listing = $query
-            ->withCount(['boosting', 'reviews', 'verified'])
-            ->orderByDesc('boosting_count')
-            ->orderByDesc('verified_count')
-            ->orderByDesc('reviews_count')
-            ->paginate(10);
-
-
-        $listing->map(function ($item) use ($item2) {
-            $radLat1 = $item['address_latitude'];
-            $radLon1 = $item['address_longitude'];
-            $radLat2 = $item2['address_latitude'];
-            $radLon2 = $item2['address_longitude'];
-            $item['km'] = (isset($radLon2) && isset($radLat2)) ? $this->haversineDistance($radLat1, $radLon1, $radLat2, $radLon2) : null;
-            return $item;
-        });
-
-
-
-        $data = ["listing" => $listing];
-
-
-        return response()->json($data, 200);
     }
 
 
@@ -168,187 +172,187 @@ class ListingController extends Controller
     public function AddListings()
     {
         try {
-        $listing_creation_amount = request()->listing_creation_amount;
+            $listing_creation_amount = request()->listing_creation_amount;
 
-        // check balance
-        // $balance = (new Balance)->check($listing_creation_amount);
-        // if ($balance < $listing_creation_amount )
-        //     return response()->json(['error' => 'Insufficient balance'], 422);
+            // check balance
+            // $balance = (new Balance)->check($listing_creation_amount);
+            // if ($balance < $listing_creation_amount )
+            //     return response()->json(['error' => 'Insufficient balance'], 422);
 
-        $user_data = Auth::user();
-        $validator = Validator::make(request()->all(), [
-            'listing_name' => 'required|unique:listings',
-            'listing_description' => 'required',
-            'listing_phone' => 'nullable',
-            'listing_address' => 'nullable',
-            'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic,avif',
-            'photo_list' => 'nullable|array',
-            'amenity' => 'nullable|array',
-            'video' => 'nullable|array',
-            'listing_creation_amount' => 'required'
-        ]);
+            $user_data = Auth::user();
+            $validator = Validator::make(request()->all(), [
+                'listing_name' => 'required|unique:listings',
+                'listing_description' => 'required',
+                'listing_phone' => 'nullable',
+                'listing_address' => 'nullable',
+                'listing_featured_photo' => 'required|image|mimes:jpeg,png,jpg,gif,heic,avif',
+                'photo_list' => 'nullable|array',
+                'amenity' => 'nullable|array',
+                'video' => 'nullable|array',
+                'listing_creation_amount' => 'required'
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 422);
-        }
-
-
-        $data = request()->all();
-        if (request()->hasFile('listing_featured_photo')) {
-            $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos/');
-            $data['listing_featured_photo'] = $final_name;
-        }
-        $data['listing_slug'] = Str::slug(request()->listing_name);
-        $data['user_id'] = $user_data->id;
-        $data['admin_id'] = 0;
-        $data['listing_status'] = "Active";
-        $listing = Listing::create($data); //listing Created
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->messages()], 422);
+            }
 
 
-        // Social Icons
-        if (is_array(request()->social_media) || isset(request()->social_media)) {
+            $data = request()->all();
+            if (request()->hasFile('listing_featured_photo')) {
+                $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos/');
+                $data['listing_featured_photo'] = $final_name;
+            }
+            $data['listing_slug'] = Str::slug(request()->listing_name);
+            $data['user_id'] = $user_data->id;
+            $data['admin_id'] = 0;
+            $data['listing_status'] = "Active";
+            $listing = Listing::create($data); //listing Created
 
-            // dump(request()->social_media);
-            foreach (request()->social_media as $item) {
-                if (is_array($item) && array_key_exists('icon', $item) && array_key_exists('url', $item)) {
-                    ListingSocialItem::create(
+
+            // Social Icons
+            if (is_array(request()->social_media) || isset(request()->social_media)) {
+
+                // dump(request()->social_media);
+                foreach (request()->social_media as $item) {
+                    if (is_array($item) && array_key_exists('icon', $item) && array_key_exists('url', $item)) {
+                        ListingSocialItem::create(
+                            [
+                                "listing_id" => $listing->id,
+                                "social_icon" =>  $item['icon'],
+                                "social_url" =>  $item['url'],
+                            ]
+                        );
+                    }
+                }
+            }
+            // Amenity
+
+            if (isset(request()->amenity) && is_array(request()->amenity)) {
+                foreach (request()->amenity as $item) {
+                    ListingAmenity::create(
                         [
-                            "listing_id" => $listing->id,
-                            "social_icon" =>  $item['icon'],
-                            "social_url" =>  $item['url'],
+                            'listing_id' => $listing->id,
+                            'amenity_id' => $item
                         ]
                     );
                 }
             }
-        }
-        // Amenity
 
-        if (isset(request()->amenity) && is_array(request()->amenity)) {
-            foreach (request()->amenity as $item) {
-                ListingAmenity::create(
-                    [
+            // Photo
+            if (is_array(request()->photo_list) || isset(request()->photo_list)) {
+                foreach (request()->photo_list as $item) {
+                    $final_photo_name =  (new Upload)->image($item, 'uploads/listing_photos/');
+                    ListingPhoto::create([
                         'listing_id' => $listing->id,
-                        'amenity_id' => $item
-                    ]
-                );
+                        'photo' => $final_photo_name,
+                    ]);
+                }
             }
-        }
 
-        // Photo
-        if (is_array(request()->photo_list) || isset(request()->photo_list)) {
-            foreach (request()->photo_list as $item) {
-                $final_photo_name =  (new Upload)->image($item, 'uploads/listing_photos/');
-                ListingPhoto::create([
-                    'listing_id' => $listing->id,
-                    'photo' => $final_photo_name,
-                ]);
-            }
-        }
-
-        //Video
-        if (is_array(request()->video) || isset(request()->video)) {
-            foreach (request()->video as $item) {
-                $videoName =  (new Upload)->video($item, 'uploads/listing_videos/');
-                ListingVideo::create([
-                    'listing_id' => $listing->id,
-                    'is_mobile_video' => true,
-                    'youtube_video_id' => $videoName,
-                ]);
-            }
-        }
-
-
-        // Additional Features
-        if (is_array(request()->additional_feature_name) || isset(request()->additional_feature_name)) {
-
-            foreach (request()->additional_feature_name as $item) {
-                ListingAdditionalFeature::create(
-                    [
+            //Video
+            if (is_array(request()->video) || isset(request()->video)) {
+                foreach (request()->video as $item) {
+                    $videoName =  (new Upload)->video($item, 'uploads/listing_videos/');
+                    ListingVideo::create([
                         'listing_id' => $listing->id,
-                        'additional_feature_name' => $item,
-                        'additional_feature_value' => $item,
-                    ]
-                );
+                        'is_mobile_video' => true,
+                        'youtube_video_id' => $videoName,
+                    ]);
+                }
             }
-        }
-        ListingSubscription::create(
-            [
-                "listing_id" => $listing->id,
-                "start_date" => request()->start_date,
-                "end_date" => request()->end_date,
-                "amount" => request()->listing_creation_amount,
-            ]
-        );
 
-        // debit from wallate
-        $ref_number = Str::random(10);
-        $credit = [
-            'user_id' => auth()->user()->id,
-            'type' => 'credit',
-            'status' => 'success', //debit, credit
-            'ref_number' => $ref_number,
-            'trans_id' => $ref_number,
-            'amount' => $listing_creation_amount,
-            'description' => "Top Up " . $listing_creation_amount,
-            'purpose' => 'top-up', //verification ,packages, top-up, withdrawal,referrals, boost]
-            'listing_id' => $listing->id,
-        ];
-        $listing_debit = [
-            'user_id' => auth()->user()->id,
-            'type' => 'debit',
-            'status' => 'success', //debit, credit
-            'ref_number' => $ref_number,
-            'trans_id' => $ref_number,
-            'amount' => $listing_creation_amount,
-            'description' => "Listings Purchased " . $listing_creation_amount,
-            'purpose' => 'listings', //verification ,packages, top-up, withdrawal,referrals, boost]
-            'listing_id' => $listing->id,
-        ];
-        Transactions::create($credit);
-        Transactions::create($listing_debit);
-        // send invioce
-        $item = [
-            "invoiceNumber" => rand(1111, 9999),
-            "invoiceDate" => Carbon::now()->format("d M, Y"),
-            "user" => auth()->user()->name,
-            "purpose" => $listing_debit["purpose"],
-            "status" => $listing_debit["status"],
-            "ref_number" => $listing_debit["ref_number"],
-            "amount" => $listing_debit["amount"],
-            'description' => "Congratulation!!!, You Just enlisted your Business($listing->listing_name) for 1 year",
 
-        ];
-        // notification
-        $notification =
-            [
-                'message' =>
-                $listing_debit['description'],
+            // Additional Features
+            if (is_array(request()->additional_feature_name) || isset(request()->additional_feature_name)) {
+
+                foreach (request()->additional_feature_name as $item) {
+                    ListingAdditionalFeature::create(
+                        [
+                            'listing_id' => $listing->id,
+                            'additional_feature_name' => $item,
+                            'additional_feature_value' => $item,
+                        ]
+                    );
+                }
+            }
+            ListingSubscription::create(
+                [
+                    "listing_id" => $listing->id,
+                    "start_date" => request()->start_date,
+                    "end_date" => request()->end_date,
+                    "amount" => request()->listing_creation_amount,
+                ]
+            );
+
+            // debit from wallate
+            $ref_number = Str::random(10);
+            $credit = [
                 'user_id' => auth()->user()->id,
-                'title' => "Listing "
+                'type' => 'credit',
+                'status' => 'success', //debit, credit
+                'ref_number' => $ref_number,
+                'trans_id' => $ref_number,
+                'amount' => $listing_creation_amount,
+                'description' => "Top Up " . $listing_creation_amount,
+                'purpose' => 'top-up', //verification ,packages, top-up, withdrawal,referrals, boost]
+                'listing_id' => $listing->id,
             ];
-
-        // sendmail
-        try {
-            //referrerMail
-            $listingsMail = [
-                'subject' => 'Congratulations on Successfully Listing Your Service on 9jajob',
-                'user' => auth()->user()->name,
-                'view' => 'mail.listingMail',
+            $listing_debit = [
+                'user_id' => auth()->user()->id,
+                'type' => 'debit',
+                'status' => 'success', //debit, credit
+                'ref_number' => $ref_number,
+                'trans_id' => $ref_number,
+                'amount' => $listing_creation_amount,
+                'description' => "Listings Purchased " . $listing_creation_amount,
+                'purpose' => 'listings', //verification ,packages, top-up, withdrawal,referrals, boost]
+                'listing_id' => $listing->id,
             ];
-            Mail::to(auth()->user()->email)->queue(new SystemMailNotification($listingsMail)); //referrerMail
+            Transactions::create($credit);
+            Transactions::create($listing_debit);
+            // send invioce
+            $item = [
+                "invoiceNumber" => rand(1111, 9999),
+                "invoiceDate" => Carbon::now()->format("d M, Y"),
+                "user" => auth()->user()->name,
+                "purpose" => $listing_debit["purpose"],
+                "status" => $listing_debit["status"],
+                "ref_number" => $listing_debit["ref_number"],
+                "amount" => $listing_debit["amount"],
+                'description' => "Congratulation!!!, You Just enlisted your Business($listing->listing_name) for 1 year",
 
+            ];
+            // notification
+            $notification =
+                [
+                    'message' =>
+                    $listing_debit['description'],
+                    'user_id' => auth()->user()->id,
+                    'title' => "Listing "
+                ];
+
+            // sendmail
+            try {
+                //referrerMail
+                $listingsMail = [
+                    'subject' => 'Congratulations on Successfully Listing Your Service on 9jajob',
+                    'user' => auth()->user()->name,
+                    'view' => 'mail.listingMail',
+                ];
+                Mail::to(auth()->user()->email)->queue(new SystemMailNotification($listingsMail)); //referrerMail
+
+            } catch (\Throwable $th) {
+                // throw $th;
+            }
+            // send referrer funds
+            (new ReferralSystem)->referred();
+            (new Notify)->trigger($notification);
+
+            $getAll = Listing::find($listing->id);
+
+            return response()->json(['message' => "Success!!",  "listing" => $getAll], 200);
         } catch (\Throwable $th) {
-            // throw $th;
-        }
-        // send referrer funds
-        (new ReferralSystem)->referred();
-        (new Notify)->trigger($notification);
-
-        $getAll = Listing::find($listing->id);
-
-        return response()->json(['message' => "Success!!",  "listing" => $getAll], 200);
-        } catch (\Throwable $th) {
-            dd($th);
+            // dd($th);
         }
     }
 
