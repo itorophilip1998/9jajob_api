@@ -1,45 +1,50 @@
 <?php
+
 namespace App\Http\Controllers\Front;
-use App\Http\Controllers\Controller;
-use App\Models\LanguageMenuText;
-use App\Models\LanguageNotificationText;
-use App\Models\LanguageWebsiteText;
+
+use DB;
+use Auth;
+use Hash;
 use App\Models\User;
 use App\Models\Review;
-use App\Models\GeneralSetting;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\Models\EmailTemplate;
+use App\Models\GeneralSetting;
+use Illuminate\Validation\Rule;
+use App\Models\LanguageMenuText;
+use App\Models\LanguageWebsiteText;
+use App\Http\Controllers\Controller;
+use App\Mail\SystemMailNotification;
+use Illuminate\Support\Facades\Mail;
+use App\Models\LanguageNotificationText;
 use App\Mail\RegistrationEmailToCustomer;
 use App\Mail\ResetPasswordMessageToCustomer;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use DB;
-use Hash;
-use Auth;
-use Illuminate\Support\Facades\Mail;
 
 
 class CustomerAuthController extends Controller
 {
 
 
-    public function login() {
-    	return view('front.customer_login');
+    public function login()
+    {
+        return view('front.customer_login');
     }
 
-    public function login_store(Request $request) {
+    public function login_store(Request $request)
+    {
         $g_setting = GeneralSetting::where('id', 1)->first();
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-        ],[
+        ], [
             'email.required' => ERR_EMAIL_REQUIRED,
             'email.email' => ERR_EMAIL_INVALID,
             'password.required' => ERR_PASSWORD_REQUIRED
         ]);
 
-        if($g_setting->google_recaptcha_status == 'Show') {
+        if ($g_setting->google_recaptcha_status == 'Show') {
             $request->validate([
                 'g-recaptcha-response' => 'required'
             ], [
@@ -48,35 +53,38 @@ class CustomerAuthController extends Controller
         }
 
         $credential = [
-            'email'=> $request->email,
-            'password'=> $request->password,
-            'status'=> 'Active'
+            'email' => $request->email,
+            'password' => $request->password,
+            'status' => 'Active'
         ];
 
-        if(Auth::guard('web')->attempt($credential)) {
+        if (Auth::guard('web')->attempt($credential)) {
             return redirect()->intended(route('customer_dashboard'))->with('success', SUCCESS_LOGIN);
         } else {
             return redirect()->back()->with('error', ERR_CUSTOMER_NOT_FOUND);
         }
     }
 
-    public function logout() {
+    public function logout()
+    {
         Auth::guard('web')->logout();
         return redirect()->route('customer_login');
     }
 
-    public function registration() {
-    	return view('front.customer_registration');
+    public function registration()
+    {
+        return view('front.customer_registration');
     }
 
-    public function registration_store(Request $request) {
+    public function registration_store(Request $request)
+    {
 
-        if(env('PROJECT_MODE') == 0) {
+        if (env('PROJECT_MODE') == 0) {
             return redirect()->back()->with('error', env('PROJECT_NOTIFICATION'));
         }
 
         $g_setting = GeneralSetting::where('id', 1)->first();
-        $token = hash('sha256',time());
+        $token = hash('sha256', time());
         $obj = new User();
         $data = $request->only($obj->getFillable());
         $request->validate([
@@ -84,13 +92,13 @@ class CustomerAuthController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required',
             're_password' => 'required|same:password'
-        ] );
+        ]);
 
-        if($g_setting->google_recaptcha_status == 'Show') {
+        if ($g_setting->google_recaptcha_status == 'Show') {
             $request->validate([
                 'g-recaptcha-response' => 'required'
             ], [
-               'g-recaptcha-response.required' => ERR_RECAPTCHA_REQUIRED
+                'g-recaptcha-response.required' => ERR_RECAPTCHA_REQUIRED
             ]);
         }
         unset($request->re_password);
@@ -103,54 +111,69 @@ class CustomerAuthController extends Controller
         $et_data = EmailTemplate::where('id', 6)->first();
         $subject = $et_data->et_subject;
         $message = $et_data->et_content;
-        $verification_link = url('customer/registration/verify/'.$token.'/'.$request->email);
+        $verification_link = url('customer/registration/verify/' . $token . '/' . $request->email);
         $message = str_replace('[[verification_link]]', $verification_link, $message);
-        Mail::to($request->email)->send(new RegistrationEmailToCustomer($subject,$message));
+        Mail::to($request->email)->queue(new RegistrationEmailToCustomer($subject, $message));
         return redirect()->back()->with('success', SUCCESS_REGISTRATION_EMAIL_SEND);
     }
 
-    public function registration_verify() {
+    public function registration_verify()
+    {
 
-        if(env('PROJECT_MODE') == 0) {
-            return redirect()->back()->with('error', env('PROJECT_NOTIFICATION'));
-        }
+        try {
+            $email_from_url = request()->segment(count(request()->segments()));
+            $aa = User::where('email', $email_from_url)->first();
+            if (!$aa) {
+                return redirect()->route('customer_login');
+            }
+            $expected_url = url('customer/registration/verify/' . $aa->token . '/' . $aa->email);
+            $current_url = url()->current();
+            if ($expected_url != $current_url) {
+                return redirect()->route('customer_login');
+            }
+            $data['status'] = 'Active';
+            $data['token'] = '';
+            $user = User::where('email', $email_from_url)->first();
 
-        $email_from_url = request()->segment(count(request()->segments()));
-        $aa = User::where('email', $email_from_url)->first();
-        if(!$aa) {
-            return redirect()->route('customer_login');
+            if ($user?->status && strtolower($user?->status) !== 'active') {
+                $user?->update($data);
+
+                $welcomeMail = [
+                    'subject' => 'Welcome to 9jajob',
+                    'view' => 'mail.welcomeMail',
+                    'user' => $user['name']
+                ];
+                Mail::to($user['email'])->queue(new SystemMailNotification($welcomeMail));
+            }
+
+            return redirect('https://www.9jajob.com/verified')->with('success', 'User Successfully Verifiied');
+        } catch (\Throwable $th) {
+            return redirect('https://www.9jajob.com/verified')->with('success', 'User Successfully Verifiied');
         }
-        $expected_url = url('customer/registration/verify/'.$aa->token.'/'.$aa->email);
-        $current_url = url()->current();
-        if($expected_url != $current_url) {
-            return redirect()->route('customer_login');
-        }
-        $data['status'] = 'Active';
-        $data['token'] = '';
-        User::where('email',$email_from_url)->update($data);
-        return redirect()->route('customer_login')->with('success', SUCCESS_REGISTRATION_VERIFY_DONE);
     }
 
 
-    public function forget_password() {
+    public function forget_password()
+    {
         return view('front.customer_forget_password');
     }
 
-    public function forget_password_store(Request $request) {
+    public function forget_password_store(Request $request)
+    {
 
-        if(env('PROJECT_MODE') == 0) {
+        if (env('PROJECT_MODE') == 0) {
             return redirect()->back()->with('error', env('PROJECT_NOTIFICATION'));
         }
 
         $g_setting = GeneralSetting::where('id', 1)->first();
         $request->validate([
             'email' => 'required|email'
-        ],[
+        ], [
             'email.required' => ERR_EMAIL_REQUIRED,
             'email.email' => ERR_EMAIL_INVALID
         ]);
 
-        if($g_setting->google_recaptcha_status == 'Show') {
+        if ($g_setting->google_recaptcha_status == 'Show') {
             $request->validate([
                 'g-recaptcha-response' => 'required'
             ], [
@@ -158,46 +181,48 @@ class CustomerAuthController extends Controller
             ]);
         }
 
-        $check_email = User::where('email',$request->email)->where('status','Active')->first();
-        if(!$check_email) {
+        $check_email = User::where('email', $request->email)->where('status', 'Active')->first();
+        if (!$check_email) {
             return redirect()->back()->with('error', ERR_EMAIL_NOT_FOUND);
         } else {
             $et_data = EmailTemplate::where('id', 7)->first();
             $subject = $et_data->et_subject;
             $message = $et_data->et_content;
-            $token = hash('sha256',time());
-            $reset_link =  'customer/reset-password/'.$token.'/'.$request->email;
+            $token = hash('sha256', time());
+            $reset_link =  'customer/reset-password/' . $token . '/' . $request->email;
             $message = str_replace('[[reset_link]]', $reset_link, $message);
 
             $data['token'] = $token;
-            User::where('email',$request->email)->update($data);
-            Mail::to($request->email)->send(new ResetPasswordMessageToCustomer($subject,$message,$token));
+            User::where('email', $request->email)->update($data);
+            Mail::to($request->email)->queue(new ResetPasswordMessageToCustomer($subject, $message, $token));
         }
         return redirect()->back()->with('success', SUCCESS_FORGET_PASSWORD_EMAIL_SEND);
     }
 
 
-    public function reset_password() {
+    public function reset_password()
+    {
         $email_from_url = request()->segment(count(request()->segments()));
 
         $aa = User::where('email', $email_from_url)->first();
 
-        if(!$aa) {
+        if (!$aa) {
             return redirect()->route('customer_login');
         }
 
-        $expected_url = url('customer/reset-password/'.$aa->token.'/'.$aa->email);
+        $expected_url = url('customer/reset-password/' . $aa->token . '/' . $aa->email);
         $current_url = url()->current();
-        if($expected_url != $current_url) {
+        if ($expected_url != $current_url) {
             return redirect()->route('customer_login');
         }
         $email = $aa->email;
         return view('front.customer_reset_password', compact('email'));
     }
 
-    public function reset_password_update(Request $request) {
+    public function reset_password_update(Request $request)
+    {
 
-        if(env('PROJECT_MODE') == 0) {
+        if (env('PROJECT_MODE') == 0) {
             return redirect()->back()->with('error', env('PROJECT_NOTIFICATION'));
         }
 
@@ -211,7 +236,7 @@ class CustomerAuthController extends Controller
             'retype_password.same' => ERR_PASSWORDS_MATCH
         ]);
 
-        if($g_setting->google_recaptcha_status == 'Show') {
+        if ($g_setting->google_recaptcha_status == 'Show') {
             $request->validate([
                 'g-recaptcha-response' => 'required'
             ], [

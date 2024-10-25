@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('reviews', function (Blueprint $table) {
-            $table->foreignId('booking_id')->nullable();
+            if (!Schema::hasColumn('reviews', 'booking_id')) {
+                $table->bigInteger('booking_id')->unsigned()->nullable();
+            }
+
         });
     }
 

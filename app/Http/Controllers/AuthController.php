@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
-
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Referral;
@@ -13,9 +11,11 @@ use App\Models\Notification;
 use App\Models\Transactions;
 use App\Http\services\Upload;
 use App\Models\EmailTemplate;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
 
+use App\Mail\SystemMailNotification;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use function PHPUnit\Framework\isEmpty;
 use Illuminate\Support\Facades\Storage;
@@ -44,6 +44,7 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
             're_password' => 'required|same:password',
+            'phone' => 'required|unique:users'
         ]);
 
         //Send failed response if request is not valid
@@ -55,28 +56,43 @@ class AuthController extends Controller
         $data = request()->all();
         $data['password'] = Hash::make(request()->password);
         $data['token'] = $token;
-        $data['status'] = 'active';
+        $data['status'] = 'pending';
         User::create($data);
-
-
-        // Send Email
-        $et_data = EmailTemplate::where('id', 6)->first();
-        $subject = $et_data->et_subject;
-        $message = $et_data->et_content;
-        $verification_link = url('customer/registration/verify/' . $token . '/' . request()->email);
-        $message = str_replace('[[verification_link]]', $verification_link, $message);
-        try {
-            Mail::to(request()->email)->send(new RegistrationEmailToCustomer($subject, $message));
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
-
         $credentials = request(['email', 'password']);
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return $this->respondWithToken($token, "Registered Successfully!, Please check your mail for verification");
+        $ref_code = auth()->user()->referrer_code;
+        if (!$ref_code) {
+            return false;
+        }
+        $newCode = substr($ref_code, 6);
+
+        Referral::updateOrCreate([
+            "user_id" => auth()->user()->id,
+            'referrer_id' => $newCode,
+        ], [
+            'user_id' => auth()->user()->id,
+            'referrer_id' => $newCode,
+            'ref_code' => $ref_code,
+            'amount_earn' => 0,
+        ]);
+        $newUser = auth()->user()->name;
+        DB::table('admin_notifications')->insert(
+            [
+                'description' => "$newUser Just Registered in the system.",
+                'title' => "User Registration",
+                'status' => 'unread',
+                'created_at' => Carbon::now()
+
+            ]
+        );
+
+        // send mails
+        $this->sendMail($data);
+
+        return response()->json(['message' => "Registered Successfully!, Please check your mail for verification"], 200);
     }
 
     public function editUser()
@@ -85,14 +101,17 @@ class AuthController extends Controller
         $validator = Validator::make(request()->all(), [
             'password' => 'nullable|min:8',
             're_password' => 'nullable|same:password',
+            // 'phone'=>'required|unique:users'
         ]);
 
-        //Send failed response if request is not valid
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
         }
 
         $data = request()->all();
+        if (request()->password !== null) {
+            $data['password'] = Hash::make($data['password']);
+        }
         if (request()->password !== null) {
             $data['password'] = Hash::make($data['password']);
         }
@@ -106,15 +125,46 @@ class AuthController extends Controller
         }
 
         $user = User::find(auth()->user()->id);
+        //Send failed response if request is not valid
+        // if ($user?->phone ) {
+        //     return response()->json(['error' => $validator->messages()], 422);
+        // }
         $user->update($data);
 
         return response()->json(['message' => 'Successfully edited User'], 200);
     }
 
 
-    public function login()
+
+    public function sendMail($user)
     {
 
+        try {
+            // ConfirmationMail
+            $confirmationMail = [
+                'subject' => 'Confirm Your Email Address',
+                'link' => url('customer/registration/verify/' . $user['token'] . '/' . $user['email']),
+                'view' => 'mail.emailConfirmation',
+                'user' => $user['name']
+            ];
+            Mail::to($user['email'])->queue(new SystemMailNotification($confirmationMail)); //confirmationMail
+
+        } catch (\Throwable $th) {
+            //  throw $th;
+        }
+    }
+
+    public function login()
+    {
+        $user = User::where('email', request()->email)->first();
+        // return $user?->status;
+
+        if ($user?->status && strtolower($user?->status) !== 'active') {
+            $token = ['token' => hash('sha256', time())];
+            $user->update($token);
+            if ($user) $this->sendMail($user);
+            return response()->json(['error' => 'User not active, please verify your account!'], 404);
+        }
         $credentials = request(['email', 'password']);
 
         if (!$token = auth()->attempt($credentials)) {
@@ -122,6 +172,15 @@ class AuthController extends Controller
         }
 
         return $this->respondWithToken($token, "Login Successfully!");
+    }
+
+    public function statusCheck()
+    {
+        $status = request()->status;
+        $user = User::find(request()->user_id);
+
+        $user->update(['status' => request()->status]);
+        return response()->json(["message" => "User is $status!"]);
     }
 
     /**
@@ -157,7 +216,6 @@ class AuthController extends Controller
         try {
             $user = User::find(auth()->user()->id);
             if ($user && $user->expo_token === request()->expo_token) {
-
                 $user->update(['expo_token' => request()->expo_token]);
             }
 
@@ -188,11 +246,8 @@ class AuthController extends Controller
 
     public function forgotPassword()
     {
-
-
         $validator = Validator::make(request()->all(), [
             'email' => 'required|email'
-
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
@@ -203,16 +258,21 @@ class AuthController extends Controller
             return response()->json(['error' => 'Email Not Found !'], 422);
         } else {
             $et_data = EmailTemplate::where('id', 7)->first();
-            $subject = $et_data->et_subject;
-            $message = 'Hello ' . $check_email->name . ", \n to reset your password copy the OTP bellow:";
             $token = rand(10000, 99999);
             // $reset_link = url('customer/reset-password/' . $token . '/' . request()->email);
 
             $data['token'] = $token;
             User::where('email', request()->email)->update($data);
             try {
-
-                Mail::to(request()->email)->send(new ResetPasswordMessageToCustomer($subject, $message, $token));
+                // ConfirmationMail
+                $confirmationMail = [
+                    'subject' => $et_data->et_subject,
+                    'message' => 'Dear ' . $check_email->name . ", \n to reset your password copy the OTP bellow:",
+                    'view' => 'mail.passwordReset',
+                    'token' => $token,
+                    'user' => $check_email->name,
+                ];
+                Mail::to(request()->email)->queue(new SystemMailNotification($confirmationMail));
             } catch (\Throwable $th) {
                 //throw $th;
             }

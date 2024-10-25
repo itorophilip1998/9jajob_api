@@ -17,11 +17,11 @@ return new class extends Migration
             $table->foreignId('listing_id');
             $table->date('date');
             $table->time('time');
-            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'completed', 'cancelled', 'accepted', 'declined'])->default('pending');
             $table->timestamps();
         });
     }
-
+ 
     /**
      * Reverse the migrations.
      */

@@ -20,9 +20,9 @@ class ListingPhoto extends Model
 
         // Add the 'user_photo' attribute to the array
         $attributes['photo'] =
-        $this->photo ? $url :  null;
+            $this->photo ? $url :
+            $this->photo;
 
         return $attributes;
     }
-
 }

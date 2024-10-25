@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Spam;
 use App\Models\User;
 use App\Models\Chats;
+use App\Models\friends;
+use App\Services\Notify;
 use App\Models\Notification;
 use App\Http\services\Upload;
 use App\Http\Requests\StoreChatsRequest;
@@ -25,8 +27,8 @@ class ChatsController extends Controller
         })->orWhere(function ($query) use ($user_id, $friend_id) {
             $query->where('user_id', $friend_id)
                 ->where('friend_id', $user_id);
-        })->get()
-          ->map(function ($item) use($friend_id) {
+        })->with("chatted_user")->get()
+            ->map(function ($item) use ($friend_id) {
                 $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $friend_id])->without('friend')->first();
                 $item['spam'] = ($spam) ? $spam->status : null;
                 return $item;
@@ -51,7 +53,8 @@ class ChatsController extends Controller
 
 
         $req = request()->all();
-        $req['user_id'] = auth()->user()->id;
+        $req['user_id'] = request()->user_id ?? auth()->user()->id;
+        $req['status'] = 'unread';
         $photos = [];
         if (is_array(request()->photo) || is_object(
             request()->photo
@@ -63,30 +66,63 @@ class ChatsController extends Controller
         }
 
         $req['photo'] = json_encode($photos);
-        Chats::create($req);
+        $chats = Chats::create($req);
+        // friends side
+        $friends = [
+            'user_id'  => $req["friend_id"],
+            'friend_id' =>   $req['user_id'],
+            'chat_id' => $chats->id,
+            'status' => 'unread',
+        ];
+        friends::updateOrCreate([
+            'user_id' => $req['friend_id'],
+            'friend_id' => $req['user_id'],
+        ], $friends);
 
-        return response()->json(['message' => "Successfully initiated Chat!!"], 200);
+        // users auth user side
+        $user = [
+            'user_id' =>   $req['user_id'],
+            'friend_id' => $req['friend_id'],
+            'chat_id' => $chats->id,
+            'status' => 'unread',
+        ];
+        friends::updateOrCreate([
+            'user_id' =>   $req['user_id'],
+            'friend_id' => $req['friend_id'],
+        ], $user);
+
+        $friend = User::find(request()->friend_id);
+
+        (new Notify)->chatTrigger([
+            'to' => $friend?->expo_token,
+            'title' => "New message from $friend?->name",
+            'body' => request()->message,
+        ]);
+        return response()->json(['message' => "Successfully initiated Chat!!", 'chats' => $chats], 200);
     }
 
     public function userChats()
     {
-        $authUser = auth()->user();
-        $chattedUsers = User::select('id', 'name', 'email', 'phone', 'photo')->whereHas('chats', function ($query) use ($authUser) {
-            $query->where('user_id', $authUser->id)->latest();
-        })->withOnly('chats')->get()
+        $friends = friends::where('user_id', auth()->user()->id)->orderBy('updated_at', 'Desc')->get()
             ->map(function ($item) {
-                $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $item->id])->without('friend')->first();
+                $spam = Spam::where(['user_id' => auth()->user()->id, 'friend_id' => $item->friend_id])->without('friend')->first();
                 $item['spam'] = ($spam) ? $spam->status : null;
                 return $item;
             });
-
-        return response()->json(['chatted_users' => $chattedUsers], 200);
+        return response()->json(['chatted_users' => $friends], 200);
     }
 
     public function updateStatus()
     {
-        Chats::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
+        if (request()->unread_all) {
+            friends::where(['user_id' => auth()->user()->id])
+                ->update(['status' => 'read']);
+        }
+
+        friends::where(['friend_id' => request()->friend_id, 'user_id' => auth()->user()->id])
+
             ->update(['status' => 'read']);
+
 
         return response()->json(['message' => 'Updated Successfully'], 200);
     }

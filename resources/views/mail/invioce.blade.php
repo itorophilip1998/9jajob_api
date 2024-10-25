@@ -89,17 +89,18 @@
     <div class="container">
         <div class="header">
             <h2>Invoice</h2>
-            <p>Hello {{  $item["user"] }} Thank you for your using 9jajob service!</p>
+            <p>Hello {{  $item["user"] }} </p>
+            {{-- <p>{{ $item['description'] }}</p> --}}
         </div>
 
-        <div class="invoice-details">
+        {{-- <div class="invoice-details">
             <div>
                 <strong>Invoice Number:</strong> {{ $item["invoiceNumber"] }}
             </div>
 
-        </div>
+        </div> --}}
 
-        <div class="invoice-details">
+        {{-- <div class="invoice-details">
 
             <div>
                 <strong>Invoice Date:</strong> {{ $item["invoiceDate"] }}
@@ -132,9 +133,15 @@
 
         <div class="total">
             <strong>Total Amount:</strong> {{ $item["amount"] }}
-        </div>
+        </div> --}}
+
+
+
     </div>
+
+
     <footer>
+        <p>Thank you for your using 9jajob service!</p>
         © 2023 9jajob. All rights reserved.
 
     </footer>

@@ -9,8 +9,10 @@ use App\Models\Transactions;
 use App\Models\Verification;
 use App\Http\services\Upload;
 use App\Http\services\Balance;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Client\Request;
 use App\Http\Controllers\Controller;
+use App\Mail\SystemMailNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreVerificationRequest;
@@ -21,25 +23,26 @@ class VerificationController extends Controller
 
     public function create()
     {
-        $amount = request()->amount;
+
+        $extra_details = DB::table("extra_details")->first();
+        $amount = $extra_details?->verification_amount;
         // check balance
         $balance = (new Balance)->check($amount);
-        if ($balance < $amount)
+
+        // dump($extra_details?->system_payment_mode, $balance, $amount);
+        if ($balance <= $amount && $extra_details?->system_payment_mode === "payment")
             return response()->json(['error' => 'Insufficient balance'], 422);
+
 
         $validator = Validator::make(request()->all(), [
             'listing_id' => 'required',
-            'reg_number' => 'required',
             'id_card_front' => 'required|file',
-            'id_card_back' => 'required|file'
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 422);
         }
 
-
         // check balance
-
         $totalBalance = Transactions::where(['user_id' => auth()->user()->id])->get()->sum('amount');
         if ($totalBalance < 1000) {
             return response()->json(['message' => 'insufficient fund'], 200);
@@ -78,9 +81,11 @@ class VerificationController extends Controller
 
         $isVerified = Verification::where('listing_id', $req['listing_id'])->first();
 
-        if (isset($isVerified) && $isVerified->status == 'pending') return response()->json(['message' => 'Verification In Progress!'], 200);
+        if (isset($isVerified) && $isVerified->status == 'pending') return response()->json(['message' => 'There is an existing verification!'], 200);
+
         else if (isset($isVerified) &&  $isVerified->status != 'completed') return response()->json(['message' => 'Verification Completed Already!'], 200);
 
+        if (!request()->reg_number || request()->reg_number === NULL)  $req['reg_number'] = "N/A";
 
         Verification::create($req);
         // send transaction
@@ -108,19 +113,27 @@ class VerificationController extends Controller
             "ref_number" => $transaction["ref_number"],
             "amount" => $transaction["amount"],
         ];
-        Mail::send('mail.invioce',  ['item' => $item], function ($message) {
-            $message->to(auth()->user()->email);
-            $message->subject('Invioce');
-        });
+
         Notification::create(
             [
                 'message' => $transaction['description'],
                 'user_id' => auth()->user()->id,
-                'title' => 'Verification'
+                'title' => 'Verification',
+                'status' => 'unread'
+            ]
+        );
+
+        DB::table('admin_notifications')->insert(
+            [
+                'description' =>  $transaction['description'],
+                'title' => "Verification",
+                'status' => 'unread',
+                'created_at' => Carbon::now()
             ]
         );
         return response()->json(['message' => 'Verification In Progress!!!'], 200);
     }
+
     public function listOfVerifications()
     {
         $status = request()->input('status');

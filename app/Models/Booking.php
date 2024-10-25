@@ -17,20 +17,22 @@ class Booking extends Model
         'date',
         'time',
         'status',
-        
+        'location'
+
     ];
     protected $with = [
-        'listings'
+        'listings',
+        'user'
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id')->select(['id', 'name', 'email', 'photo']);
+        return $this->belongsTo(User::class, 'user_id')->select(['id', 'name', 'email', 'photo', 'phone'])->without("package");
     }
 
     public function listings()
     {
-        return $this->belongsTo(Listing::class, 'listing_id')->withOnly(['verified'])
-            ->select(['id', 'listing_name', 'listing_address', 'listing_phone']);
+        return $this->belongsTo(Listing::class, 'listing_id')->withOnly(['verified', 'user', 'reviews'])
+            ->select(['id', 'listing_name', 'listing_address', 'listing_phone', 'user_id']);
     }
 }

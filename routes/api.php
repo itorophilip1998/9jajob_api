@@ -1,26 +1,29 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Http\services\Upload;
 use App\Models\ListingCategory;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SpamController;
+use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\RatingsController;
+use App\Http\Controllers\BoostingController;
+use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\API\ReviewController;
 use App\Http\Controllers\API\AmenityController;
 use App\Http\Controllers\API\ListingController;
+use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\DynamicFormsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\VerificationController;
-use App\Http\Controllers\API\PackageController;
-use App\Http\Controllers\API\ListingCategoryController;
-use App\Http\Controllers\BoostingController;
-use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\Front\ContactController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\ReferralController;
-use App\Http\Controllers\SpamController;
+use App\Http\Controllers\API\ListingCategoryController;
 
 // authentication
 Route::group([
@@ -35,11 +38,14 @@ Route::group([
     Route::post('edit-user',  [AuthController::class, 'editUser'])->middleware("auth:api");
     Route::post('forgot-password',  [AuthController::class, 'forgotPassword']);
     Route::post('reset-password',  [AuthController::class, 'resetPassword']);
+    Route::post('de-activate-account',  [AuthController::class, 'statusCheck']);
 });
-
 
 // Amenities
 Route::get('amenities', [AmenityController::class, 'index']);
+// Dynamic Forms
+Route::get('dynamic-forms', [DynamicFormsController::class, 'index']);
+Route::post('update-expo-token', [DynamicFormsController::class, 'UpdateToken'])->middleware("auth:api");
 
 // Listing Category
 Route::group([
@@ -54,6 +60,7 @@ Route::group([
 });
 
 Route::post('/add-listings', [ListingController::class, 'AddListings'])->middleware("auth:api");
+Route::post('/renew-listings', [ListingController::class, 'renewListing'])->middleware("auth:api");
 Route::post('/update-listings/{id}', [ListingController::class, 'update'])->middleware("auth:api");
 Route::delete('/delete-listings/{id}', [ListingController::class, 'destroy'])->middleware("auth:api");
 
@@ -166,3 +173,21 @@ Route::group([
 ], function ($router) {
     Route::post('/', [ContactController::class, 'send_email']);
 });
+
+
+
+
+ Route::post('/delete-file', function()
+ {
+     // Extract the filename from the URL
+     $filename =  request()->url;
+
+     // Delete the file from DigitalOcean Spaces
+     Storage::disk('do_spaces')->delete($filename);
+
+     return "File '$filename' deleted successfully.";
+ });
+
+
+
+

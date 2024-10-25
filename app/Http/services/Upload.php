@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Storage;
 
 // use Intervention\Image\ImageManager;
 
-
 class Upload
 {
     public function image($item,$url)
@@ -39,4 +38,16 @@ class Upload
         return $videoName;
     }
 
+    public function unlinkFile($url)
+    {
+        // Extract the filename from the URL
+        $filename = basename($url);
+
+        // Delete the file from DigitalOcean Spaces
+        Storage::disk('do_spaces')->delete($url);
+
+        return "File '$filename' deleted successfully.";
+    }
+
 }
+

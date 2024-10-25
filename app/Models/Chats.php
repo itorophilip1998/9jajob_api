@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\friends;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +25,12 @@ class Chats extends Model
 
     protected $with = [
         // 'user',
-        'friend'
+        'friend',
+    ];
+
+    protected $hidden = [
+        // 'user',
+        'status',
     ];
 
     public function user()
@@ -35,6 +41,10 @@ class Chats extends Model
     public function friend()
     {
         return $this->belongsTo(User::class, 'friend_id')->without(['package'])->select(['id', 'name', 'email', 'photo']);
+    }
+    public function chatted_user()
+    {
+        return $this->hasOne(friends::class, 'chat_id')->select(["id", "status", 'chat_id'])->withOut(["chat", "friend"])->latest();
     }
 
     public function toArray()

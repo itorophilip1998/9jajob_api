@@ -9,3 +9,4 @@ class Authentication extends Model
 {
     use HasFactory;
 }
+ 

@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\CustomerAuthController;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,7 +20,32 @@ Route::get('/', function () {
     return view('welcome');
 });
 
- 
+Route::get('delete-account', function () {
+    return view("front.deleteAccount");
+});
+
+Route::post('delete-account', function (Request $request) {
+
+
+    // Find the user by email and soft delete
+    try {
+        $user = User::where('email', $request->email);
+
+
+        if ($user?->first()) {
+            // $user->delete(); // Soft delete the user
+            return redirect()->back()->withErrors(['email' => 'User not found.']);
+
+        }
+
+        return redirect()->back()->withErrors(['email' => 'User not found.']);
+
+    } catch (\Throwable $th) {
+        return redirect()->back()->withErrors(['email' => 'User not found.']);
+
+    }
+});
+
 
 Route::get('customer/registration/verify/{token}/{email}', [CustomerAuthController::class, 'registration_verify'])
     ->name('customer_registration_verify');

@@ -47,7 +47,8 @@ class Listing extends Model
     ];
     protected $with = [
         'rListingCategory',
-        'rListingLocation', 'user',
+        'rListingLocation',
+         'user',
         'amenities',
         'listingAdditionalFeatures',
         'listingSocialItem',
@@ -55,6 +56,7 @@ class Listing extends Model
         'listingsVideos',
         'verified',
         'boosting',
+        'listing_subscription'
     ];
 
     public function toArray()
@@ -62,12 +64,10 @@ class Listing extends Model
         $attributes = parent::toArray();
         // Add the 'user_photo' attribute to the array
         $url = Storage::disk('do_spaces')->url("/uploads/listing_featured_photos" . "/" . $this->listing_featured_photo);
-
-        $attributes['listing_featured_photo'] = $url ?? null;
+        $attributes['listing_featured_photo'] = $this->listing_featured_photo ? $url : null;
         $ratings = $this->reviews->pluck('rating')->toArray();
         $count = count($ratings);
-        $sum = array_sum($ratings);
-
+        $sum = array_sum($ratings); 
         $attributes['rate_star'] = ($count !== 0) ? min(5, round($sum / $count, 2)) : 0;
         return $attributes;
     }
@@ -121,6 +121,8 @@ class Listing extends Model
     {
         return $this->hasOne(Verification::class, 'listing_id')->select('id', 'status', 'listing_id');
     }
-
-
+    public function  listing_subscription()
+    {
+        return $this->hasOne(ListingSubscription::class, 'listing_id');
+    }
 }
