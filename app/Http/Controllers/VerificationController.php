@@ -30,7 +30,7 @@ class VerificationController extends Controller
         $balance = (new Balance)->check($amount);
 
         // dump($extra_details?->system_payment_mode, $balance, $amount);
-        if ($balance <= $amount && $extra_details?->system_payment_mode === "payment")
+        if ($balance <= $amount)
             return response()->json(['error' => 'Insufficient balance'], 422);
 
 
