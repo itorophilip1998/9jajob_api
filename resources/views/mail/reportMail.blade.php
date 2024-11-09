@@ -6,8 +6,13 @@
         <h2>Dear Admin,</h2>
  <p>
     </br/>
-   <b>
+   <br>
     {{ $item["fromMail"] }}
+   </b>
+    </br/>
+
+   <b>
+    {{ $item["userInfo"] }}
    </b>
    <p>
     {{ $item["mailMessage"] }}
