@@ -29,11 +29,7 @@ class ReportController extends Controller
             $report = Report::create($req);
             $listingName = $report?->user?->name;
             $subject = "Reporting a user";
-            $message = request()->report . "<br/> <b>Listing:</b> $listingName";
-            $message = str_replace('[[visitor_name]]', request()->name, $message);
-            $message = str_replace('[[visitor_email]]', request()->email, $message);
-            $message = str_replace('[[visitor_phone]]', request()->phone, $message);
-            $message = str_replace('[[visitor_message]]', request()->report, $message);
+            $message = request()->report . "<b>Listing:</b> $listingName"; 
             Mail::to('support@sabifix.biz')->queue(new ContactPageMessage($subject, $message));
             return response()->json(['message' => 'Success!!'], 200);
         } catch (\Throwable $th) {
