@@ -46,7 +46,7 @@ class VerificationController extends Controller
             // check balance
             $totalBalance = Transactions::where(['user_id' => auth()->user()->id])->get()->sum('amount');
             if ($totalBalance < 1000) {
-                return response()->json(['message' => 'insufficient fund'], 200);
+                return response()->json(['message' => 'insufficient fund, Please Top-Up your wallet'], 200);
             }
             $req = request()->all();
 
