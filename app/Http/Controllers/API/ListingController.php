@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\API;
-
-
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Amenity;
@@ -172,7 +170,7 @@ class ListingController extends Controller
     public function AddListings()
     {
         try {
-            $listing_creation_amount = request()->listing_creation_amount;
+            $listing_creation_amount = request()->listing_creation_amount ;
 
             // check balance
             // $balance = (new Balance)->check($listing_creation_amount);
@@ -196,7 +194,6 @@ class ListingController extends Controller
                 return response()->json(['error' => $validator->messages()], 422);
             }
 
-
             $data = request()->all();
             if (request()->hasFile('listing_featured_photo')) {
                 $final_name =  (new Upload)->image(request()->file('listing_featured_photo'), 'uploads/listing_featured_photos/');
@@ -207,7 +204,6 @@ class ListingController extends Controller
             $data['admin_id'] = 0;
             $data['listing_status'] = "Active";
             $listing = Listing::create($data); //listing Created
-
 
             // Social Icons
             if (is_array(request()->social_media) || isset(request()->social_media)) {
@@ -280,10 +276,9 @@ class ListingController extends Controller
                     "listing_id" => $listing->id,
                     "start_date" => request()->start_date,
                     "end_date" => request()->end_date,
-                    "amount" => request()->listing_creation_amount,
+                    "amount" => $listing_creation_amount,
                 ]
             );
-
             // debit from wallate
             $ref_number = Str::random(10);
             $credit = [
@@ -304,7 +299,7 @@ class ListingController extends Controller
                 'ref_number' => $ref_number,
                 'trans_id' => $ref_number,
                 'amount' => $listing_creation_amount,
-                'description' => "Listings Purchased " . $listing_creation_amount,
+                'description' => "Listings Purchased " . $listing_creation_amount ?? "Free Mode",
                 'purpose' => 'listings', //verification ,packages, top-up, withdrawal,referrals, boost]
                 'listing_id' => $listing->id,
             ];
@@ -320,8 +315,8 @@ class ListingController extends Controller
                 "ref_number" => $listing_debit["ref_number"],
                 "amount" => $listing_debit["amount"],
                 'description' => "Congratulation!!!, You Just enlisted your Business($listing->listing_name) for 1 year",
-
             ];
+
             // notification
             $notification =
                 [
@@ -347,9 +342,7 @@ class ListingController extends Controller
             // send referrer funds
             (new ReferralSystem)->referred();
             (new Notify)->trigger($notification);
-
             $getAll = Listing::find($listing->id);
-
             return response()->json(['message' => "Success!!",  "listing" => $getAll], 200);
         } catch (\Throwable $th) {
             // dd($th);
