@@ -27,8 +27,7 @@ class ContactController extends Controller
                 'phone' => 'nullable',
             ]);
 
-
-            // Send Email
+ 
 
             try {
                 $item = [
