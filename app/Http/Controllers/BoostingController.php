@@ -63,7 +63,7 @@ class BoostingController extends Controller
             'ref_number' => $ref_number,
             'trans_id' => $ref_number,
             'amount' => request()->amount,
-            'description' => "Congratulation!!!, You Just Boost your Business($isMyListing?->listing_name), this means your business will be enlisted in the top listings of 9jajob",
+            'description' => "Congratulation!!!, You Just Boost your Business($isMyListing?->listing_name), this means your business will be enlisted in the top listings of Sabifix",
             'purpose' => 'boost', //verification ,packages, top-up, withdrawal,referrals, boost]
 
         ];
@@ -82,22 +82,21 @@ class BoostingController extends Controller
         try {
 
 
-            $start_date=Carbon::parse(request()->start_date);
-            $end_date=Carbon::parse(request()->end_date);
-            $boostingMail=[
-             'subject'=>'Business Boost Successfully Activated on 9jajob',
-             'user'=>auth()->user()->name,
-             'view'=>'mail.boostingMail',
-             'start_date'=>$start_date?->format('jS F, Y'),
-             'end_date'=>$end_date?->format('jS F, Y'),
-          ];
-        //   dump($boostingMail);
+            $start_date = Carbon::parse(request()->start_date);
+            $end_date = Carbon::parse(request()->end_date);
+            $boostingMail = [
+                'subject' => 'Business Boost Successfully Activated on Sabifix',
+                'user' => auth()->user()->name,
+                'view' => 'mail.boostingMail',
+                'start_date' => $start_date?->format('jS F, Y'),
+                'end_date' => $end_date?->format('jS F, Y'),
+            ];
+            //   dump($boostingMail);
 
-             Mail::to(auth()->user()->email)->queue(new SystemMailNotification($boostingMail));
-
-         } catch (\Throwable $th) {
+            Mail::to(auth()->user()->email)->queue(new SystemMailNotification($boostingMail));
+        } catch (\Throwable $th) {
             //  throw $th;
-         }
+        }
         return response()->json(['message' => 'Boosting Initiated!!!'], 200);
     }
 }

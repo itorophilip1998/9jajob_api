@@ -139,16 +139,16 @@ class CustomerAuthController extends Controller
                 $user?->update($data);
 
                 $welcomeMail = [
-                    'subject' => 'Welcome to 9jajob',
+                    'subject' => 'Welcome to Sabifix',
                     'view' => 'mail.welcomeMail',
                     'user' => $user['name']
                 ];
                 Mail::to($user['email'])->queue(new SystemMailNotification($welcomeMail));
             }
 
-            return redirect('https://www.9jajob.com/verified')->with('success', 'User Successfully Verifiied');
+            return redirect('https://www.sabifix.biz/verified')->with('success', 'User Successfully Verifiied');
         } catch (\Throwable $th) {
-            return redirect('https://www.9jajob.com/verified')->with('success', 'User Successfully Verifiied');
+            return redirect('https://www.sabifix.biz/verified')->with('success', 'User Successfully Verifiied');
         }
     }
 

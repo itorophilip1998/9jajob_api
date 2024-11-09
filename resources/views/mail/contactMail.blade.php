@@ -5,15 +5,13 @@
     <div class="container">
         <h2>Dear Admin,</h2>
  <p>
-    </br/>
+    <br/>
    <b>
     {{ $item["userInfo"] }}
    </b>
    <p>
     {{ $item["mailMessage"] }}
    </p>
-
-
 
     </div>
 @endsection

@@ -4,7 +4,7 @@
 @section('content')
     <div class="container">
         <h2>Dear {{  $item["user"] }},</h2>
-        <p> We're excited to inform you that your business boost on 9jajob has been successfully activated! This boost will enhance your business visibility and reach on our platform, helping you attract more customers and grow your brand. </p>
+        <p> We're excited to inform you that your business boost on Sabifix has been successfully activated! This boost will enhance your business visibility and reach on our platform, helping you attract more customers and grow your brand. </p>
        <p>
         Boost Start Date: <b>{{ $item['start_date'] }} <br/></b>
         Boost End Date: <b>{{ $item['end_date'] }}</b>

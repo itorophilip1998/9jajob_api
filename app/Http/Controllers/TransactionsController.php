@@ -47,12 +47,12 @@ class TransactionsController extends Controller
 
             $item = [
                 "user" => auth()->user()->name,
-                'view'=>'mail.fundingInvoice',
-            'subject'=>'Funds Successfully Added to Your 9jajob Wallet',
-            'amount'=>request()->amount
+                'view' => 'mail.fundingInvoice',
+                'subject' => 'Funds Successfully Added to Your Sabifix Wallet',
+                'amount' => request()->amount
             ];
-            if(request()->purpose==='top-up')
-            Mail::to(auth()->user()->email)->queue(new SystemMailNotification($item));
+            if (request()->purpose === 'top-up')
+                Mail::to(auth()->user()->email)->queue(new SystemMailNotification($item));
         } catch (\Throwable $th) {
             //throw $th;
         }

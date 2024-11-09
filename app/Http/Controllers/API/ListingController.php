@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\API;
+
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Amenity;
@@ -170,7 +171,7 @@ class ListingController extends Controller
     public function AddListings()
     {
         try {
-            $listing_creation_amount = request()->listing_creation_amount ;
+            $listing_creation_amount = request()->listing_creation_amount;
 
             // check balance
             // $balance = (new Balance)->check($listing_creation_amount);
@@ -330,7 +331,7 @@ class ListingController extends Controller
             try {
                 //referrerMail
                 $listingsMail = [
-                    'subject' => 'Congratulations on Successfully Listing Your Service on 9jajob',
+                    'subject' => 'Congratulations on Successfully Listing Your Service on Sabifix',
                     'user' => auth()->user()->name,
                     'view' => 'mail.listingMail',
                 ];

@@ -114,7 +114,7 @@ class BookingController extends Controller
         $booking = Booking::create($req);
         $listing_user_id = Listing::find(request()->listing_id) ?? 0;
         $client = User::find($listing_user_id?->user_id);
-        $user = auth()->user(); 
+        $user = auth()->user();
         $userDetails = [
             'message' => "You just book $client->name, you have an option to cancel booking or modify the booking",
             'user_id' =>  $user->id ?? 0,
@@ -145,7 +145,7 @@ class BookingController extends Controller
                 'view' => 'mail.bookingMail',
                 'subject' => 'Appointment Confirmation',
                 'amount' => request()->amount,
-                'mailMessage' => "Your appointment has been successfully scheduled. If you need to make any changes or wish to cancel/accept the booking, please log in to your account on our platform and manage your bookings accordingly.\n Thank you for choosing",
+                'mailMessage' => "Your appointment has been successfully scheduled. If you need to make any changes or wish to cancel/accept the booking, please log in to your account on our platform and manage your bookings accordingly.\n Thank you for choosing us",
                 "mailInfo" => "You have pending booking from $client?->name",
                 'booking' => $booking
             ];
@@ -184,7 +184,7 @@ class BookingController extends Controller
                 'view' => 'mail.bookingMail',
                 'subject' => "Booking Canceled - Let's Get Started!",
                 'amount' => request()->amount,
-                'mailMessage' => "Should you have any questions or wish to discuss the reason for the cancellation and explore options for rescheduling, please feel free to reach out to the service provider via our 9jajob chatting medium or by calling directly",
+                'mailMessage' => "Should you have any questions or wish to discuss the reason for the cancellation and explore options for rescheduling, please feel free to reach out to the service provider via our Sabifix chatting medium or by calling directly",
                 "mailInfo" => "We regret to inform you that your booking has been canceled by $user?->name",
                 'booking' => $booking
             ];
@@ -201,7 +201,7 @@ class BookingController extends Controller
                 'view' => 'mail.bookingMail',
                 'subject' => "Booking Completed - Your Feedback Matters!",
                 'amount' => request()->amount,
-                'mailMessage' => "We hope you were satisfied with the service provided. Your feedback is valuable to us and every 9jajob user. You can now rate the service provider's work and write a review based on your experience.
+                'mailMessage' => "We hope you were satisfied with the service provided. Your feedback is valuable to us and every Sabifix user. You can now rate the service provider's work and write a review based on your experience.
 \n Thank you for choosing us. \n We look forward to serving you again in the future!",
                 "mailInfo" => "Your booking has been successfully completed.",
                 'booking' => $booking

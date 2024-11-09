@@ -82,7 +82,7 @@
 <body>
   <div class="mailBox">
         <div class="header">
-                        <img src="https://i.ibb.co/564KHgf/9jajob.png" alt="Company Logo" class="logo">
+                        <img src="https://i.ibb.co/564KHgf/Sabifix.png" alt="Company Logo" class="logo">
 
         </div>
 
@@ -141,8 +141,8 @@
 
 
     <footer>
-        <p>Thank you for your using 9jajob service!</p>
-        © 2023 9jajob. All rights reserved.
+        <p>Thank you for your using Sabifix service!</p>
+        © 2023 Sabifix. All rights reserved.
 
     </footer>
   </div>
