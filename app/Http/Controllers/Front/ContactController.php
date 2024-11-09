@@ -35,7 +35,7 @@ class ContactController extends Controller
             $message = str_replace('[[visitor_email]]', $request->email, $message);
             $message = str_replace('[[visitor_phone]]', $request->phone, $message);
             $message = str_replace('[[visitor_message]]', $request->message, $message);
-            Mail::to('itorophilip1998@gmail.com')->send(new ContactPageMessage($subject, $message));
+            Mail::queue('support@sabifix.biz')->send(new ContactPageMessage($subject, $message));
             return response()->json(['message' => 'success']);
         } catch (\Throwable $th) {
             //throw $th;
