@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\UpdateReportRequest;
 use App\Mail\ContactPageMessage;
 use App\Mail\SystemMailNotification;
+use App\Models\Listing;
 use Illuminate\Support\Facades\Mail;
 
 class ReportController extends Controller
@@ -28,12 +29,13 @@ class ReportController extends Controller
             $req = request()->all();
             $req['reporter_id'] = auth()->user()->id;
             Report::create($req);
+            $listingName = Listing::where("id", $req['listing_id'])?->pluck("listing_name");
             $item = [
                 'view' => 'mail.reportMail',
                 'subject' => "Report User",
                 'mailMessage' =>  request()->report,
                 'fromMail' => "Mail From: " .  auth()->user()->name,
-                'userInfo' => "Listing ID Reported: " .  $req['reporter_id']
+                'userInfo' => "Listing ID Reported: " .  $listingName
             ];
             Mail::to('support@sabifix.biz')->queue(new SystemMailNotification($item));
 
