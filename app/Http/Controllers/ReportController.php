@@ -27,13 +27,14 @@ class ReportController extends Controller
             }
             $req = request()->all();
             $req['reporter_id'] = auth()->user()->id;
-            Report::create($req);
+            $report = Report::create($req);
+            $listingName = $report?->user?->name;
             $item = [
                 'view' => 'mail.reportMail',
                 'subject' => "Report User",
                 'mailMessage' =>  request()->report,
-                'from' => "Mail From: " .  auth()->user()->name,
-                'userInfo' => "User Reported: " . request()->listing_id
+                'fromMail' => "Mail From: " .  auth()->user()->name,
+                'userInfo' => "User Reported: " . $listingName
             ];
             Mail::to('support@sabifix.biz')->queue(new SystemMailNotification($item));
 
