@@ -6,10 +6,18 @@
         <h2>Dear Admin,</h2>
  <p>
     <br/>
-   <b>
-    {{ $item["userInfo"] }}
+  <p>
+     <b>
+Mail From:
    </b>
+    {{ $item["userInfo"] }}
+  </p>
    <p>
+    <b>Phone Number : </b>
+    {{ $item["phone"] }}
+   </p>
+   <p>
+    <b>Message : </b>
     {{ $item["mailMessage"] }}
    </p>
 

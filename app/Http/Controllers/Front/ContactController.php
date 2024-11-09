@@ -34,7 +34,8 @@ class ContactController extends Controller
                     'view' => 'mail.contactMail',
                     'subject' => "Contact Us ",
                     'mailMessage' =>  request()->message,
-                    'userInfo' => "Mail From: " . request()->name ?? request()->email
+                    'userInfo' => request()->name ?? request()->email,
+                    'phone' => request()->phone,
                 ];
                 Mail::to('support@sabifix.biz')->queue(new SystemMailNotification($item));
             } catch (\Throwable $th) {
