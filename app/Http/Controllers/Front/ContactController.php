@@ -38,8 +38,8 @@ class ContactController extends Controller
             Mail::queue('support@sabifix.biz')->send(new ContactPageMessage($subject, $message));
             return response()->json(['message' => 'success']);
         } catch (\Throwable $th) {
-            //throw $th;
-            return response()->json(['message' => 'success']);
+            throw $th;
+            // return response()->json(['message' => 'success']);
         }
     }
 }
