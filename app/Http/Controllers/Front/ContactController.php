@@ -26,7 +26,7 @@ class ContactController extends Controller
                 'message' => 'required',
                 'phone' => 'nullable',
             ]);
-dd(request()->all());
+// dd(request()->all());
 
 
             try {
