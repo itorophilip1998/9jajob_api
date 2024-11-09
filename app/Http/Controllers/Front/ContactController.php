@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Mail\ContactPageMessage;
+use App\Mail\SystemMailNotification;
 use App\Models\Admin;
 use App\Models\EmailTemplate;
 use App\Models\GeneralSetting;
@@ -28,17 +29,21 @@ class ContactController extends Controller
 
 
             // Send Email
-            $email_template_data = EmailTemplate::where('id', 1)->first();
-            $subject = $email_template_data->et_subject;
-            $message = $email_template_data->et_content;
-            $message = str_replace('[[visitor_name]]', $request->name, $message);
-            $message = str_replace('[[visitor_email]]', $request->email, $message);
-            $message = str_replace('[[visitor_phone]]', $request->phone, $message);
-            $message = str_replace('[[visitor_message]]', $request->message, $message);
-            Mail::to('support@sabifix.biz')->queue(new ContactPageMessage($subject, $message));
+
+            try {
+                $item = [
+                    'view' => 'mail.contactMail',
+                    'subject' => "Contact Us ",
+                    'mailMessage' =>  request()->message,
+                    'userInfo' => "Mail From: " . request()->name ?? request()->email
+                ];
+                Mail::to('support@sabifix.biz')->queue(new SystemMailNotification($item));
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
             return response()->json(['message' => 'success']);
         } catch (\Throwable $th) {
-            throw $th;
+            // throw $th;
             // return response()->json(['message' => 'success']);
         }
     }

@@ -9,6 +9,7 @@ use App\Http\Requests\StoreReportRequest;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\UpdateReportRequest;
 use App\Mail\ContactPageMessage;
+use App\Mail\SystemMailNotification;
 use Illuminate\Support\Facades\Mail;
 
 class ReportController extends Controller
@@ -28,12 +29,18 @@ class ReportController extends Controller
             $req['reporter_id'] = auth()->user()->id;
             $report = Report::create($req);
             $listingName = $report?->user?->name;
-            $subject = "Reporting a user";
-            $message = request()->report . "<b>Listing:</b> $listingName"; 
-            Mail::to('support@sabifix.biz')->queue(new ContactPageMessage($subject, $message));
+            $item = [
+                'view' => 'mail.reportMail',
+                'subject' => "Report User",
+                'mailMessage' =>  request()->report,
+                'userInfo' => "Mail From: " .  auth()->user()->name,
+                'userInfo' => "User Reported: " . $listingName
+            ];
+            Mail::to('support@sabifix.biz')->queue(new SystemMailNotification($item));
+
             return response()->json(['message' => 'Success!!'], 200);
         } catch (\Throwable $th) {
-            throw $th;
+            // throw $th;
         }
     }
 }
