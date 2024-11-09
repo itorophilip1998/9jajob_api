@@ -26,7 +26,7 @@ class VerificationController extends Controller
 
         $extra_details = DB::table("extra_details")->first();
         $amount = $extra_details?->verification_amount;
-        // check balance
+    
         $balance = (new Balance)->check($amount);
 
         // dump($extra_details?->system_payment_mode, $balance, $amount);
