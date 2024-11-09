@@ -24,7 +24,7 @@ class VerificationController extends Controller
     public function create()
     {
 
-    try {
+        try {
             $extra_details = DB::table("extra_details")->first();
             $amount = $extra_details?->verification_amount;
 
@@ -133,9 +133,9 @@ class VerificationController extends Controller
                 ]
             );
             return response()->json(['message' => 'Verification In Progress!!!'], 200);
-    } catch (\Throwable $th) {
-        throw $th;
-    }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     public function listOfVerifications()
