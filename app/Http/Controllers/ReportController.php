@@ -27,7 +27,7 @@ class ReportController extends Controller
             }
             $req = request()->all();
             $req['reporter_id'] = auth()->user()->id;
-             Report::create($req);
+            Report::create($req);
             $item = [
                 'view' => 'mail.reportMail',
                 'subject' => "Report User",
