@@ -114,8 +114,7 @@ class BookingController extends Controller
         $booking = Booking::create($req);
         $listing_user_id = Listing::find(request()->listing_id) ?? 0;
         $client = User::find($listing_user_id?->user_id);
-        $user = auth()->user();
-        // userMessage
+        $user = auth()->user(); 
         $userDetails = [
             'message' => "You just book $client->name, you have an option to cancel booking or modify the booking",
             'user_id' =>  $user->id ?? 0,
