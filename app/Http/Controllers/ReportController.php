@@ -26,14 +26,14 @@ class ReportController extends Controller
         $req = request()->all();
         $req['reporter_id'] = auth()->user()->id;
         $report = Report::create($req);
-        $listingName = $report?->user?->name;
+        $listingName=$report?->user?->name;
         $subject = "Reporting a user";
-        $message = request()->report . "<br/> <b>Listing:</b> $listingName";
+        $message = request()->report."<br/> <b>Listing:</b> $listingName";
         $message = str_replace('[[visitor_name]]', request()->name, $message);
         $message = str_replace('[[visitor_email]]', request()->email, $message);
         $message = str_replace('[[visitor_phone]]', request()->phone, $message);
         $message = str_replace('[[visitor_message]]', request()->report, $message);
-        Mail::queue('support@sabifix.biz')->send(new ContactPageMessage($subject, $message));
+        Mail::to('support@sabifix.biz')->queue(new ContactPageMessage($subject, $message));
         return response()->json(['message' => 'Success!!'], 200);
     }
 }
