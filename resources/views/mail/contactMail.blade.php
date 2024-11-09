@@ -7,7 +7,7 @@
  <p>
     </br/>
    <b>
-    {{ $item["mailMessage"] }}
+    {{ $item["userInfo"] }}
    </b>
    <p>
     {{ $item["mailMessage"] }}
