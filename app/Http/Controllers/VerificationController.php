@@ -32,7 +32,7 @@ class VerificationController extends Controller
 
             // dump($extra_details?->system_payment_mode, $balance, $amount);
             if ($balance <= $amount)
-                return response()->json(['error' => 'Insufficient balance, Please Top-Up your wallet'], 422);
+                return response()->json(['error' => 'Insufficient balance, Please Top-Up wallet'], 422);
 
 
             $validator = Validator::make(request()->all(), [
@@ -46,7 +46,7 @@ class VerificationController extends Controller
             // check balance
             $totalBalance = Transactions::where(['user_id' => auth()->user()->id])->get()->sum('amount');
             if ($totalBalance < 1000) {
-                return response()->json(['message' => 'insufficient fund, Please Top-Up your wallet'], 200);
+                return response()->json(['message' => 'insufficient fund, Please Top-Up wallet'], 200);
             }
             $req = request()->all();
 
